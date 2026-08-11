@@ -1,0 +1,82 @@
+/* Splash Screen Animations */
+
+@keyframes delay-1000 {
+    0%,
+    100% {
+        opacity: 0.3;
+    }
+    50% {
+        opacity: 0.6;
+    }
+}
+
+.animate-pulse.delay-1000 {
+    animation: delay-1000 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    animation-delay: 1s;
+}
+
+
+/* Glow Effects */
+
+.shadow-violet-500\/25 {
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.25);
+}
+
+.shadow-pink-500\/25 {
+    box-shadow: 0 0 20px rgba(236, 72, 153, 0.25);
+}
+
+
+/* Gradient Text */
+
+.bg-gradient-to-r.from-violet-400.to-pink-400.bg-clip-text.text-transparent {
+    background: linear-gradient(to right, rgb(167, 139, 250), rgb(244, 114, 182));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+
+/* Button Hover Effects */
+
+.group:hover .group-hover\:translate-x-1 {
+    transform: translateX(0.25rem);
+}
+
+
+/* Smooth Transitions */
+
+.transition-all.duration-300 {
+    transition-property: all;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 300ms;
+}
+
+.transition-all.duration-200 {
+    transition-property: all;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 200ms;
+}
+
+
+/* Focus States */
+
+.focus\:outline-none:focus {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+}
+
+.focus\:border-violet-500:focus {
+    border-color: rgb(139, 92, 246);
+}
+
+
+/* Disabled States */
+
+.disabled\:opacity-50:disabled {
+    opacity: 0.5;
+}
+
+.disabled\:cursor-not-allowed:disabled {
+    cursor: not-allowed;
+}

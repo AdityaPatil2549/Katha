@@ -1,0 +1,150 @@
+{
+  "meta": {
+    "name": "Smriti Atlas Core",
+    "version": "1.0.0",
+    "entries": 50,
+    "sizeMB": 2.5,
+    "createdAt": "2026-01-12T00:00:00.000Z",
+    "curator": "Katha Editorial",
+    "license": "Personal Use Only"
+  },
+  "collections": [
+    {
+      "id": "life-changing-movies",
+      "title": "100 Life-Changing Movies",
+      "subtitle": "Stories that transform how you see the world",
+      "description": "A curated collection of films that have profoundly shaped human consciousness and understanding.",
+      "category": "movie",
+      "philosophy": "Cinema as a mirror for personal growth and societal change",
+      "lifeStage": ["student", "career", "self-discovery"],
+      "curatorNote": "These films aren't just entertainment—they're experiences that reshape your perspective on life, love, and purpose.",
+      "entryIds": ["interstellar-2014", "matrix-1999", "inception-2010", "fight-club-1999", "american-beauty-1999"],
+      "difficulty": "medium",
+      "emotionalProfile": ["inspiring", "thoughtful", "emotional"],
+      "version": "atlas-core-v1"
+    },
+    {
+      "id": "philosophical-anime",
+      "title": "Best Philosophical Anime",
+      "subtitle": "Animation that explores deep questions",
+      "description": "Anime series and films that tackle philosophy, ethics, and the human condition through the medium of animation.",
+      "category": "anime",
+      "philosophy": "Animation as a medium for exploring complex philosophical concepts",
+      "lifeStage": ["student", "self-discovery"],
+      "curatorNote": "These shows prove that animation can be the most profound medium for exploring life's biggest questions.",
+      "entryIds": ["vinland-saga-2019", "attack-on-titan-2013", "death-note-2006", "steins-gate-2011", "monster-2004"],
+      "difficulty": "heavy",
+      "emotionalProfile": ["thoughtful", "intense", "inspiring"],
+      "version": "atlas-core-v1"
+    }
+  ],
+  "entries": [
+    {
+      "id": "interstellar-2014",
+      "title": "Interstellar",
+      "originalTitle": "Interstellar",
+      "category": "movie",
+      "year": 2014,
+      "country": "United States",
+      "genres": ["Sci-Fi", "Drama", "Adventure"],
+      "themes": ["time", "love", "sacrifice", "humanity", "exploration"],
+      "impactTags": ["mind-bending", "emotional", "inspiring"],
+      "difficulty": "medium",
+      "emotionalTone": ["hopeful", "melancholic", "intense"],
+      "runtime": 169,
+      "description": "A team of explorers travel through a wormhole in space in an attempt to ensure humanity's survival.",
+      "whyWatch": "Explores the power of love transcending time and space, with stunning visuals and scientific accuracy.",
+      "lifeLessons": ["Love transcends time and space", "Human connection is our greatest strength", "Exploration drives progress"],
+      "reflectionPrompts": ["What would you sacrifice for humanity?", "How does love connect us across distances?", "What drives human exploration?"],
+      "bestWatchedWhen": ["feeling lost", "seeking motivation", "questioning life"],
+      "recommendedAge": "13+",
+      "culturalImpact": "Revitalized interest in space exploration and theoretical physics",
+      "createdBy": "Smriti Atlas Editorial",
+      "version": "atlas-core-v1"
+    },
+    {
+      "id": "vinland-saga-2019",
+      "title": "Vinland Saga",
+      "originalTitle": "ヴィンランド・サガ",
+      "category": "anime",
+      "year": 2019,
+      "country": "Japan",
+      "genres": ["Action", "Drama", "Historical"],
+      "themes": ["violence", "peace", "revenge", "growth", "philosophy"],
+      "impactTags": ["emotional", "thoughtful", "inspiring"],
+      "difficulty": "heavy",
+      "emotionalTone": ["intense", "melancholic", "hopeful"],
+      "seasons": 2,
+      "episodes": 48,
+      "description": "A young Viking prince seeks revenge for his father's death, but grows to question the cycle of violence.",
+      "whyWatch": "A profound exploration of violence, peace, and what it means to be truly strong.",
+      "lifeLessons": ["True strength lies in compassion", "Violence begets violence", "Peace is the ultimate victory"],
+      "reflectionPrompts": ["What does true strength mean to you?", "Can peace be achieved through violence?", "What would you sacrifice for peace?"],
+      "bestWatchedWhen": ["feeling angry", "seeking wisdom", "questioning violence"],
+      "recommendedAge": "16+",
+      "culturalImpact": "Modern masterpiece exploring pacifist philosophy through action storytelling",
+      "createdBy": "Smriti Atlas Editorial",
+      "version": "atlas-core-v1"
+    },
+    {
+      "id": "matrix-1999",
+      "title": "The Matrix",
+      "originalTitle": "The Matrix",
+      "category": "movie",
+      "year": 1999,
+      "country": "United States",
+      "genres": ["Sci-Fi", "Action"],
+      "themes": ["reality", "choice", "control", "freedom", "technology"],
+      "impactTags": ["mind-bending", "inspiring", "thoughtful"],
+      "difficulty": "medium",
+      "emotionalTone": ["intense", "thoughtful", "hopeful"],
+      "runtime": 136,
+      "description": "A computer hacker learns about the true nature of his reality and his role in the war against its controllers.",
+      "whyWatch": "Revolutionary filmmaking that questions the nature of reality and human choice.",
+      "lifeLessons": ["Reality is perception", "Choice defines humanity", "Question everything"],
+      "reflectionPrompts": ["What is real?", "How much control do you have over your life?", "Would you choose truth over comfort?"],
+      "bestWatchedWhen": ["questioning reality", "seeking motivation", "feeling trapped"],
+      "recommendedAge": "14+",
+      "culturalImpact": "Changed action cinema and philosophical discussions about reality",
+      "createdBy": "Smriti Atlas Editorial",
+      "version": "atlas-core-v1"
+    }
+  ],
+  "knowledge": [
+    {
+      "id": "interstellar-love-lesson",
+      "entryId": "interstellar-2014",
+      "principles": ["Love transcends time and space", "Human connection is fundamental"],
+      "ideas": ["Time as a dimension", "Love as a force", "Sacrifice for greater good"],
+      "quotes": ["Love is the one thing that transcends dimensions of time and space"],
+      "concepts": ["Relativity", "Time dilation", "Emotional bonds"],
+      "reflectionExercises": ["Write about someone you love across distance", "Reflect on sacrifices you've made"],
+      "journalingPrompts": ["How has love changed your perception of time?", "What would you risk for those you love?"],
+      "wisdomScore": 9
+    }
+  ],
+  "lifePhases": [
+    {
+      "id": "college-era",
+      "phase": "College Era",
+      "description": "Period of intellectual growth and self-discovery",
+      "emotionalNeeds": ["inspiration", "guidance", "perspective"],
+      "recommendedThemes": ["philosophy", "identity", "future"],
+      "entryIds": ["interstellar-2014", "matrix-1999", "inception-2010"]
+    }
+  ],
+  "moodMap": [
+    {
+      "mood": "lost",
+      "description": "Feeling directionless or uncertain",
+      "emotionalGoal": "Clarity and purpose",
+      "recommendedEntryIds": ["interstellar-2014", "matrix-1999"]
+    },
+    {
+      "mood": "angry",
+      "description": "Feeling anger or desire for revenge",
+      "emotionalGoal": "Understanding and peace",
+      "recommendedEntryIds": ["vinland-saga-2019"]
+    }
+  ]
+}
