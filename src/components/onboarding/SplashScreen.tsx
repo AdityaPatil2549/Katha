@@ -76,13 +76,13 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
   };
 
   // ─── ANIMATION VARIANTS ───
-  const containerVariants = {
+  const containerVariants: any = {
     hidden: { opacity: 0 },
     visible: { opacity: 1, transition: { duration: 1.2, ease: 'easeOut' } },
     exit: { opacity: 0, transition: { duration: 0.8, ease: 'easeInOut' } }
   };
 
-  const staggerContainer = {
+  const staggerContainer: any = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
@@ -90,12 +90,12 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
     }
   };
 
-  const fadeUp = {
+  const fadeUp: any = {
     hidden: { opacity: 0, y: 30 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } }
   };
 
-  const slideVariants = {
+  const slideVariants: any = {
     enter: (direction: number) => ({ x: direction > 0 ? 80 : -80, opacity: 0, filter: 'blur(8px)' }),
     center: { x: 0, opacity: 1, filter: 'blur(0px)', transition: { duration: 0.6, ease: [0.32, 0.72, 0, 1] } },
     exit: (direction: number) => ({ x: direction < 0 ? 80 : -80, opacity: 0, filter: 'blur(8px)', transition: { duration: 0.4 } })
@@ -189,6 +189,7 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
 
   // ─── CAROUSEL ONBOARDING ───
   const screen = onboardingScreens[onboardingStep];
+  if (!screen) return null;
 
   return (
     <motion.div

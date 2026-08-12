@@ -17,6 +17,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!auth) {
+      // Running in local-only mode without Firebase keys
+      setLoading(false);
+      return;
+    }
+
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       dbService.setUserId(currentUser?.uid || null);
@@ -27,6 +33,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signInWithGoogle = async () => {
+    if (!auth) {
+      // Mock login for local mode
+      const mockUser = {
+        uid: 'local-mock-user-123',
+        displayName: 'Local Explorer',
+        email: 'local@katha.app',
+        photoURL: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Katha'
+      } as User;
+      setUser(mockUser);
+      dbService.setUserId(mockUser.uid);
+      return;
+    }
+
     try {
       await signInWithPopup(auth, googleProvider);
     } catch (error) {
@@ -36,6 +55,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = async () => {
+    if (!auth) {
+      // Mock logout for local mode
+      setUser(null);
+      dbService.setUserId(null);
+      return;
+    }
+
     try {
       await signOut(auth);
     } catch (error) {

@@ -141,8 +141,8 @@ export default function StoryPageEnhanced() {
             </div>
           </div>
         </div>
+      </motion.div>
       </div>
-
       {/* Sticky Action Bar */}
       <div className="sticky top-0 z-10 bg-midnight-bg/90 backdrop-blur-md border-b border-midnight-border">
         <div className="max-w-7xl mx-auto px-4 py-3">
@@ -349,10 +349,6 @@ export default function StoryPageEnhanced() {
           </div>
         </div>
       </div>
-      </div>
-      </motion.div>
-      </div>
-
       <DataEntryModal 
         isOpen={showDataModal} 
         onClose={() => setShowDataModal(false)} 

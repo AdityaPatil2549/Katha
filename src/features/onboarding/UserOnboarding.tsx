@@ -96,6 +96,17 @@ export function UserOnboarding() {
     if (done === 'true') setIsVisible(false);
   }, []);
 
+  useEffect(() => {
+    if (isVisible) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isVisible]);
+
   const handleComplete = () => {
     localStorage.setItem('smriti-onboarding-completed', 'true');
     if (username.trim()) {
@@ -108,6 +119,7 @@ export function UserOnboarding() {
   if (!isVisible) return <></>;
 
   const step = steps[currentStep];
+  if (!step) return null;
   const isLast = currentStep === steps.length - 1;
 
   return (
@@ -135,7 +147,7 @@ export function UserOnboarding() {
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.95, opacity: 0, y: 30 }}
           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-          className="relative w-full max-w-[860px] flex rounded-[2rem] overflow-hidden"
+          className="relative w-full max-w-[860px] max-h-[85vh] flex rounded-[2rem] overflow-hidden"
           style={{
             background: 'linear-gradient(135deg, rgba(20,22,35,0.95), rgba(10,11,18,0.98))',
             border: '1px solid rgba(255,255,255,0.08)',
@@ -243,7 +255,7 @@ export function UserOnboarding() {
           </div>
 
           {/* ─── RIGHT PANEL ─── */}
-          <div className="flex-1 flex flex-col min-h-[580px] bg-gradient-to-b from-white/[0.02] to-transparent relative">
+          <div className="flex-1 flex flex-col h-full bg-gradient-to-b from-white/[0.02] to-transparent relative">
             
             {/* Ambient top glow */}
             <motion.div 
