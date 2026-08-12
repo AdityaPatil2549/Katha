@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, BookOpen, Brain, Shield, ChevronRight } from 'lucide-react';
+import { ArrowRight, BookOpen, Brain, Shield, Sparkles } from 'lucide-react';
 
 interface OnboardingScreen {
   id: number;
@@ -8,6 +8,7 @@ interface OnboardingScreen {
   subtitle: string;
   description: string;
   icon: React.ReactNode;
+  color: string;
 }
 
 interface SplashScreenProps {
@@ -24,282 +25,202 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
       id: 0,
       title: 'Your Stories',
       subtitle: 'Track Everything',
-      description: 'Track movies, anime, series, documentaries, and more. Your personal library awaits.',
-      icon: <BookOpen className="w-8 h-8" />
+      description: 'Movies, anime, series, and books. Your entire entertainment universe beautifully organized in one place.',
+      icon: <BookOpen className="w-8 h-8 text-white" />,
+      color: 'from-cyan-500 to-blue-600'
     },
     {
       id: 1,
       title: 'Smriti Remembers',
       subtitle: 'Never Forget',
-      description: 'Your watch history, ratings, notes, and emotional journey — always remembered.',
-      icon: <Brain className="w-8 h-8" />
+      description: 'Your watch history, emotional journeys, and personal ratings — preserved and analyzed forever.',
+      icon: <Brain className="w-8 h-8 text-white" />,
+      color: 'from-violet-500 to-purple-600'
     },
     {
       id: 2,
       title: 'Fully Yours',
       subtitle: 'Privacy First',
-      description: 'Offline. Private. Secure. Your data never leaves your device.',
-      icon: <Shield className="w-8 h-8" />
+      description: '100% offline-first. No servers, no tracking. Your memories belong to you and only you.',
+      icon: <Shield className="w-8 h-8 text-white" />,
+      color: 'from-emerald-400 to-teal-500'
     }
   ];
 
   useEffect(() => {
-    // Simulate loading time for premium feel
-    const timer = setTimeout(() => {
-      setIsReady(true);
-    }, 2000);
-
+    // Cinematic delay
+    const timer = setTimeout(() => setIsReady(true), 2500);
     return () => clearTimeout(timer);
   }, []);
 
-  const handleEnterLibrary = () => {
+  const handleComplete = () => {
     localStorage.setItem('katha_onboarded', 'true');
-    if (onComplete) {
-      onComplete();
-    } else {
-      setCurrentScreen('complete');
-    }
-  };
-
-  const handleSkipIntro = () => {
-    localStorage.setItem('katha_onboarded', 'true');
-    if (onComplete) {
-      onComplete();
-    } else {
-      setCurrentScreen('complete');
-    }
+    if (onComplete) onComplete();
+    else setCurrentScreen('complete');
   };
 
   const handleNext = () => {
     if (onboardingStep < onboardingScreens.length - 1) {
       setOnboardingStep(onboardingStep + 1);
     } else {
-      handleEnterLibrary();
+      handleComplete();
     }
-  };
-
-  const handlePrevious = () => {
-    if (onboardingStep > 0) {
-      setOnboardingStep(onboardingStep - 1);
-    }
-  };
-
-  const handleStartOnboarding = () => {
-    setCurrentScreen('onboarding');
-  };
-
-  // Animation variants
-  const containerVariants: any = {
-    hidden: { opacity: 0 },
-    visible: { 
-      opacity: 1,
-      transition: { duration: 0.6, ease: 'easeOut' }
-    },
-    exit: { 
-      opacity: 0,
-      transition: { duration: 0.4, ease: 'easeIn' }
-    }
-  };
-
-  const logoVariants: any = {
-    hidden: { 
-      opacity: 0,
-      scale: 0.8,
-      y: 20
-    },
-    visible: { 
-      opacity: 1,
-      scale: 1,
-      y: 0,
-      transition: { 
-        duration: 0.8, 
-        ease: [0.16, 1, 0.3, 1],
-        delay: 0.2
-      }
-    }
-  };
-
-  const textVariants: any = {
-    hidden: { 
-      opacity: 0,
-      y: 30
-    },
-    visible: { 
-      opacity: 1,
-      y: 0,
-      transition: { 
-        duration: 0.6,
-        ease: 'easeOut',
-        delay: 0.6
-      }
-    }
-  };
-
-  const buttonVariants: any = {
-    hidden: { 
-      opacity: 0,
-      y: 20
-    },
-    visible: { 
-      opacity: 1,
-      y: 0,
-      transition: { 
-        duration: 0.5,
-        ease: 'easeOut',
-        delay: 0.8
-      }
-    }
-  };
-
-  const slideVariants = {
-    enter: (direction: number) => ({
-      x: direction > 0 ? 1000 : -1000,
-      opacity: 0
-    }),
-    center: {
-      zIndex: 1,
-      x: 0,
-      opacity: 1
-    },
-    exit: (direction: number) => ({
-      zIndex: 0,
-      x: direction < 0 ? 1000 : -1000,
-      opacity: 0
-    })
   };
 
   const [direction, setDirection] = useState(0);
 
   const paginate = (newDirection: number) => {
     setDirection(newDirection);
-    if (newDirection > 0) {
-      handleNext();
-    } else {
-      handlePrevious();
+    if (newDirection > 0) handleNext();
+    else if (onboardingStep > 0) setOnboardingStep(onboardingStep - 1);
+  };
+
+  // ─── ANIMATION VARIANTS ───
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { duration: 1.2, ease: 'easeOut' } },
+    exit: { opacity: 0, transition: { duration: 0.8, ease: 'easeInOut' } }
+  };
+
+  const staggerContainer = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.15, delayChildren: 0.4 }
     }
   };
 
-  // Splash Screen
+  const fadeUp = {
+    hidden: { opacity: 0, y: 30 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } }
+  };
+
+  const slideVariants = {
+    enter: (direction: number) => ({ x: direction > 0 ? 80 : -80, opacity: 0, filter: 'blur(8px)' }),
+    center: { x: 0, opacity: 1, filter: 'blur(0px)', transition: { duration: 0.6, ease: [0.32, 0.72, 0, 1] } },
+    exit: (direction: number) => ({ x: direction < 0 ? 80 : -80, opacity: 0, filter: 'blur(8px)', transition: { duration: 0.4 } })
+  };
+
+  // ─── SPLASH SCREEN ───
   if (currentScreen === 'splash') {
     return (
       <motion.div
-        className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-900 flex items-center justify-center relative overflow-hidden"
+        className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden bg-[#04050C]"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
+        exit="exit"
       >
-        {/* Background Effects */}
-        <div className="absolute inset-0">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-violet-500/10 rounded-full blur-3xl animate-pulse" />
-          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-pink-500/10 rounded-full blur-3xl animate-pulse delay-1000" />
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-cyan-500/5 rounded-full blur-2xl" />
+        {/* Deep cinematic background orbs */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <motion.div
+            animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
+            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute top-1/4 -left-1/4 w-[800px] h-[800px] bg-violet-600/20 rounded-full blur-[120px]"
+          />
+          <motion.div
+            animate={{ scale: [1, 1.5, 1], opacity: [0.2, 0.4, 0.2] }}
+            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+            className="absolute bottom-1/4 -right-1/4 w-[600px] h-[600px] bg-cyan-600/20 rounded-full blur-[100px]"
+          />
         </div>
 
-        <div className="relative z-10 text-center space-y-8 max-w-md mx-auto px-6">
-          {/* Logo */}
-          <motion.div
-            className="relative"
-            variants={logoVariants}
-            initial="hidden"
-            animate="visible"
-          >
-            <div className="w-24 h-24 mx-auto relative">
-              {/* Glow Effect */}
-              <div className="absolute inset-0 bg-gradient-to-r from-violet-500 to-pink-500 rounded-2xl blur-xl opacity-50 animate-pulse" />
-              
-              {/* Logo Container */}
-              <div className="relative w-full h-full bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl border border-violet-500/20 flex items-center justify-center shadow-2xl">
-                <div className="text-4xl font-bold bg-gradient-to-r from-violet-400 to-pink-400 bg-clip-text text-transparent">
+        <div className="relative z-10 flex flex-col items-center justify-center w-full max-w-lg px-6 text-center">
+          
+          <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="flex flex-col items-center">
+            
+            {/* Cinematic Logo */}
+            <motion.div variants={fadeUp} className="relative mb-12">
+              <motion.div
+                animate={{ y: [-5, 5, -5] }}
+                transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+                className="relative w-28 h-28 flex items-center justify-center rounded-[2rem]"
+                style={{
+                  background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.02) 100%)',
+                  boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.1), 0 20px 40px rgba(0,0,0,0.5)',
+                  backdropFilter: 'blur(20px)'
+                }}
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-violet-500/30 to-fuchsia-500/30 rounded-[2rem] blur-xl" />
+                <span className="relative text-5xl font-black bg-clip-text text-transparent bg-gradient-to-br from-white to-white/60">
                   K
+                </span>
+              </motion.div>
+            </motion.div>
+
+            {/* Typography */}
+            <motion.div variants={fadeUp} className="space-y-4 mb-16">
+              <h1 className="text-6xl font-bold tracking-tight text-white mb-2">Katha</h1>
+              <p className="text-xs uppercase tracking-[0.4em] text-violet-400/80 font-semibold mb-6">Powered by Smriti</p>
+              <p className="text-lg text-white/50 max-w-sm mx-auto font-light leading-relaxed">
+                Your personal universe of stories. <br/> Remembered forever.
+              </p>
+            </motion.div>
+
+            {/* Action Buttons */}
+            <motion.div variants={fadeUp} className="w-full space-y-4 flex flex-col items-center">
+              <motion.button
+                onClick={() => setCurrentScreen('onboarding')}
+                disabled={!isReady}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="relative group w-full max-w-[280px] h-14 rounded-2xl flex items-center justify-center gap-3 overflow-hidden disabled:opacity-0 transition-opacity duration-1000"
+              >
+                <div className="absolute inset-0 bg-white text-black flex items-center justify-center gap-2 font-bold text-sm transition-transform duration-300 group-hover:scale-105">
+                  Begin Journey
+                  <ArrowRight className="w-4 h-4" />
                 </div>
-              </div>
-            </div>
-          </motion.div>
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-r from-violet-500 to-cyan-500 mix-blend-overlay" />
+              </motion.button>
 
-          {/* Text Content */}
-          <motion.div
-            variants={textVariants}
-            initial="hidden"
-            animate="visible"
-            className="space-y-4"
-          >
-            <h1 className="text-5xl font-bold text-text-primary">
-              Katha
-            </h1>
-            
-            <p className="text-xl text-violet-300 font-light">
-              Powered by Smriti
-            </p>
-            
-            <p className="text-lg text-slate-300">
-              Your personal library of stories.
-            </p>
-            
-            <p className="text-sm text-slate-400 leading-relaxed">
-              Track every movie, series, anime, documentary, and experience.
-              All your stories. Remembered forever.
-            </p>
-          </motion.div>
+              <button
+                onClick={handleComplete}
+                className="text-xs text-white/30 hover:text-white/70 transition-colors uppercase tracking-widest font-medium"
+              >
+                Skip Intro
+              </button>
+            </motion.div>
 
-          {/* Buttons */}
-          <motion.div
-            variants={buttonVariants}
-            initial="hidden"
-            animate="visible"
-            className="space-y-3"
-          >
-            <button
-              onClick={handleStartOnboarding}
-              disabled={!isReady}
-              className="w-full py-4 px-6 bg-gradient-to-r from-violet-600 to-pink-600 text-text-primary font-semibold rounded-xl hover:from-violet-700 hover:to-pink-700 transition-all duration-300 shadow-lg hover:shadow-violet-500/25 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 group"
-            >
-              Enter Your Library
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </button>
-            
-            <button
-              onClick={handleSkipIntro}
-              className="w-full py-3 px-6 text-slate-400 hover:text-text-primary transition-colors duration-200 text-sm"
-            >
-              Skip Intro
-            </button>
-          </motion.div>
-
-          {/* Footer */}
-          <motion.div
-            variants={textVariants}
-            initial="hidden"
-            animate="visible"
-            className="pt-8 text-xs text-slate-500 space-y-1"
-          >
-            <p>Privacy-first. Fully offline.</p>
-            <p>Your data stays with you.</p>
           </motion.div>
         </div>
       </motion.div>
     );
   }
 
-  // Onboarding Screens
-  if (currentScreen === 'onboarding') {
-    const screen = onboardingScreens[onboardingStep];
-    
-    if (!screen) return null;
-    
-    return (
-      <motion.div
-        className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-900 flex items-center justify-center relative overflow-hidden"
-        initial="hidden"
-        animate="visible"
-        exit="exit"
-      >
-        {/* Background Effects */}
-        <div className="absolute inset-0">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-violet-500/10 rounded-full blur-3xl animate-pulse" />
-          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-pink-500/10 rounded-full blur-3xl animate-pulse delay-1000" />
-        </div>
+  // ─── CAROUSEL ONBOARDING ───
+  const screen = onboardingScreens[onboardingStep];
 
-        <div className="relative z-10 w-full max-w-md mx-auto px-6">
+  return (
+    <motion.div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[#04050C]"
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      exit="exit"
+    >
+      {/* Dynamic Background matching step color */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none transition-colors duration-1000">
+        <motion.div
+          key={`bg-${onboardingStep}`}
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 0.15, scale: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 1.5 }}
+          className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full blur-[120px] bg-gradient-to-br ${screen.color}`}
+        />
+      </div>
+
+      <div className="relative z-10 w-full max-w-lg px-6 flex flex-col items-center">
+        
+        {/* Glassmorphic Card Container */}
+        <div 
+          className="w-full p-8 md:p-12 rounded-[2.5rem] relative overflow-hidden"
+          style={{
+            background: 'rgba(255,255,255,0.02)',
+            boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.05), 0 20px 40px rgba(0,0,0,0.4)',
+            backdropFilter: 'blur(24px)'
+          }}
+        >
           <AnimatePresence initial={false} custom={direction} mode="wait">
             <motion.div
               key={onboardingStep}
@@ -308,101 +229,79 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
               initial="enter"
               animate="center"
               exit="exit"
-              transition={{
-                x: { type: 'spring', stiffness: 300, damping: 30 },
-                opacity: { duration: 0.2 }
-              }}
-              className="text-center space-y-8"
+              className="flex flex-col items-center text-center"
             >
-              {/* Icon */}
+              {/* Icon floating */}
               <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
-                className="w-20 h-20 mx-auto bg-gradient-to-br from-violet-600 to-pink-600 rounded-2xl flex items-center justify-center text-text-primary shadow-xl"
+                animate={{ y: [-5, 5, -5] }}
+                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                className={`w-24 h-24 rounded-3xl mb-8 flex items-center justify-center bg-gradient-to-br ${screen.color} shadow-2xl relative`}
               >
+                <div className="absolute inset-0 bg-white/20 rounded-3xl mix-blend-overlay" />
                 {screen.icon}
               </motion.div>
 
-              {/* Content */}
-              <div className="space-y-4">
-                <motion.h2
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 }}
-                  className="text-3xl font-bold text-text-primary"
-                >
-                  {screen.title}
-                </motion.h2>
-                
-                <motion.p
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.4 }}
-                  className="text-lg text-violet-300 font-light"
-                >
-                  {screen.subtitle}
-                </motion.p>
-                
-                <motion.p
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.5 }}
-                  className="text-slate-300 leading-relaxed"
-                >
-                  {screen.description}
-                </motion.p>
-              </div>
-
-              {/* Progress Indicators */}
-              <div className="flex justify-center gap-2">
-                {onboardingScreens.map((_, index) => (
-                  <div
-                    key={index}
-                    className={`h-2 rounded-full transition-all duration-300 ${
-                      index === onboardingStep
-                        ? 'w-8 bg-gradient-to-r from-violet-600 to-pink-600'
-                        : 'w-2 bg-slate-600'
-                    }`}
-                  />
-                ))}
-              </div>
-
-              {/* Navigation */}
-              <div className="flex gap-3">
-                {onboardingStep > 0 && (
-                  <button
-                    onClick={() => paginate(-1)}
-                    className="flex-1 py-3 px-6 text-slate-400 hover:text-text-primary transition-colors duration-200"
-                  >
-                    Previous
-                  </button>
-                )}
-                
-                <button
-                  onClick={() => paginate(1)}
-                  className="flex-1 py-3 px-6 bg-gradient-to-r from-violet-600 to-pink-600 text-text-primary font-semibold rounded-xl hover:from-violet-700 hover:to-pink-700 transition-all duration-300 shadow-lg hover:shadow-violet-500/25 flex items-center justify-center gap-2"
-                >
-                  {onboardingStep === onboardingScreens.length - 1 ? 'Start My Journey' : 'Next'}
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-              </div>
+              <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-white/40 mb-2">
+                {screen.subtitle}
+              </h2>
+              <h3 className="text-3xl font-black text-white mb-4 tracking-tight">
+                {screen.title}
+              </h3>
+              <p className="text-white/50 text-sm leading-relaxed max-w-[280px] mx-auto">
+                {screen.description}
+              </p>
             </motion.div>
           </AnimatePresence>
 
+          {/* Navigation & Progress */}
+          <div className="mt-12 flex flex-col items-center gap-8">
+            
+            {/* Dots */}
+            <div className="flex justify-center gap-2">
+              {onboardingScreens.map((_, idx) => (
+                <div
+                  key={idx}
+                  className={`h-1.5 rounded-full transition-all duration-500 ${
+                    idx === onboardingStep
+                      ? `w-8 bg-gradient-to-r ${screen.color}`
+                      : 'w-2 bg-white/10'
+                  }`}
+                />
+              ))}
+            </div>
+
+            {/* Buttons */}
+            <div className="flex w-full gap-3">
+              <button
+                onClick={() => paginate(-1)}
+                className={`flex-1 h-12 rounded-xl text-sm font-semibold transition-all duration-300 ${
+                  onboardingStep === 0 
+                    ? 'opacity-0 pointer-events-none' 
+                    : 'text-white/40 hover:text-white hover:bg-white/5'
+                }`}
+              >
+                Back
+              </button>
+              
+              <button
+                onClick={() => paginate(1)}
+                className={`flex-1 h-12 rounded-xl text-sm font-bold text-white flex items-center justify-center gap-2 bg-gradient-to-r ${screen.color} shadow-lg transition-transform hover:scale-105`}
+              >
+                {onboardingStep === onboardingScreens.length - 1 ? (
+                  <>
+                    <Sparkles className="w-4 h-4" /> Finish
+                  </>
+                ) : (
+                  <>
+                    Next <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
+              </button>
+            </div>
+            
+          </div>
         </div>
-
-        {/* Skip Option */}
-        <button
-          onClick={handleSkipIntro}
-          className="absolute top-8 right-8 z-50 text-slate-500 hover:text-slate-300 transition-colors text-sm font-medium"
-        >
-          Skip
-        </button>
-      </motion.div>
-    );
-  }
-
-  // Complete - This will trigger app load
-  return null;
+      </div>
+    </motion.div>
+  );
 }
