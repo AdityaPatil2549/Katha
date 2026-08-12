@@ -129,18 +129,19 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
           
           <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="flex flex-col items-center">
             
-            {/* Cinematic Logo */}
-            <motion.div variants={fadeUp} className="relative mb-12">
+            {/* Hero Illustration */}
+            <motion.div variants={fadeUp} className="relative mb-8 w-full max-w-sm aspect-square">
               <motion.div
-                animate={{ y: [-5, 5, -5] }}
-                transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-                className="relative w-32 h-32 flex items-center justify-center rounded-[2rem]"
+                animate={{ y: [-8, 8, -8] }}
+                transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+                className="relative w-full h-full flex items-center justify-center"
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-violet-500/30 to-fuchsia-500/30 rounded-[2rem] blur-2xl" />
-                <div className="relative w-full h-full p-2">
-                  <img src="/icons/logo-dark.png" alt="Katha" className="w-full h-full object-contain logo-dark drop-shadow-[0_0_20px_rgba(255,255,255,0.3)]" />
-                  <img src="/icons/logo-light.png" alt="Katha" className="w-full h-full object-contain logo-light drop-shadow-[0_0_20px_rgba(0,0,0,0.2)]" />
-                </div>
+                <div className="absolute inset-0 bg-gradient-to-br from-amber-500/20 to-orange-600/20 rounded-full blur-3xl mix-blend-screen" />
+                <img 
+                  src="/images/hero-journey.png" 
+                  alt="Katha - The Golden Journey" 
+                  className="relative z-10 w-full h-full object-contain drop-shadow-[0_0_30px_rgba(245,158,11,0.3)]" 
+                />
               </motion.div>
             </motion.div>
 
