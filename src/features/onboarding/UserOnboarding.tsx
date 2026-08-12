@@ -133,11 +133,9 @@ export function UserOnboarding() {
         style={{ background: 'rgba(4,5,12,0.85)', backdropFilter: 'blur(32px)' }}
       >
         {/* Cinematic ambient background */}
-        <motion.div
-          animate={{ opacity: [0.3, 0.6, 0.3], scale: [1, 1.1, 1] }}
-          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-1/2 left-1/4 w-[800px] h-[800px] rounded-full blur-[160px] pointer-events-none -translate-y-1/2"
-          style={{ background: `radial-gradient(circle, ${step.glow.replace('0.8','0.2')}, transparent 70%)` }}
+        <div
+          className="absolute top-1/2 left-1/4 w-[800px] h-[800px] rounded-full blur-[120px] pointer-events-none -translate-y-1/2 transition-colors duration-1000"
+          style={{ background: `radial-gradient(circle, ${step.glow.replace('0.8','0.15')}, transparent 70%)` }}
         />
 
         {/* Modal */}
@@ -251,7 +249,7 @@ export function UserOnboarding() {
           </div>
 
           {/* ─── RIGHT PANEL ─── */}
-          <div className="flex-1 flex flex-col h-full bg-gradient-to-b from-white/[0.02] to-transparent relative">
+          <div className="flex-1 flex flex-col h-full min-h-0 bg-gradient-to-b from-white/[0.02] to-transparent relative">
             
             {/* Ambient top glow */}
             <motion.div 
@@ -260,7 +258,7 @@ export function UserOnboarding() {
             />
 
             {/* Top bar */}
-            <div className="flex items-center justify-between px-10 pt-8 pb-2 relative z-10">
+            <div className="flex items-center justify-between px-10 pt-8 pb-2 relative z-10 flex-shrink-0">
               <div className="text-white/30 text-xs font-semibold tracking-widest uppercase">Step {currentStep + 1} of {steps.length}</div>
               <button
                 onClick={handleComplete}
@@ -271,7 +269,7 @@ export function UserOnboarding() {
             </div>
 
             {/* Gradient accent line */}
-            <div className="px-10 relative z-10">
+            <div className="px-10 relative z-10 flex-shrink-0">
               <motion.div
                 key={`line-${currentStep}`}
                 initial={{ scaleX: 0, opacity: 0 }}
@@ -289,7 +287,7 @@ export function UserOnboarding() {
             </div>
 
             {/* Content area */}
-            <div className="flex-1 overflow-y-auto px-10 py-8 relative z-10 scrollbar-hide">
+            <div className="flex-1 overflow-y-auto px-10 py-8 relative z-10 scrollbar-hide min-h-0">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={currentStep}
@@ -300,7 +298,7 @@ export function UserOnboarding() {
                   className="h-full flex flex-col"
                 >
                   {/* Title */}
-                  <div className="mb-8">
+                  <div className="mb-8 flex-shrink-0">
                     <h2 className="font-serif italic tracking-wide text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white to-white/70 mb-3 drop-shadow-md">
                       {step.title}
                     </h2>
@@ -308,7 +306,7 @@ export function UserOnboarding() {
                   </div>
 
                   {/* Step-specific content */}
-                  <div className="flex-1 flex flex-col">
+                  <div className="flex-1 flex flex-col min-h-0">
                     <StepContent
                       stepId={step.id}
                       step={step}
@@ -321,7 +319,7 @@ export function UserOnboarding() {
             </div>
 
             {/* Footer */}
-            <div className="px-10 pb-8 pt-6 flex items-center justify-between border-t border-white/5 relative z-10 bg-black/20">
+            <div className="px-10 pb-8 pt-6 flex flex-shrink-0 items-center justify-between border-t border-white/5 relative z-10 bg-black/20">
               <button
                 onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
                 disabled={currentStep === 0}

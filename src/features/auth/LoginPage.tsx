@@ -50,11 +50,11 @@ export default function LoginPage() {
             initial={{ scale: 0.5, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 0.3, type: 'spring', stiffness: 200 }}
-            className="w-20 h-20 rounded-2xl bg-gradient-cinematic p-[2px] mb-8"
+            className="w-24 h-24 relative flex items-center justify-center mb-8"
           >
-            <div className="w-full h-full bg-midnight-surface rounded-2xl flex items-center justify-center">
-              <Sparkles className="w-10 h-10 text-text-primary" />
-            </div>
+            <div className="absolute inset-0 bg-gradient-to-br from-violet-500/30 to-fuchsia-500/30 rounded-2xl blur-xl" />
+            <img src="/icons/logo-dark.png" alt="Katha" className="w-full h-full object-contain logo-dark drop-shadow-[0_0_15px_rgba(255,255,255,0.2)] relative z-10" />
+            <img src="/icons/logo-light.png" alt="Katha" className="w-full h-full object-contain logo-light drop-shadow-[0_0_15px_rgba(0,0,0,0.1)] relative z-10" />
           </motion.div>
 
           <h1 className="font-serif text-4xl font-bold italic tracking-wider bg-clip-text text-transparent bg-gradient-cinematic drop-shadow-md mb-4">
