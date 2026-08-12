@@ -17,7 +17,6 @@ const primaryNav = [
 const secondaryNav = [
   { path: '/calendar', label: 'Calendar', icon: Calendar },
   { path: '/achievements', label: 'Achievements', icon: Trophy },
-  { path: '/intelligence', label: 'Intelligence', icon: Brain },
   { path: '/export-system', label: 'Export', icon: Download },
   { path: '/settings-vault', label: 'Settings', icon: Settings }
 ];
@@ -102,7 +101,22 @@ export function AppShell() {
           </div>
 
           {/* Right Actions */}
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-5">
+            
+            {/* Smriti Intelligence Premium Button */}
+            <button 
+              onClick={() => navigate('/intelligence')}
+              className="group relative hidden md:flex items-center gap-2.5 px-5 py-2 rounded-full overflow-hidden transition-all duration-300 hover:scale-105"
+              style={{ boxShadow: '0 0 20px rgba(139,92,246,0.15)' }}
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-violet-600/20 to-fuchsia-600/20 rounded-full border border-violet-500/30 group-hover:border-violet-400/60 transition-colors duration-300" />
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-gradient-to-r from-violet-600/40 to-fuchsia-600/40 blur-xl transition-opacity duration-500" />
+              <Brain className="w-4 h-4 text-violet-300 group-hover:text-white transition-colors relative z-10" />
+              <span className="text-sm font-bold tracking-widest uppercase text-violet-200 group-hover:text-white transition-colors relative z-10">
+                Intelligence
+              </span>
+            </button>
+
             <div className="relative" ref={menuRef}>
               <button 
                 className="flex items-center gap-3 hover:bg-text-primary/10 p-2 pr-4 rounded-full transition-colors duration-300 group"
