@@ -1,25 +1,5 @@
 <div align="center">
 
-<img src="public/icons/icon.svg" alt="Katha Logo" width="120" />
-
-# 🌌 Katha
-
-**Your Personal Universe of Stories & Memories**
-
-<p align="center">
-  <a href="https://katha-9eda9.web.app"><img src="https://img.shields.io/badge/Live_Demo-katha--9eda9.web.app-ff007f?style=for-the-badge&logo=firebase" alt="Live Demo" /></a>
-  <img src="https://img.shields.io/badge/Status-Active_Development-emerald?style=for-the-badge" alt="Status" />
-  <img src="https://img.shields.io/badge/Platform-PWA_%7C_Web-cyan?style=for-the-badge" alt="Platform" />
-  <img src="https://img.shields.io/badge/Privacy-100%25_Local_First-violet?style=for-the-badge" alt="Privacy" />
-  <img src="https://img.shields.io/badge/Tech-React_%7C_Vite_%7C_Tailwind-blue?style=for-the-badge" alt="Tech Stack" />
-</p>
-
-*Powered by the **Smriti Intelligence Engine***
-
----
-
-</div>
-
 ## 🚀 Live Application
 
 Experience Katha right now, fully deployed and optimized:
@@ -40,23 +20,31 @@ We believe that the stories you consume shape who you become. Katha helps you tr
 ## 🌟 The Katha Experience & Core Features
 
 ### 🧠 Smriti Intelligence Engine
+
 At the core of Katha is **Smriti** — a local intelligence engine that analyzes your consumption patterns.
+
 * 🎭 **Emotional Tracking:** Map how specific genres or media affect your mood over time.
 * ⚡ **Impact Index:** A proprietary scoring system (1-100) that calculates how deeply a story resonated with your life.
 * 💡 **Wisdom Extraction:** Save profound quotes, life lessons, and epiphanies directly tied to specific moments in a story.
 
 ### 📚 The Universal Library
+
 A unified digital bookshelf for all your media.
+
 * 🎬 **Cross-Media Tracking:** Movies (TMDB/OMDB), Anime (Jikan/MyAnimeList), TV Shows (Watchmode), and Books all live in one seamless interface.
 * 🗂️ **Smart Shelving:** Automatically organizes your collection by life phase, emotional impact, and custom tags.
 
 ### 🧭 The Smriti Atlas (Discover)
+
 A curated discovery engine designed to kill decision fatigue.
+
 * 🌡️ **Mood-Based Routing:** Tell the Atlas how you feel (e.g., "Melancholic", "Need Inspiration", "Brain Dead"), and it finds the perfect story.
 * ⏳ **Life Phase Recommendations:** Curated picks for when you're graduating, going through a breakup, or starting a new career.
 
 ### 🔮 Memory World
+
 A visual representation of your media life.
+
 * ⏱️ **The Timeline:** A chronological, scrollable journey of your media consumption history.
 * 🖼️ **The Gallery:** A stunning visual mosaic of everything you've watched.
 * 📖 **Life Journal:** A dedicated space for the wisdom and quotes you've extracted.
@@ -69,7 +57,7 @@ Katha features a custom, ultra-premium design system built on top of Tailwind CS
 
 * **Canvas:** Deep midnight black (`#04050C` / `#0B0C14`).
 * **Surfaces:** Translucent glassmorphism with dynamic ambient glows and deep drop shadows.
-* **Neon Accents:** 
+* **Neon Accents:**
   * 🟣 **Violet** (Wisdom & Intelligence)
   * 🔵 **Cyan** (Memory & Discovery)
   * 🔴 **Rose** (Emotion & Heart)
@@ -92,15 +80,15 @@ We believe your personal stories and emotional data are intimately yours. Katha 
 
 Katha uses a modern, lightning-fast frontend stack.
 
-| Domain | Technology | Purpose |
-|:---:|:---|:---|
-| **Core Framework** | React 18, TypeScript, Vite | Fast rendering, strict typing, rapid HMR. |
-| **Styling** | Tailwind CSS | Utility-first styling for complex glassmorphic UI. |
-| **Motion/Animation** | Framer Motion | High-performance spring physics and layout animations. |
-| **State Management**| Zustand | Lightweight, un-opinionated global state. |
-| **Local Database** | Dexie.js (IndexedDB) | Robust, typed wrapper for local browser storage. |
-| **Data Fetching** | Custom API Services | Integrations with TMDB, OMDB, Jikan, Trakt, and Watchmode. |
-| **Hosting & Deploy**| Firebase Hosting | High-speed global CDN with HTTP/2 and asset compression. |
+|           Domain           | Technology                 | Purpose                                                    |
+| :------------------------: | :------------------------- | :--------------------------------------------------------- |
+|  **Core Framework**  | React 18, TypeScript, Vite | Fast rendering, strict typing, rapid HMR.                  |
+|     **Styling**     | Tailwind CSS               | Utility-first styling for complex glassmorphic UI.         |
+| **Motion/Animation** | Framer Motion              | High-performance spring physics and layout animations.     |
+| **State Management** | Zustand                    | Lightweight, un-opinionated global state.                  |
+|  **Local Database**  | Dexie.js (IndexedDB)       | Robust, typed wrapper for local browser storage.           |
+|  **Data Fetching**  | Custom API Services        | Integrations with TMDB, OMDB, Jikan, Trakt, and Watchmode. |
+| **Hosting & Deploy** | Firebase Hosting           | High-speed global CDN with HTTP/2 and asset compression.   |
 
 <br/>
 
@@ -109,32 +97,40 @@ Katha uses a modern, lightning-fast frontend stack.
 Ready to build your personal atlas? Follow these steps to run Katha locally.
 
 ### Prerequisites
+
 * Node.js (v18 or higher)
 * npm or yarn
 
 ### 1. Clone the repository
+
 ```bash
 git clone https://github.com/AdityaPatil2549/Katha.git
 cd Katha
 ```
 
 ### 2. Install dependencies
+
 ```bash
 npm install
 ```
 
 ### 3. Set up Environment Variables
-Katha connects to various external APIs to fetch movie, TV, and anime metadata. 
+
+Katha connects to various external APIs to fetch movie, TV, and anime metadata.
 
 Copy the example environment file:
+
 ```bash
 cp .env.example .env.local
 ```
+
 Open `.env.local` and add your API keys. *Note: You can run the app without some of these, but specific discovery features may be limited.*
+
 * `VITE_TMDB_API_KEY`: For Movies and TV Shows.
 * `VITE_OMDB_API_KEY`: For backup movie data.
 
 ### 4. Start the development server
+
 ```bash
 npm run dev
 ```
@@ -166,9 +162,5 @@ We welcome contributions! If you're passionate about storytelling, personal know
 <br/>
 
 ---
-<div align="center">
-  
-**Katha** — *Your story, remembered forever.* <br/>
-Built with 💜 by [Aditya Yuvraj Patil](https://github.com/AdityaPatil2549)
 
-</div>
+<div align="center">

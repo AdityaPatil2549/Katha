@@ -134,17 +134,13 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
               <motion.div
                 animate={{ y: [-5, 5, -5] }}
                 transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-                className="relative w-28 h-28 flex items-center justify-center rounded-[2rem]"
-                style={{
-                  background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.02) 100%)',
-                  boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.1), 0 20px 40px rgba(0,0,0,0.5)',
-                  backdropFilter: 'blur(20px)'
-                }}
+                className="relative w-32 h-32 flex items-center justify-center rounded-[2rem]"
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-violet-500/30 to-fuchsia-500/30 rounded-[2rem] blur-xl" />
-                <span className="relative text-5xl font-black bg-clip-text text-transparent bg-gradient-to-br from-white to-white/60">
-                  K
-                </span>
+                <div className="absolute inset-0 bg-gradient-to-br from-violet-500/30 to-fuchsia-500/30 rounded-[2rem] blur-2xl" />
+                <div className="relative w-full h-full p-2">
+                  <img src="/icons/logo-dark.png" alt="Katha" className="w-full h-full object-contain logo-dark drop-shadow-[0_0_20px_rgba(255,255,255,0.3)]" />
+                  <img src="/icons/logo-light.png" alt="Katha" className="w-full h-full object-contain logo-light drop-shadow-[0_0_20px_rgba(0,0,0,0.2)]" />
+                </div>
               </motion.div>
             </motion.div>
 

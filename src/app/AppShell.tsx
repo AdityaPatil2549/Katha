@@ -64,9 +64,10 @@ export function AppShell() {
           
           {/* Logo & Primary Nav */}
           <div className="flex items-center gap-12">
-            <h1 className="font-serif text-3xl font-bold italic tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-accent-primary via-accent-cyan to-accent-rose drop-shadow-[0_0_15px_rgba(138,43,226,0.5)] cursor-pointer hover:scale-105 transition-transform duration-500" onClick={() => navigate('/')}>
-              Katha
-            </h1>
+            <div className="cursor-pointer hover:scale-105 transition-transform duration-500 w-[52px] h-[52px] relative flex items-center justify-center" onClick={() => navigate('/')}>
+              <img src="/icons/logo-dark.png" alt="Katha" className="w-full h-full object-contain logo-dark" />
+              <img src="/icons/logo-light.png" alt="Katha" className="w-full h-full object-contain logo-light" />
+            </div>
             
             <nav className="hidden md:flex items-center gap-2">
               {primaryNav.map((item) => (

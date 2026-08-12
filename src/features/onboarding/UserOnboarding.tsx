@@ -175,14 +175,10 @@ export function UserOnboarding() {
 
             {/* App logo */}
             <div className="relative flex flex-col items-center gap-3">
-              <div
-                className="w-12 h-12 rounded-2xl flex items-center justify-center p-[1px] relative group"
-                style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.3), rgba(255,255,255,0.05))' }}
-              >
-                <div className="absolute inset-0 bg-gradient-to-br from-violet-500/50 to-pink-500/50 blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
-                <div className="w-full h-full bg-[#0b0c14] rounded-2xl flex items-center justify-center">
-                  <Film className="w-5 h-5 text-white/90" />
-                </div>
+              <div className="w-16 h-16 relative group flex items-center justify-center">
+                <div className="absolute inset-0 bg-gradient-to-br from-violet-500/30 to-fuchsia-500/30 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
+                <img src="/icons/logo-dark.png" alt="Katha" className="w-full h-full object-contain logo-dark drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]" />
+                <img src="/icons/logo-light.png" alt="Katha" className="w-full h-full object-contain logo-light drop-shadow-[0_0_15px_rgba(0,0,0,0.1)]" />
               </div>
               <span className="text-white/40 text-[10px] font-bold tracking-[0.3em] uppercase">Katha</span>
             </div>

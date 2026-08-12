@@ -345,6 +345,19 @@
    Utilities
 =========================== */
 @layer utilities {
+    /* Logo Theme Display */
+    .logo-light {
+        display: none;
+    }
+    
+    :root[data-theme="light"] .logo-light {
+        display: block;
+    }
+    
+    :root[data-theme="light"] .logo-dark {
+        display: none;
+    }
+
     /* Text Gradient */
     
     .text-gradient {
