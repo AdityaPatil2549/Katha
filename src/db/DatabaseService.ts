@@ -5,6 +5,7 @@ import { DexieKnowledgeRepository } from './repositories/DexieKnowledgeRepositor
 import { DexieTimelineRepository } from './repositories/DexieTimelineRepository';
 import { FirestoreStoryRepository } from './repositories/FirestoreStoryRepository';
 import { FirestoreMomentRepository } from './repositories/FirestoreMomentRepository';
+import { db } from '@/lib/firebase';
 import type { 
   StoryRepository, 
   MomentRepository, 
@@ -34,7 +35,7 @@ export class DatabaseService {
     if (this.userId === userId) return;
     this.userId = userId;
 
-    if (userId) {
+    if (userId && db) {
       this._stories = new FirestoreStoryRepository(userId);
       this._moments = new FirestoreMomentRepository(userId);
       // Fallback to local for others until fully migrated
