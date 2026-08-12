@@ -7,6 +7,7 @@ import { useMagneticCursor } from '@/hooks/useMagneticCursor';
 import { useState, useRef, useEffect } from 'react';
 import { User, Settings, Download, Brain, Trophy, Calendar, ChevronDown, Book, Cloud, CloudOff, RefreshCw } from 'lucide-react';
 import { useSyncStore } from '@/store/syncStore';
+import { OutboxModal } from '@/components/system/OutboxModal';
 
 const primaryNav = [
   { path: '/', label: 'Home' },
@@ -29,6 +30,7 @@ export function AppShell() {
   const { isOnline, isSyncing, pendingCount } = useSyncStore();
   const [isScrolled, setIsScrolled] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [showOutbox, setShowOutbox] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   // Initialize global magnetic cursor
@@ -108,7 +110,11 @@ export function AppShell() {
           <div className="flex items-center gap-5">
             
             {/* Sync Indicator */}
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-midnight-surface/50 border border-midnight-border backdrop-blur-sm">
+            <button 
+              onClick={() => setShowOutbox(true)}
+              className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-midnight-surface/50 border border-midnight-border backdrop-blur-sm hover:bg-white/5 transition-colors"
+              title="View Sync Outbox"
+            >
               {!isOnline ? (
                 <>
                   <CloudOff className="w-4 h-4 text-accent-amber" />
@@ -130,7 +136,7 @@ export function AppShell() {
                   <span className="text-xs font-medium text-text-secondary">Synced</span>
                 </>
               )}
-            </div>
+            </button>
 
             {/* Smriti Intelligence Premium Button */}
             <button 
@@ -211,6 +217,13 @@ export function AppShell() {
       <AppStatusBar />
 
       <UserOnboarding />
+      
+      <OutboxModal 
+        isOpen={showOutbox} 
+        onClose={() => setShowOutbox(false)} 
+        isOnline={isOnline}
+        isSyncing={isSyncing}
+      />
     </div>
   );
 }

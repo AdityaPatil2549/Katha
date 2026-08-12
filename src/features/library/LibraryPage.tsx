@@ -1,7 +1,21 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Search, Heart, Play, Pause, Check, Star, Clock, Grid, List, BookOpen } from 'lucide-react';
+import { 
+  LayoutGrid as Grid, 
+  List, 
+  Heart, 
+  Search,
+  Star,
+  Clock,
+  BookOpen,
+  Play,
+  Check,
+  Pause,
+  Filter,
+  Cloud
+} from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useStoriesStore } from '@/store';
+import { useSyncStore } from '@/store/syncStore';
 import { useNavigate } from 'react-router-dom';
 import { FadeIn } from '@/components/ui/motion/FadeIn';
 import { StaggerContainer, staggerItemVariants } from '@/components/ui/motion/StaggerContainer';
@@ -22,6 +36,8 @@ export default function LibraryPage() {
     getWatching,
     getCompleted
   } = useStoriesStore();
+
+  const { pendingIds } = useSyncStore();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -289,6 +305,11 @@ export default function LibraryPage() {
                         {getStatusIcon(story.status)}
                       </div>
                     </div>
+                    {pendingIds.includes(story.id) && (
+                      <div className="absolute top-4 left-4 z-10 p-2 bg-midnight-bg/80 backdrop-blur-md rounded-full border border-midnight-border/50 shadow-sm">
+                        <Cloud className="w-4 h-4 text-accent-cyan animate-pulse" title="Pending Sync" />
+                      </div>
+                    )}
                   </div>
                   
                   {/* Story Info (Grid) */}
@@ -315,7 +336,12 @@ export default function LibraryPage() {
                     )}
                   </div>
                   <div className="flex-1 min-w-0 space-y-3">
-                    <h3 className="font-serif text-3xl font-medium text-text-primary truncate">{story.title}</h3>
+                    <div className="flex items-center gap-3">
+                      <h3 className="font-serif text-3xl font-medium text-text-primary truncate">{story.title}</h3>
+                      {pendingIds.includes(story.id) && (
+                        <Cloud className="w-5 h-5 text-accent-cyan animate-pulse shrink-0" title="Pending Sync" />
+                      )}
+                    </div>
                     <div className="flex flex-wrap items-center gap-4 text-xs font-sans tracking-[0.1em] text-text-secondary uppercase">
                       <span className="text-text-primary/70">{story.category}</span>
                       <span className="w-1 h-1 rounded-full bg-midnight-divider" />

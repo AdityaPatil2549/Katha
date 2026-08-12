@@ -1,6 +1,7 @@
 import { db } from './KathaDb';
 import { dbService } from './DatabaseService';
 import { useSyncStore } from '@/store/syncStore';
+import { toast } from '@/components/system/ToastProvider';
 
 export class SyncManager {
   private isSyncing = false;
@@ -39,6 +40,7 @@ export class SyncManager {
     try {
       const pendingSyncs = await db.syncQueue.orderBy('timestamp').toArray();
       useSyncStore.getState().setPendingCount(pendingSyncs.length);
+      useSyncStore.getState().setPendingIds(pendingSyncs.map(item => item.documentId));
       
       if (!navigator.onLine) {
         return; // We update count but don't flush if offline
@@ -52,21 +54,18 @@ export class SyncManager {
       useSyncStore.getState().setSyncing(true);
 
       console.log(`[SyncManager] Found ${pendingSyncs.length} offline mutations. Attempting to flush to cloud...`);
+      let successCount = 0;
 
       for (const item of pendingSyncs) {
         if (!navigator.onLine) {
           console.warn('[SyncManager] Connection lost during flush. Aborting.');
+          toast('Sync paused. You went offline.', 'error');
           break; // Stop if we go offline during sync
         }
 
         try {
-          // Route the mutation to the correct cloud repository manually or via the DB Service
-          // For safety, we access the underlying cloud repos through the DatabaseService 
-          // (assuming they expose them or we do it via raw Firestore commands if needed)
-          
           let success = false;
           
-          // Using explicit routing based on table name
           if (item.table === 'stories') {
             const cloudRepo = (dbService.stories as any).cloudRepo;
             if (cloudRepo) {
@@ -110,18 +109,22 @@ export class SyncManager {
           }
 
           if (success) {
-            // Remove from queue upon success
-            await db.syncQueue.delete(item.id);
-            // Update UI count
-            useSyncStore.getState().setPendingCount(await db.syncQueue.count());
+            await db.syncQueue.delete(item.id!);
+            successCount++;
             console.log(`[SyncManager] Successfully flushed ${item.action} for ${item.table}`);
           }
         } catch (err) {
           console.error(`[SyncManager] Failed to flush mutation ${item.id}:`, err);
-          // If it's an unrecoverable error (e.g. invalid document), we might want to delete it eventually
-          // but for now we leave it in the queue to try again later.
         }
       }
+
+      if (successCount > 0) {
+        const remaining = await db.syncQueue.toArray();
+        useSyncStore.getState().setPendingCount(remaining.length);
+        useSyncStore.getState().setPendingIds(remaining.map(item => item.documentId));
+        toast(`${successCount} item${successCount > 1 ? 's' : ''} synced to Katha Cloud`, 'success');
+      }
+
     } catch (err) {
       console.error('[SyncManager] Critical error during flush:', err);
     } finally {
@@ -131,5 +134,4 @@ export class SyncManager {
   }
 }
 
-// Singleton instance
 export const syncManager = new SyncManager();

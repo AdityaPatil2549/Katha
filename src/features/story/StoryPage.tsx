@@ -20,9 +20,11 @@ import {
   X,
   Lightbulb,
   Copy,
-  Check
+  Check,
+  Cloud
 } from 'lucide-react';
 import { useStoriesStore, useMomentsStore, useSessionsStore, useKnowledgeStore } from '@/store';
+import { useSyncStore } from '@/store/syncStore';
 import type { Story, Moment, Session, Knowledge } from '@/types/models';
 import { FadeIn } from '@/components/ui/motion/FadeIn';
 import { StaggerContainer, staggerItemVariants } from '@/components/ui/motion/StaggerContainer';
@@ -61,6 +63,8 @@ export default function StoryPage() {
     addKnowledge,
     deleteKnowledge
   } = useKnowledgeStore();
+
+  const { pendingIds } = useSyncStore();
 
   const [story, setStory] = useState<Story | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -603,6 +607,11 @@ export default function StoryPage() {
                                 >
                                   <Trash2 className="w-4 h-4" />
                                 </button>
+                                {pendingIds.includes(moment.id) && (
+                                  <div className="p-3">
+                                    <Cloud className="w-4 h-4 text-accent-cyan animate-pulse" title="Pending Sync" />
+                                  </div>
+                                )}
                               </div>
                             </div>
                           </div>
