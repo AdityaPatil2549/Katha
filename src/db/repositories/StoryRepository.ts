@@ -15,6 +15,7 @@ export interface StoryRepository {
   findFavorites(): Promise<Story[]>;
   findByTag(tag: string): Promise<Story[]>;
   findByMood(mood: string): Promise<Story[]>;
+  search(query: string): Promise<Story[]>;
   
   // Specialized queries
   findWatching(): Promise<Story[]>;

@@ -1,4 +1,4 @@
-import Dexie, { Table } from 'dexie';
+import { db } from '@/db/KathaDb';
 import type { 
   AtlasEntry, 
   AtlasCollection, 
@@ -11,45 +11,19 @@ import type {
   AtlasDiscoveryFilters
 } from '@/types/atlas';
 
-// Atlas Database Schema
-class AtlasDatabase extends Dexie {
-  entries!: Table<AtlasEntry>;
-  collections!: Table<AtlasCollection>;
-  knowledge!: Table<AtlasKnowledge>;
-  lifePhases!: Table<AtlasLifePhase>;
-  moodMap!: Table<AtlasMoodMap>;
-  meta!: Table<AtlasMeta>;
-
-  constructor() {
-    super('KathaAtlasDatabase');
-    
-    // Define database schema
-    this.version(1).stores({
-      entries: 'id, title, category, year, genres, themes, impactTags, difficulty, emotionalTone, runtime, seasons, episodes, createdBy, version',
-      collections: 'id, title, category, difficulty, version, entryIds',
-      knowledge: 'id, entryId, wisdomScore',
-      lifePhases: 'id, phase, entryIds',
-      moodMap: 'mood, recommendedEntryIds',
-      meta: 'name, version, createdAt'
-    });
-  }
-}
-
-const db = new AtlasDatabase();
-
 export class AtlasRepository {
   // Entry operations
   async getAllEntries(): Promise<AtlasEntry[]> {
-    return await db.entries.toArray();
+    return await db.atlasEntries.toArray();
   }
 
   async getEntryById(id: string): Promise<AtlasEntry | null> {
-    const entry = await db.entries.get(id);
+    const entry = await db.atlasEntries.get(id);
     return entry || null;
   }
 
   async searchEntries(query: string): Promise<AtlasSearchResult[]> {
-    const allEntries = await db.entries.toArray();
+    const allEntries = await db.atlasEntries.toArray();
     const lowerQuery = query.toLowerCase();
     
     const results: AtlasSearchResult[] = [];
@@ -122,22 +96,22 @@ export class AtlasRepository {
   }
 
   async getEntriesByCategory(category: string): Promise<AtlasEntry[]> {
-    return await db.entries.where('category').equals(category).toArray();
+    return await db.atlasEntries.where('category').equals(category).toArray();
   }
 
   async getEntriesByTheme(theme: string): Promise<AtlasEntry[]> {
-    const allEntries = await db.entries.toArray();
+    const allEntries = await db.atlasEntries.toArray();
     return allEntries.filter(entry => 
       entry.themes.some(t => t.toLowerCase().includes(theme.toLowerCase()))
     );
   }
 
   async getEntriesByDifficulty(difficulty: string): Promise<AtlasEntry[]> {
-    return await db.entries.where('difficulty').equals(difficulty).toArray();
+    return await db.atlasEntries.where('difficulty').equals(difficulty).toArray();
   }
 
   async getEntriesByFilters(filters: AtlasDiscoveryFilters): Promise<AtlasEntry[]> {
-    let query = db.entries.toCollection();
+    let query = db.atlasEntries.toCollection();
     const allEntries = await query.toArray();
     
     return allEntries.filter(entry => {
@@ -198,11 +172,11 @@ export class AtlasRepository {
 
   // Collection operations
   async getAllCollections(): Promise<AtlasCollection[]> {
-    return await db.collections.toArray();
+    return await db.atlasCollections.toArray();
   }
 
   async getCollectionById(id: string): Promise<AtlasCollection | null> {
-    const collection = await db.collections.get(id);
+    const collection = await db.atlasCollections.get(id);
     return collection || null;
   }
 
@@ -210,23 +184,18 @@ export class AtlasRepository {
     const collection = await this.getCollectionById(collectionId);
     if (!collection) return [];
     
-    const entries: AtlasEntry[] = [];
-    for (const entryId of collection.entryIds) {
-      const entry = await this.getEntryById(entryId);
-      if (entry) entries.push(entry);
-    }
-    return entries;
+    return await db.atlasEntries.where('id').anyOf(collection.entryIds).toArray();
   }
 
   // Knowledge operations
   async getKnowledgeByEntryId(entryId: string): Promise<AtlasKnowledge | null> {
-    const knowledge = await db.knowledge.where('entryId').equals(entryId).first();
+    const knowledge = await db.atlasKnowledge.where('entryId').equals(entryId).first();
     return knowledge || null;
   }
 
   // Life phase operations
   async getLifePhase(phase: string): Promise<AtlasLifePhase | null> {
-    const lifePhase = await db.lifePhases.where('phase').equals(phase).first();
+    const lifePhase = await db.atlasLifePhases.where('phase').equals(phase).first();
     return lifePhase || null;
   }
 
@@ -234,83 +203,69 @@ export class AtlasRepository {
     const lifePhase = await this.getLifePhase(phase);
     if (!lifePhase) return [];
     
-    const entries: AtlasEntry[] = [];
-    for (const entryId of lifePhase.entryIds) {
-      const entry = await this.getEntryById(entryId);
-      if (entry) entries.push(entry);
-    }
-    return entries;
+    return await db.atlasEntries.where('id').anyOf(lifePhase.entryIds).toArray();
   }
 
   // Mood operations
   async getMoodRecommendations(mood: string): Promise<AtlasEntry[]> {
-    const moodMap = await db.moodMap.where('mood').equals(mood).first();
+    const moodMap = await db.atlasMoodMap.get(mood);
     if (!moodMap) return [];
     
-    const entries: AtlasEntry[] = [];
-    for (const entryId of moodMap.recommendedEntryIds) {
-      const entry = await this.getEntryById(entryId);
-      if (entry) entries.push(entry);
-    }
-    return entries;
+    return await db.atlasEntries.where('id').anyOf(moodMap.recommendedEntryIds).toArray();
+  }
+
+  // Meta operations
+  async getAtlasVersion(): Promise<string> {
+    const meta = await db.atlasMeta.get('core');
+    return meta?.version || '0.0.0';
   }
 
   // Dataset operations
   async installDataset(dataset: AtlasDataset): Promise<void> {
-    // Clear existing data
-    await Promise.all([
-      db.entries.clear(),
-      db.collections.clear(),
-      db.knowledge.clear(),
-      db.lifePhases.clear(),
-      db.moodMap.clear(),
-      db.meta.clear()
-    ]);
-    
-    // Install new data in batches for performance
-    const batchSize = 100;
-    
-    // Install entries
-    for (let i = 0; i < dataset.entries.length; i += batchSize) {
-      const batch = dataset.entries.slice(i, i + batchSize);
-      await db.entries.bulkAdd(batch);
-    }
-    
-    // Install collections
-    for (let i = 0; i < dataset.collections.length; i += batchSize) {
-      const batch = dataset.collections.slice(i, i + batchSize);
-      await db.collections.bulkAdd(batch);
-    }
-    
-    // Install knowledge
-    for (let i = 0; i < dataset.knowledge.length; i += batchSize) {
-      const batch = dataset.knowledge.slice(i, i + batchSize);
-      await db.knowledge.bulkAdd(batch);
-    }
-    
-    // Install life phases
-    await db.lifePhases.bulkAdd(dataset.lifePhases);
-    
-    // Install mood map
-    await db.moodMap.bulkAdd(dataset.moodMap);
-    
-    // Install meta
-    await db.meta.add(dataset.meta);
-  }
+    await db.transaction('rw', [
+      db.atlasEntries, 
+      db.atlasCollections, 
+      db.atlasKnowledge, 
+      db.atlasLifePhases, 
+      db.atlasMoodMap, 
+      db.atlasMeta
+    ], async () => {
+        // Clear existing data
+        await db.atlasEntries.clear();
+        await db.atlasCollections.clear();
+        await db.atlasKnowledge.clear();
+        await db.atlasLifePhases.clear();
+        await db.atlasMoodMap.clear();
 
-  async getDatasetVersion(): Promise<string | null> {
-    const meta = await db.meta.limit(1).first();
-    return meta?.version || null;
+        // Install new data
+        await db.atlasEntries.bulkAdd(dataset.entries);
+        await db.atlasCollections.bulkAdd(dataset.collections);
+        await db.atlasKnowledge.bulkAdd(dataset.knowledge);
+        await db.atlasLifePhases.bulkAdd(dataset.lifePhases);
+        await db.atlasMoodMap.bulkAdd(dataset.moodMap);
+
+        // Update meta
+        await db.atlasMeta.put({
+          name: 'core',
+          version: dataset.meta?.version || '1.0.0',
+          createdAt: dataset.meta?.createdAt || new Date().toISOString(),
+          entries: dataset.entries.length,
+          sizeMB: 0,
+          curator: dataset.meta?.curator || 'system',
+          license: dataset.meta?.license || 'private'
+        });
+      }
+    );
   }
 
   async clearDataset(): Promise<void> {
     await Promise.all([
-      db.entries.clear(),
-      db.collections.clear(),
-      db.knowledge.clear(),
-      db.lifePhases.clear(),
-      db.moodMap.clear(),
-      db.meta.clear()
+      db.atlasEntries.clear(),
+      db.atlasCollections.clear(),
+      db.atlasKnowledge.clear(),
+      db.atlasLifePhases.clear(),
+      db.atlasMoodMap.clear(),
+      db.atlasMeta.clear()
     ]);
   }
 
@@ -324,12 +279,12 @@ export class AtlasRepository {
     version: string | null;
   }> {
     const [entries, collections, knowledge, lifePhases, moodMaps, version] = await Promise.all([
-      db.entries.count(),
-      db.collections.count(),
-      db.knowledge.count(),
-      db.lifePhases.count(),
-      db.moodMap.count(),
-      this.getDatasetVersion()
+      db.atlasEntries.count(),
+      db.atlasCollections.count(),
+      db.atlasKnowledge.count(),
+      db.atlasLifePhases.count(),
+      db.atlasMoodMap.count(),
+      this.getAtlasVersion()
     ]);
     
     return {

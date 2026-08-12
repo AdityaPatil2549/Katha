@@ -1,3 +1,5 @@
+import { dbService } from '@/db/DatabaseService';
+
 const BASE_URL = '/api/omdb';
 
 export interface OMDBDetails {
@@ -31,11 +33,18 @@ export interface OMDBDetails {
 class OMDBService {
   async getByImdbId(imdbId: string): Promise<OMDBDetails | null> {
     if (!imdbId) return null;
+    
+    const cacheKey = `omdb_id_${imdbId}`;
+    const cached = await dbService.apiCache.get(cacheKey);
+    if (cached) return cached;
+
     try {
       const response = await fetch(`${BASE_URL}?i=${imdbId}`);
       if (!response.ok) throw new Error('Failed to fetch OMDB data');
       const data = await response.json();
       if (data.Response === 'False') return null;
+      
+      await dbService.apiCache.set(cacheKey, 'omdb', data);
       return data;
     } catch (error) {
       console.error('OMDB Fetch Error:', error);
@@ -45,6 +54,11 @@ class OMDBService {
 
   async getByTitle(title: string, year?: string): Promise<OMDBDetails | null> {
     if (!title) return null;
+    
+    const cacheKey = `omdb_title_${title.toLowerCase()}_${year || 'any'}`;
+    const cached = await dbService.apiCache.get(cacheKey);
+    if (cached) return cached;
+
     try {
       let url = `${BASE_URL}?t=${encodeURIComponent(title)}`;
       if (year) {
@@ -54,6 +68,8 @@ class OMDBService {
       if (!response.ok) throw new Error('Failed to fetch OMDB data');
       const data = await response.json();
       if (data.Response === 'False') return null;
+      
+      await dbService.apiCache.set(cacheKey, 'omdb', data);
       return data;
     } catch (error) {
       console.error('OMDB Fetch Error:', error);

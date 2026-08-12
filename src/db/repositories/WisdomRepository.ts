@@ -1,4 +1,4 @@
-import Dexie, { Table } from 'dexie';
+import { db } from '@/db/KathaDb';
 import type { 
   PersonalWisdom,
   PersonalInsight,
@@ -12,38 +12,6 @@ import type {
   LegacyDocument,
   WisdomRepository as IWisdomRepository
 } from '@/types/knowledge';
-
-class WisdomDatabase extends Dexie {
-  wisdom!: Table<PersonalWisdom>;
-  insights!: Table<PersonalInsight>;
-  principles!: Table<PersonalPrinciple>;
-  quotes!: Table<PersonalQuote>;
-  stories!: Table<PersonalStory>;
-  connections!: Table<KnowledgeConnection>;
-  themes!: Table<WisdomTheme>;
-  lifeLessons!: Table<LifeLesson>;
-  philosophies!: Table<PersonalPhilosophy>;
-  legacyDocuments!: Table<LegacyDocument>;
-
-  constructor() {
-    super('KathaWisdomDatabase');
-    
-    this.version(1).stores({
-      wisdom: 'id, createdAt, updatedAt',
-      insights: 'id, timestamp, sourceEntryId, category, depth',
-      principles: 'id, timestamp, name, category, importance',
-      quotes: 'id, timestamp, content, source, resonance',
-      stories: 'id, timestamp, title, genre, sharingLevel',
-      connections: 'id, sourceId, targetId, sourceType, targetType, strength',
-      themes: 'id, name, category, importance, currentStatus',
-      lifeLessons: 'id, timestamp, title, category, value',
-      philosophies: 'id, timestamp, title',
-      legacyDocuments: 'id, timestamp, title, type, sharingLevel'
-    });
-  }
-}
-
-const db = new WisdomDatabase();
 
 export class WisdomRepository implements IWisdomRepository {
   // Wisdom CRUD operations
@@ -62,7 +30,7 @@ export class WisdomRepository implements IWisdomRepository {
         await db.quotes.bulkPut(wisdom.quotes);
       }
       if (wisdom.stories) {
-        await db.stories.put(wisdom.stories);
+        await db.personalStories.put(wisdom.stories);
       }
       if (wisdom.knowledgeGraph.length > 0) {
         await db.connections.bulkPut(wisdom.knowledgeGraph);
@@ -94,7 +62,7 @@ export class WisdomRepository implements IWisdomRepository {
       const insights = await db.insights.toArray();
       const principles = await db.principles.toArray();
       const quotes = await db.quotes.toArray();
-      const stories = await db.stories.limit(1).first();
+      const stories = await db.personalStories.limit(1).first();
       const knowledgeGraph = await db.connections.toArray();
       const wisdomThemes = await db.themes.toArray();
       const lifeLessons = await db.lifeLessons.toArray();
@@ -177,7 +145,7 @@ export class WisdomRepository implements IWisdomRepository {
       results.push(...quotes.map(quote => ({ type: 'quote', ...quote })));
 
       // Search stories
-      const stories = await db.stories
+      const stories = await db.personalStories
         .filter(story => 
           story.title.toLowerCase().includes(lowerQuery) ||
           story.narrative.toLowerCase().includes(lowerQuery)
@@ -306,7 +274,7 @@ export class WisdomRepository implements IWisdomRepository {
       turningPoints: []
     };
 
-    await db.stories.add(newStory);
+    await db.personalStories.add(newStory);
     return id;
   }
 
@@ -339,7 +307,7 @@ export class WisdomRepository implements IWisdomRepository {
         db.insights.toArray(),
         db.principles.toArray(),
         db.quotes.toArray(),
-        db.stories.toArray(),
+        db.personalStories.toArray(),
         db.lifeLessons.toArray()
       ]);
 
@@ -398,7 +366,7 @@ export class WisdomRepository implements IWisdomRepository {
       
       if (wisdom.personalPhilosophy.coreBeliefs.length > 0) {
         markdown += `### Core Beliefs\n\n`;
-        wisdom.personalPhilosophy.coreBeliefs.forEach(belief => {
+        wisdom.personalPhilosophy.coreBeliefs.forEach((belief: any) => {
           markdown += `- **${belief.statement}** (Confidence: ${belief.confidence}/10)\n`;
         });
         markdown += `\n`;
@@ -408,7 +376,7 @@ export class WisdomRepository implements IWisdomRepository {
     // Life Lessons
     if (wisdom.lifeLessons.length > 0) {
       markdown += `## Life Lessons\n\n`;
-      wisdom.lifeLessons.forEach(lesson => {
+      wisdom.lifeLessons.forEach((lesson: LifeLesson) => {
         markdown += `### ${lesson.title}\n\n`;
         markdown += `${lesson.description}\n\n`;
         markdown += `*Value: ${lesson.value}/10 | Difficulty: ${lesson.difficulty}/10*\n\n`;
@@ -418,7 +386,7 @@ export class WisdomRepository implements IWisdomRepository {
     // Principles
     if (wisdom.principles.length > 0) {
       markdown += `## Personal Principles\n\n`;
-      wisdom.principles.forEach(principle => {
+      wisdom.principles.forEach((principle: PersonalPrinciple) => {
         markdown += `### ${principle.name}\n\n`;
         markdown += `${principle.description}\n\n`;
         markdown += `*Importance: ${principle.importance}/10 | Category: ${principle.category}*\n\n`;
@@ -428,7 +396,7 @@ export class WisdomRepository implements IWisdomRepository {
     // Insights
     if (wisdom.insights.length > 0) {
       markdown += `## Personal Insights\n\n`;
-      wisdom.insights.forEach(insight => {
+      wisdom.insights.forEach((insight: PersonalInsight) => {
         markdown += `### ${insight.title}\n\n`;
         markdown += `${insight.description}\n\n`;
         markdown += `*Category: ${insight.category} | Depth: ${insight.depth}/10*\n\n`;
@@ -438,7 +406,7 @@ export class WisdomRepository implements IWisdomRepository {
     // Quotes
     if (wisdom.quotes.length > 0) {
       markdown += `## Meaningful Quotes\n\n`;
-      wisdom.quotes.forEach(quote => {
+      wisdom.quotes.forEach((quote: PersonalQuote) => {
         markdown += `> ${quote.content}\n`;
         markdown += `> — ${quote.attribution}\n\n`;
         if (quote.personalMeaning) {

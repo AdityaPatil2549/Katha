@@ -5,7 +5,8 @@ import { UserOnboarding } from '@/features/onboarding/UserOnboarding';
 import { KathaCosmos } from '@/components/canvas/KathaCosmos';
 import { useMagneticCursor } from '@/hooks/useMagneticCursor';
 import { useState, useRef, useEffect } from 'react';
-import { User, Settings, Download, Brain, Trophy, Calendar, ChevronDown } from 'lucide-react';
+import { User, Settings, Download, Brain, Trophy, Calendar, ChevronDown, Book, Cloud, CloudOff, RefreshCw } from 'lucide-react';
+import { useSyncStore } from '@/store/syncStore';
 
 const primaryNav = [
   { path: '/', label: 'Home' },
@@ -15,6 +16,7 @@ const primaryNav = [
 ];
 
 const secondaryNav = [
+  { path: '/journal', label: 'Journal', icon: Book },
   { path: '/calendar', label: 'Calendar', icon: Calendar },
   { path: '/achievements', label: 'Achievements', icon: Trophy },
   { path: '/export-system', label: 'Export', icon: Download },
@@ -24,6 +26,7 @@ const secondaryNav = [
 export function AppShell() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { isOnline, isSyncing, pendingCount } = useSyncStore();
   const [isScrolled, setIsScrolled] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -104,6 +107,31 @@ export function AppShell() {
           {/* Right Actions */}
           <div className="flex items-center gap-5">
             
+            {/* Sync Indicator */}
+            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-midnight-surface/50 border border-midnight-border backdrop-blur-sm">
+              {!isOnline ? (
+                <>
+                  <CloudOff className="w-4 h-4 text-accent-amber" />
+                  <span className="text-xs font-medium text-text-secondary">Offline {pendingCount > 0 && `(${pendingCount})`}</span>
+                </>
+              ) : isSyncing ? (
+                <>
+                  <RefreshCw className="w-4 h-4 text-accent-cyan animate-spin" />
+                  <span className="text-xs font-medium text-text-secondary">Syncing...</span>
+                </>
+              ) : pendingCount > 0 ? (
+                <>
+                  <Cloud className="w-4 h-4 text-accent-cyan" />
+                  <span className="text-xs font-medium text-text-secondary">{pendingCount} Pending</span>
+                </>
+              ) : (
+                <>
+                  <Cloud className="w-4 h-4 text-accent-emerald" />
+                  <span className="text-xs font-medium text-text-secondary">Synced</span>
+                </>
+              )}
+            </div>
+
             {/* Smriti Intelligence Premium Button */}
             <button 
               onClick={() => navigate('/intelligence')}

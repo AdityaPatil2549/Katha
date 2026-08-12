@@ -14,6 +14,14 @@ export default async function handler(req: Request) {
         headers: { 'Content-Type': 'application/json' },
       });
     }
+    
+    // Basic SSRF protection
+    if (!path.startsWith('/') || path.includes('../') || path.includes('//')) {
+      return new Response(JSON.stringify({ error: 'Invalid path parameter' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
 
     if (!TRAKT_CLIENT_ID) {
       return new Response(JSON.stringify({ error: 'Trakt client ID not configured' }), {

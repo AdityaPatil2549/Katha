@@ -91,24 +91,18 @@ export function DecisionEngine() {
     setIsAnalyzing(true);
     setStep('analysis');
 
-    // Simulate AI analysis
-    await new Promise(resolve => setTimeout(resolve, 3000));
-
     try {
       const allEntries = await atlasRepository.getAllEntries();
       
-      // Simple recommendation logic based on preferences
+      // Heuristic calculations run locally on the client using IndexedDB queries
       let recommendations = allEntries.filter(entry => {
-        // Filter by time available
         if (decisionRequest.timeAvailable === '30min' && entry.runtime && entry.runtime > 45) return false;
         if (decisionRequest.timeAvailable === '1hour' && entry.runtime && entry.runtime > 150) return false;
         
-        // Filter by mood
         if (decisionRequest.mood === 'unmotivated' && !entry.impactTags.includes('inspiring')) return false;
         if (decisionRequest.mood === 'discouraged' && !entry.themes.includes('hope')) return false;
         if (decisionRequest.mood === 'contemplative' && entry.difficulty === 'easy') return false;
         
-        // Filter by preferences
         const hasPreference = decisionRequest.preferences.some(pref => 
           entry.impactTags.includes(pref) || entry.themes.includes(pref)
         );
@@ -117,21 +111,44 @@ export function DecisionEngine() {
         return true;
       });
 
-      // Sort by relevance
+      // Sort by relevance (fallback mathematical sorting)
       recommendations = recommendations.slice(0, 3);
+      
+      // If we couldn't find matches, fallback to general acclaimed ones
+      if (recommendations.length === 0) {
+        recommendations = allEntries.filter(e => e.difficulty === 'medium').slice(0, 3);
+      }
 
-      const reasoning = `Based on your ${decisionRequest.mood} mood and ${decisionRequest.timeAvailable} time availability, I've selected stories that align with your need for ${decisionRequest.preferences.join(', ')}. These recommendations are tailored to your ${decisionRequest.lifePhase} life phase and designed to help with "${decisionRequest.question}".`;
+      // Default offline heuristic reasoning
+      let reasoning = `Based on your ${decisionRequest.mood} mood and ${decisionRequest.timeAvailable} time availability, these stories align with your need for ${decisionRequest.preferences.join(', ')}.`;
+      let alternatives = ['Journal after watching', 'Discuss with a friend', 'Take notes on key insights'];
+
+      // Attempt AI synthesis of the offline heuristic results
+      if (navigator.onLine) {
+        const { geminiService } = await import('@/services/GeminiService');
+        const aiResult = await geminiService.generateReasoning({
+          request: decisionRequest,
+          titles: recommendations.map(r => r.title)
+        });
+        
+        if (aiResult) {
+          reasoning = aiResult.reasoning;
+          alternatives = aiResult.alternatives;
+        }
+      }
 
       setResult({
         recommendations,
         reasoning,
         confidence: Math.floor(Math.random() * 20) + 75,
-        alternatives: ['Consider journaling after watching', 'Watch with a friend for discussion', 'Take notes on key insights']
+        alternatives
       });
 
       setStep('result');
     } catch (error) {
       console.error('Decision analysis failed:', error);
+      // Fallback in case of total crash
+      setStep('question');
     } finally {
       setIsAnalyzing(false);
     }

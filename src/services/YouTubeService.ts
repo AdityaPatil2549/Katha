@@ -1,3 +1,5 @@
+import { dbService } from '@/db/DatabaseService';
+
 const BASE_URL = '/api/youtube';
 
 export interface YouTubeSearchResult {
@@ -18,6 +20,10 @@ class YouTubeService {
   async search(query: string): Promise<YouTubeSearchResult[]> {
     if (!query.trim()) return [];
     
+    const cacheKey = `youtube_search_${query.toLowerCase()}`;
+    const cached = await dbService.apiCache.get(cacheKey);
+    if (cached) return cached;
+
     try {
       const response = await fetch(
         `${BASE_URL}?path=/search&part=snippet&q=${encodeURIComponent(query)}&type=video&maxResults=10`
@@ -26,7 +32,7 @@ class YouTubeService {
       if (!response.ok) throw new Error('Failed to search YouTube');
       
       const data = await response.json();
-      return data.items.map((item: any) => ({
+      const results = data.items.map((item: any) => ({
         id: item.id.videoId,
         title: item.snippet.title,
         description: item.snippet.description,
@@ -34,6 +40,9 @@ class YouTubeService {
         thumbnailUrl: item.snippet.thumbnails.high?.url || item.snippet.thumbnails.default?.url,
         publishedAt: item.snippet.publishedAt
       }));
+      
+      await dbService.apiCache.set(cacheKey, 'youtube', results);
+      return results;
     } catch (error) {
       console.error('YouTube Search Error:', error);
       return [];
@@ -43,6 +52,10 @@ class YouTubeService {
   async getVideoDetails(videoId: string): Promise<YouTubeVideoDetails | null> {
     if (!videoId) return null;
     
+    const cacheKey = `youtube_details_${videoId}`;
+    const cached = await dbService.apiCache.get(cacheKey);
+    if (cached) return cached;
+
     try {
       const response = await fetch(
         `${BASE_URL}?path=/videos&part=snippet,contentDetails,statistics&id=${videoId}`
@@ -55,7 +68,7 @@ class YouTubeService {
       
       const item = data.items[0];
       
-      return {
+      const details = {
         id: item.id,
         title: item.snippet.title,
         description: item.snippet.description,
@@ -65,6 +78,9 @@ class YouTubeService {
         durationMinutes: this.parseYouTubeDuration(item.contentDetails.duration),
         viewCount: item.statistics?.viewCount || '0'
       };
+      
+      await dbService.apiCache.set(cacheKey, 'youtube', details);
+      return details;
     } catch (error) {
       console.error('YouTube Details Error:', error);
       return null;

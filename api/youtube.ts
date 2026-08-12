@@ -15,6 +15,14 @@ export default async function handler(req: Request) {
       });
     }
 
+    // Basic SSRF protection
+    if (!path.startsWith('/') || path.includes('../') || path.includes('//')) {
+      return new Response(JSON.stringify({ error: 'Invalid path parameter' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
     if (!YOUTUBE_API_KEY) {
       return new Response(JSON.stringify({ error: 'YouTube API key not configured' }), {
         status: 500,

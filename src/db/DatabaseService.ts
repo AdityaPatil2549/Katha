@@ -3,8 +3,18 @@ import { DexieMomentRepository } from './repositories/DexieMomentRepository';
 import { DexieSessionRepository } from './repositories/DexieSessionRepository';
 import { DexieKnowledgeRepository } from './repositories/DexieKnowledgeRepository';
 import { DexieTimelineRepository } from './repositories/DexieTimelineRepository';
+import { ApiCacheRepository } from './repositories/ApiCacheRepository';
 import { FirestoreStoryRepository } from './repositories/FirestoreStoryRepository';
 import { FirestoreMomentRepository } from './repositories/FirestoreMomentRepository';
+import { FirestoreSessionRepository } from './repositories/FirestoreSessionRepository';
+import { FirestoreKnowledgeRepository } from './repositories/FirestoreKnowledgeRepository';
+import { FirestoreTimelineRepository } from './repositories/FirestoreTimelineRepository';
+import { SyncingStoryRepository } from './repositories/SyncingStoryRepository';
+import { SyncingMomentRepository } from './repositories/SyncingMomentRepository';
+import { SyncingSessionRepository } from './repositories/SyncingSessionRepository';
+import { SyncingKnowledgeRepository } from './repositories/SyncingKnowledgeRepository';
+import { SyncingTimelineRepository } from './repositories/SyncingTimelineRepository';
+import { syncManager } from './SyncManager';
 import { db } from '@/lib/firebase';
 import type { 
   StoryRepository, 
@@ -15,20 +25,33 @@ import type {
 } from './repositories';
 
 export class DatabaseService {
-  private _stories: StoryRepository;
-  private _moments: MomentRepository;
+  private _stories: SyncingStoryRepository;
+  private _moments: SyncingMomentRepository;
   private _sessions: SessionRepository;
   private _knowledge: KnowledgeRepository;
   private _timeline: TimelineRepository;
+  private _apiCache: ApiCacheRepository;
   
   private userId: string | null = null;
 
   constructor() {
-    this._stories = new DexieStoryRepository();
-    this._moments = new DexieMomentRepository();
-    this._sessions = new DexieSessionRepository();
-    this._knowledge = new DexieKnowledgeRepository();
-    this._timeline = new DexieTimelineRepository();
+    this._stories = new SyncingStoryRepository(new DexieStoryRepository(), null);
+    this._moments = new SyncingMomentRepository(new DexieMomentRepository(), null);
+    this._sessions = new SyncingSessionRepository(new DexieSessionRepository(), null);
+    this._knowledge = new SyncingKnowledgeRepository(new DexieKnowledgeRepository(), null);
+    this._timeline = new SyncingTimelineRepository(new DexieTimelineRepository(), null);
+    
+    this._apiCache = new ApiCacheRepository();
+
+    // Start background sync queue processor
+    if (typeof window !== 'undefined') {
+      syncManager.startBackgroundSync();
+    }
+
+    // Proactively remove expired API cache entries on every app start.
+    this._apiCache.clearExpired().catch(err =>
+      console.warn('ApiCache cleanup failed:', err)
+    );
   }
 
   public setUserId(userId: string | null) {
@@ -36,18 +59,19 @@ export class DatabaseService {
     this.userId = userId;
 
     if (userId && db) {
-      this._stories = new FirestoreStoryRepository(userId);
-      this._moments = new FirestoreMomentRepository(userId);
-      // Fallback to local for others until fully migrated
-      this._sessions = new DexieSessionRepository();
-      this._knowledge = new DexieKnowledgeRepository();
-      this._timeline = new DexieTimelineRepository();
+      // Connect Cloud Repositories to the Syncing Repositories
+      this._stories.setCloudRepo(new FirestoreStoryRepository(userId));
+      this._moments.setCloudRepo(new FirestoreMomentRepository(userId));
+      (this._sessions as SyncingSessionRepository).setCloudRepo(new FirestoreSessionRepository(userId));
+      (this._knowledge as SyncingKnowledgeRepository).setCloudRepo(new FirestoreKnowledgeRepository(userId));
+      (this._timeline as SyncingTimelineRepository).setCloudRepo(new FirestoreTimelineRepository(userId));
     } else {
-      this._stories = new DexieStoryRepository();
-      this._moments = new DexieMomentRepository();
-      this._sessions = new DexieSessionRepository();
-      this._knowledge = new DexieKnowledgeRepository();
-      this._timeline = new DexieTimelineRepository();
+      // Disconnect Cloud Repositories
+      this._stories.setCloudRepo(null);
+      this._moments.setCloudRepo(null);
+      (this._sessions as SyncingSessionRepository).setCloudRepo(null);
+      (this._knowledge as SyncingKnowledgeRepository).setCloudRepo(null);
+      (this._timeline as SyncingTimelineRepository).setCloudRepo(null);
     }
   }
 
@@ -56,6 +80,7 @@ export class DatabaseService {
   get sessions() { return this._sessions; }
   get knowledge() { return this._knowledge; }
   get timeline() { return this._timeline; }
+  get apiCache() { return this._apiCache; }
 
   // Health check
   async isHealthy(): Promise<boolean> {

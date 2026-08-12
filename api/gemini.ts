@@ -71,74 +71,85 @@ Format the output as a comma-separated list. Provide ONLY the list, nothing else
       });
     }
 
-    if (action === 'analyze_intelligence') {
-      const { userData } = body;
-      const prompt = `You are the Smriti Intelligence Engine. Analyze the following user data (stories they've interacted with, life moments logged, and extracted knowledge/lessons). 
-Calculate and infer deep insights about their emotional journey, taste evolution, life patterns, and extract wisdom.
-Return ONLY a strictly formatted JSON object that precisely matches this structure, with no markdown wrappers or additional text:
+    if (action === 'analyze_intelligence_emotion') {
+      const prompt = `Analyze the user data (stories, life moments). Extract deep insights about their emotional journey.
+Return strictly formatted JSON:
 {
-  "emotionalJourney": {
-    "dominantMood": "inspired|emotional|thoughtful|melancholic|joyful",
-    "moodEvolution": [
-      { "month": "Jan", "moods": { "inspired": 40, "emotional": 30, "thoughtful": 30 } },
-      ... (last 6 months, percentages must add up to 100 for each month)
-    ],
-    "emotionalGrowth": { "current": 85, "previous": 70, "growth": 15 }
-  },
-  "tasteEvolution": {
-    "genres": [
-      { "genre": "string", "current": 35, "previous": 25, "trend": "up|down|stable" },
-      ... (top 5 genres)
-    ],
-    "sophisticationScore": 0-100,
-    "diversityIndex": 0.0-1.0
-  },
-  "lifePatterns": {
-    "viewingHabits": {
-      "peakTime": "string",
-      "averageSession": "X hours",
-      "bingeTendency": 0.0-1.0,
-      "consistency": 0.0-1.0
-    },
-    "lifePhaseCorrelation": {
-      "phase-name": { "stories": number, "avgRating": number, "dominantMood": "string" }
-      ... (2 to 3 phases)
-    }
-  },
-  "wisdomExtraction": {
-    "totalLessons": number,
-    "topLessons": [
-      { "lesson": "string", "frequency": number, "stories": ["string"] }
-      ... (top 4 lessons)
-    ],
-    "personalPrinciples": [
-      { "principle": "string", "strength": 0.0-1.0, "source": "string" }
-      ... (top 3 principles)
-    ]
-  },
-  "predictions": {
-    "nextFavoriteGenre": "string",
-    "emotionalReadiness": "string",
-    "optimalWatchTime": "string",
-    "lifePhaseTransition": "string"
-  }
+  "dominantMood": "inspired|emotional|thoughtful|melancholic|joyful",
+  "moodEvolution": [ { "month": "Jan", "moods": { "inspired": 40, "emotional": 30, "thoughtful": 30 } } ],
+  "emotionalGrowth": { "current": 85, "previous": 70, "growth": 15 }
 }
-
-User Data:
-${JSON.stringify(userData, null, 2)}`;
-      
+User Data: ${JSON.stringify(body.userData, null, 2)}`;
       const jsonModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash", generationConfig: { responseMimeType: "application/json" } });
       const result = await jsonModel.generateContent(prompt);
-      const textResponse = result.response.text();
-      try {
-        const parsedData = JSON.parse(textResponse);
-        return new Response(JSON.stringify({ result: parsedData }), {
-          headers: { 'Content-Type': 'application/json' },
-        });
-      } catch (parseError) {
-        console.error('Failed to parse JSON from Gemini:', textResponse);
-        throw parseError;
-      }
+      const rawText = result.response.text();
+      const cleanJson = rawText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+      return new Response(JSON.stringify({ result: JSON.parse(cleanJson) }), { headers: { 'Content-Type': 'application/json' } });
+    }
+
+    if (action === 'analyze_intelligence_taste') {
+      const prompt = `Analyze the user data. Extract deep insights about their taste evolution.
+Return strictly formatted JSON:
+{
+  "genres": [ { "genre": "string", "current": 35, "previous": 25, "trend": "up|down|stable" } ],
+  "sophisticationScore": 80,
+  "diversityIndex": 0.85
+}
+User Data: ${JSON.stringify(body.userData, null, 2)}`;
+      const jsonModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash", generationConfig: { responseMimeType: "application/json" } });
+      const result = await jsonModel.generateContent(prompt);
+      const rawText = result.response.text();
+      const cleanJson = rawText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+      return new Response(JSON.stringify({ result: JSON.parse(cleanJson) }), { headers: { 'Content-Type': 'application/json' } });
+    }
+
+    if (action === 'analyze_intelligence_life') {
+      const prompt = `Analyze the user data. Extract deep insights about their life patterns.
+Return strictly formatted JSON:
+{
+  "viewingHabits": { "peakTime": "string", "averageSession": "X hours", "bingeTendency": 0.5, "consistency": 0.8 },
+  "lifePhaseCorrelation": { "phase-name": { "stories": 10, "avgRating": 4.5, "dominantMood": "string" } }
+}
+User Data: ${JSON.stringify(body.userData, null, 2)}`;
+      const jsonModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash", generationConfig: { responseMimeType: "application/json" } });
+      const result = await jsonModel.generateContent(prompt);
+      const rawText = result.response.text();
+      const cleanJson = rawText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+      return new Response(JSON.stringify({ result: JSON.parse(cleanJson) }), { headers: { 'Content-Type': 'application/json' } });
+    }
+
+    if (action === 'analyze_intelligence_wisdom') {
+      const prompt = `Analyze the user data. Extract deep insights about wisdom and life lessons.
+Return strictly formatted JSON:
+{
+  "totalLessons": 50,
+  "topLessons": [ { "lesson": "string", "frequency": 5, "stories": ["string"] } ],
+  "personalPrinciples": [ { "principle": "string", "strength": 0.9, "source": "string" } ]
+}
+User Data: ${JSON.stringify(body.userData, null, 2)}`;
+      const jsonModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash", generationConfig: { responseMimeType: "application/json" } });
+      const result = await jsonModel.generateContent(prompt);
+      const rawText = result.response.text();
+      const cleanJson = rawText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+      return new Response(JSON.stringify({ result: JSON.parse(cleanJson) }), { headers: { 'Content-Type': 'application/json' } });
+    }
+
+    if (action === 'generate_embedding') {
+      const prompt = text;
+      const embeddingModel = genAI.getGenerativeModel({ model: "text-embedding-004" });
+      const result = await embeddingModel.embedContent(prompt);
+      return new Response(JSON.stringify({ result: result.embedding.values }), { headers: { 'Content-Type': 'application/json' } });
+    }
+
+    if (action === 'synthesize_memory') {
+      const prompt = `You are a cinematic storyteller creating a "Spotify Wrapped" style summary for the user's year in media.
+Based on the provided user data, generate a poetic, philosophical, and deeply emotional 3-paragraph summary of their journey this year.
+Focus on the themes they explored, the emotions they felt, and how they grew. Do not use generic phrases. Be profound.
+User Data: ${JSON.stringify(body.userData, null, 2)}`;
+      const result = await model.generateContent(prompt);
+      return new Response(JSON.stringify({ result: result.response.text().trim() }), {
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
 
     return new Response(JSON.stringify({ error: 'Invalid action' }), {

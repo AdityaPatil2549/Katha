@@ -35,12 +35,23 @@ export class DexieStoryRepository implements StoryRepository {
   }
 
   async delete(id: UUID): Promise<void> {
-    await db.transaction('rw', [db.stories, db.moments, db.sessions, db.knowledge, db.timeline], async () => {
+    await db.transaction('rw', [
+      db.stories, db.moments, db.sessions, db.knowledge, db.timeline,
+      db.viewingHistory, db.impactResponses, db.storyDNA,
+      db.insights, db.atlasKnowledge
+    ], async () => {
       // Delete related data first
       await db.moments.where('storyId').equals(id).delete();
       await db.sessions.where('storyId').equals(id).delete();
       await db.knowledge.where('storyId').equals(id).delete();
       await db.timeline.where('refId').equals(id).delete();
+      
+      // Cascade delete personal/wisdom data
+      await db.viewingHistory.where('entryId').equals(id).delete();
+      await db.impactResponses.where('entryId').equals(id).delete();
+      await db.storyDNA.where('entryId').equals(id).delete();
+      await db.insights.where('sourceEntryId').equals(id).delete();
+      await db.atlasKnowledge.where('entryId').equals(id).delete();
       
       // Delete the story
       await db.stories.delete(id);
@@ -77,6 +88,16 @@ export class DexieStoryRepository implements StoryRepository {
 
   async findByMood(mood: string): Promise<Story[]> {
     return await db.stories.filter(story => (story.moods || []).includes(mood)).toArray();
+  }
+
+  async search(query: string): Promise<Story[]> {
+    const lowerQuery = query.toLowerCase();
+    return await db.stories.filter(story => 
+      story.title.toLowerCase().includes(lowerQuery) ||
+      story.genre.some(g => g.toLowerCase().includes(lowerQuery)) ||
+      (story.tags || []).some(t => t.toLowerCase().includes(lowerQuery)) ||
+      (story.description || '').toLowerCase().includes(lowerQuery)
+    ).toArray();
   }
 
   async findWatching(): Promise<Story[]> {

@@ -80,41 +80,81 @@ export class TimelineEngine {
 
   static async getTimelineWithDetails(): Promise<any[]> {
     const events = await this.getTimeline();
-    const enrichedEvents = [];
+    
+    // Collect all IDs needed for bulk fetching
+    const watchIds = new Set<string>();
+    const momentIds = new Set<string>();
+    const knowledgeIds = new Set<string>();
+    
+    events.forEach(event => {
+      switch (event.type) {
+        case 'watch':
+        case 'finish':
+        case 'rewatch':
+          watchIds.add(event.refId);
+          break;
+        case 'moment':
+          momentIds.add(event.refId);
+          break;
+        case 'knowledge':
+          knowledgeIds.add(event.refId);
+          break;
+      }
+    });
 
-    for (const event of events) {
+    // Bulk fetch primary details
+    const [stories, moments, knowledge] = await Promise.all([
+      db.stories.where('id').anyOf([...watchIds]).toArray(),
+      db.moments.where('id').anyOf([...momentIds]).toArray(),
+      db.knowledge.where('id').anyOf([...knowledgeIds]).toArray(),
+    ]);
+
+    // Create lookup maps for fast O(1) matching
+    const storyMap = new Map(stories.map(s => [s.id, s]));
+    const momentMap = new Map(moments.map(m => [m.id, m]));
+    const knowledgeMap = new Map(knowledge.map(k => [k.id, k]));
+
+    // Now, we need the stories for the moments and knowledge!
+    // Since we only know them after fetching, we do a second pass for those parent stories.
+    const parentStoryIds = new Set<string>();
+    moments.forEach(m => parentStoryIds.add(m.storyId));
+    knowledge.forEach(k => parentStoryIds.add(k.storyId));
+    
+    const parentStories = await db.stories.where('id').anyOf([...parentStoryIds]).toArray();
+    const parentStoryMap = new Map(parentStories.map(s => [s.id, s]));
+
+    // Reconstruct the array without N+1 loops
+    return events.map(event => {
       let details = null;
       
       switch (event.type) {
         case 'watch':
         case 'finish':
         case 'rewatch':
-          details = await db.stories.get(event.refId);
+          details = storyMap.get(event.refId) || null;
           break;
-        case 'moment':
-          details = await db.moments.get(event.refId);
-          if (details) {
-            const story = await db.stories.get(details.storyId);
-            details = { ...details, story };
+        case 'moment': {
+          const moment = momentMap.get(event.refId);
+          if (moment) {
+            details = { ...moment, story: parentStoryMap.get(moment.storyId) || null };
           }
           break;
-        case 'knowledge':
-          details = await db.knowledge.get(event.refId);
-          if (details) {
-            const story = await db.stories.get(details.storyId);
-            details = { ...details, story };
+        }
+        case 'knowledge': {
+          const know = knowledgeMap.get(event.refId);
+          if (know) {
+            details = { ...know, story: parentStoryMap.get(know.storyId) || null };
           }
           break;
+        }
       }
       
-      enrichedEvents.push({
+      return {
         ...event,
         details,
         formattedDate: formatDateTime(event.date),
-      });
-    }
-    
-    return enrichedEvents;
+      };
+    });
   }
 
   static async getTimelineStats(): Promise<{

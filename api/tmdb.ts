@@ -13,6 +13,14 @@ export default async function handler(req: Request) {
         headers: { 'Content-Type': 'application/json' },
       });
     }
+    
+    // Basic SSRF protection: Ensure path is relative and doesn't attempt directory traversal
+    if (!path.startsWith('/') || path.includes('../') || path.includes('//')) {
+      return new Response(JSON.stringify({ error: 'Invalid path parameter' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
 
     const TMDB_API_KEY = process.env.TMDB_API_KEY;
     if (!TMDB_API_KEY) {

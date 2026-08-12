@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth';
 import { auth, googleProvider } from '@/lib/firebase';
 import { dbService } from '@/db/DatabaseService';
+import { useStoriesStore, useMomentsStore } from '@/store';
 
 interface AuthContextType {
   user: User | null;
@@ -26,6 +27,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       dbService.setUserId(currentUser?.uid || null);
+      
+      // Hydrate all Zustand stores with the new DB context
+      useStoriesStore.getState().loadStories().catch(console.error);
+      useMomentsStore.getState().loadMoments().catch(console.error);
+
       setLoading(false);
     });
 
@@ -43,6 +49,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } as User;
       setUser(mockUser);
       dbService.setUserId(mockUser.uid);
+      
+      useStoriesStore.getState().loadStories().catch(console.error);
+      useMomentsStore.getState().loadMoments().catch(console.error);
       return;
     }
 
@@ -59,6 +68,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Mock logout for local mode
       setUser(null);
       dbService.setUserId(null);
+      
+      useStoriesStore.getState().loadStories().catch(console.error);
+      useMomentsStore.getState().loadMoments().catch(console.error);
       return;
     }
 

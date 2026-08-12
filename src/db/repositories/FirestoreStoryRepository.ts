@@ -53,9 +53,28 @@ export class FirestoreStoryRepository implements StoryRepository {
   }
 
   async delete(id: UUID): Promise<void> {
-    // In a real production app, we would use a Cloud Function or batch to delete 
-    // all related moments, sessions, etc. Here we just delete the story doc for simplicity.
-    await deleteDoc(this.getDocRef(id));
+    const batch = writeBatch(db);
+    
+    // Helper to add query results to batch
+    const deleteFromCollection = async (collectionName: string, idField: string) => {
+      const q = query(collection(db, 'users', this.userId, collectionName), where(idField, '==', id));
+      const snapshot = await getDocs(q);
+      snapshot.forEach(docSnap => batch.delete(docSnap.ref));
+    };
+
+    // Queue deletes for related data
+    await Promise.all([
+      deleteFromCollection('moments', 'storyId'),
+      deleteFromCollection('sessions', 'storyId'),
+      deleteFromCollection('knowledge', 'storyId'),
+      deleteFromCollection('timeline', 'refId')
+    ]);
+
+    // Queue delete for the story itself
+    batch.delete(this.getDocRef(id));
+
+    // Commit all deletions
+    await batch.commit();
   }
 
   async bulkUpsert(stories: Story[]): Promise<void> {
@@ -105,6 +124,19 @@ export class FirestoreStoryRepository implements StoryRepository {
     const q = query(this.collectionRef, where('moods', 'array-contains', mood));
     const snap = await getDocs(q);
     return snap.docs.map(d => d.data() as Story);
+  }
+
+  async search(searchQuery: string): Promise<Story[]> {
+    // Firestore lacks native full-text search.
+    // For a production app, use Algolia/Typesense.
+    // Here we just fetch all and filter in memory, though we shouldn't even call this
+    // because reads are handled by Dexie.
+    const all = await this.findAll();
+    const lowerQuery = searchQuery.toLowerCase();
+    return all.filter(story => 
+      story.title.toLowerCase().includes(lowerQuery) ||
+      story.genre.some(g => g.toLowerCase().includes(lowerQuery))
+    );
   }
 
   async findWatching(): Promise<Story[]> {

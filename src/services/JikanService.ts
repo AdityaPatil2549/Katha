@@ -1,3 +1,5 @@
+import { dbService } from '@/db/DatabaseService';
+
 const BASE_URL = '/api/jikan';
 
 export interface JikanSearchResult {
@@ -25,16 +27,24 @@ class JikanService {
   async search(query: string): Promise<JikanSearchResult[]> {
     if (!query.trim()) return [];
     
+    const cacheKey = `jikan_search_${query.toLowerCase()}`;
+    const cached = await dbService.apiCache.get(cacheKey);
+    if (cached) return cached;
+
+    // Respect Jikan rate limit (3 req/s) — only on cache miss before real request.
+    await new Promise(resolve => setTimeout(resolve, 350));
+
     try {
-      // Small delay to respect rate limit (3 requests per second)
-      await new Promise(resolve => setTimeout(resolve, 350));
       
       const response = await fetch(`${BASE_URL}?path=/anime&q=${encodeURIComponent(query)}&limit=10`);
       
       if (!response.ok) throw new Error('Failed to search Jikan');
       
       const data = await response.json();
-      return data.data || [];
+      const results = data.data || [];
+      
+      await dbService.apiCache.set(cacheKey, 'jikan', results);
+      return results;
     } catch (error) {
       console.error('Jikan Search Error:', error);
       return [];

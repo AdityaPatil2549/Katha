@@ -141,10 +141,10 @@ const INTELLIGENCE_MODULES = [
 ];
 
 export default function SmritiEnginePage() {
-  const { allStories } = useStoriesStore();
-  const { allMoments } = useMomentsStore();
-  const { allSessions, loadSessions } = useSessionsStore();
-  const { allKnowledge, loadKnowledge } = useKnowledgeStore();
+  const { stories: allStories } = useStoriesStore();
+  const { moments: allMoments } = useMomentsStore();
+  const { sessions: allSessions, loadSessions } = useSessionsStore();
+  const { knowledge: allKnowledge, loadKnowledge } = useKnowledgeStore();
   const [activeModule, setActiveModule] = useState('emotional');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [lastAnalysis, setLastAnalysis] = useState(new Date());

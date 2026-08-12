@@ -3,6 +3,7 @@ import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { AppShell } from '@/app/AppShell';
 import { LoadingScreen } from '@/components/system/LoadingScreen';
 import { AuthGuard } from '@/components/auth/AuthGuard';
+import { ErrorBoundary } from '@/components/system/ErrorBoundary';
 
 const LoginPage = React.lazy(() => import('@/features/auth/LoginPage'));
 const HomePage = React.lazy(() => import('@/features/home/HomePage'));
@@ -12,6 +13,7 @@ const StoryPageEnhanced = React.lazy(() => import('@/features/story/StoryPageEnh
 const AddStoryPage = React.lazy(() => import('@/features/story/AddStoryPage'));
 const MemoryPage = React.lazy(() => import('@/features/memory/MemoryPage').then(module => ({ default: module.MemoryPage })));
 const MemoryWorldPage = React.lazy(() => import('@/features/memory/MemoryWorldPage'));
+const JournalPage = React.lazy(() => import('@/features/memory/JournalPage'));
 const DiscoverPage = React.lazy(() => import('@/features/discover/DiscoverPage'));
 const DiscoverWorldPage = React.lazy(() => import('@/features/discover/DiscoverWorldPage'));
 const ExportPage = React.lazy(() => import('@/features/export/ExportPage'));
@@ -48,9 +50,11 @@ export const router = createBrowserRouter([
   {
     path: '/',
     element: (
-      <AuthGuard>
-        <AppShell />
-      </AuthGuard>
+      <ErrorBoundary>
+        <AuthGuard>
+          <AppShell />
+        </AuthGuard>
+      </ErrorBoundary>
     ),
     children: [
       { index: true, element: suspense(<HomePage />, 'Opening Your Stories') },
@@ -60,6 +64,7 @@ export const router = createBrowserRouter([
       { path: 'add-story', element: suspense(<AddStoryPage />, 'Adding New Story') },
       { path: 'memory', element: suspense(<MemoryPage />, 'Opening Your Memories') },
       { path: 'memory-world', element: suspense(<MemoryWorldPage />, 'Opening Memory World') },
+      { path: 'journal', element: suspense(<JournalPage />, 'Opening Journal') },
       { path: 'discover', element: suspense(<DiscoverPage />, 'Opening Discover') },
       { path: 'discover-world', element: suspense(<DiscoverWorldPage />, 'Opening Smriti Atlas') },
       { path: 'export', element: suspense(<ExportPage />, 'Creating Storybook') },

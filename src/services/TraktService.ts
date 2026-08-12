@@ -88,7 +88,15 @@ class TraktService {
 
   // Trakt doesn't provide posters natively, so we map their TMDB ID back to TMDBService
   private async attachTmdbPosters(items: TraktTrendingItem[], type: 'movie' | 'show'): Promise<TraktTrendingItem[]> {
-    const promises = items.map(async (item) => {
+    const chunkArray = <T>(arr: T[], size: number): T[][] => {
+      const chunks = [];
+      for (let i = 0; i < arr.length; i += size) {
+        chunks.push(arr.slice(i, i + size));
+      }
+      return chunks;
+    };
+
+    const processItem = async (item: TraktTrendingItem) => {
       const entity = type === 'movie' ? item.movie : item.show;
       if (entity && entity.ids.tmdb) {
         try {
@@ -102,9 +110,17 @@ class TraktService {
         }
       }
       return item;
-    });
+    };
 
-    return Promise.all(promises);
+    const result: TraktTrendingItem[] = [];
+    const chunks = chunkArray(items, 5); // Batch size of 5 to avoid TMDB 429 errors
+
+    for (const chunk of chunks) {
+      const processedChunk = await Promise.all(chunk.map(processItem));
+      result.push(...processedChunk);
+    }
+
+    return result;
   }
 }
 

@@ -14,6 +14,14 @@ export default async function handler(req: Request) {
       });
     }
 
+    // Basic SSRF protection
+    if (!path.startsWith('/') || path.includes('../') || path.includes('//')) {
+      return new Response(JSON.stringify({ error: 'Invalid path parameter' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
     const targetUrl = new URL(`https://api.jikan.moe/v4${path}`);
     
     // Forward the search params except 'path'

@@ -19,16 +19,14 @@ import {
   X,
   ChevronDown,
   Upload,
-  Image as ImageIcon
+  Image as ImageIcon,
+  CloudOff
 } from 'lucide-react';
 import { useStoriesStore } from '@/store';
+import { useSyncStore } from '@/store/syncStore';
 import type { Story, StoryCategory, StoryStatus } from '@/types/models';
-import { tmdbService, type TMDBResult } from '@/services/TMDBService';
-import { omdbService } from '@/services/OMDBService';
-import { youtubeService, type YouTubeSearchResult } from '@/services/YouTubeService';
-import { watchmodeService } from '@/services/WatchmodeService';
-import { jikanService, type JikanSearchResult } from '@/services/JikanService';
-import { traktService } from '@/services/TraktService';
+import { mediaService } from '@/services/MediaService';
+import { youtubeService } from '@/services/YouTubeService';
 const CATEGORIES: { value: StoryCategory; label: string; icon: React.ReactNode }[] = [
   { value: 'anime', label: 'Anime', icon: <Star className="w-4 h-4" /> },
   { value: 'series', label: 'Series', icon: <Tv className="w-4 h-4" /> },
@@ -57,6 +55,7 @@ const LIFE_PHASES = [
 export default function AddStoryPage() {
   const navigate = useNavigate();
   const { addStory } = useStoriesStore();
+  const { isOnline } = useSyncStore();
 
   const [formData, setFormData] = useState({
     title: '',
@@ -90,191 +89,83 @@ export default function AddStoryPage() {
   const [draftSaved, setDraftSaved] = useState(false);
 
   // API Integration States
-  const [searchPlatform, setSearchPlatform] = useState<'tmdb' | 'youtube' | 'jikan'>('tmdb');
+  const [searchPlatform, setSearchPlatform] = useState<'movie' | 'tv' | 'anime' | 'game' | 'youtube' | 'all'>('movie');
   const [apiSearchQuery, setApiSearchQuery] = useState('');
-  const [tmdbResults, setTmdbResults] = useState<TMDBResult[]>([]);
-  const [youtubeResults, setYoutubeResults] = useState<YouTubeSearchResult[]>([]);
-  const [jikanResults, setJikanResults] = useState<JikanSearchResult[]>([]);
+  const [searchResults, setSearchResults] = useState<any[]>([]);
   const [isSearchingApi, setIsSearchingApi] = useState(false);
   const [showApiDropdown, setShowApiDropdown] = useState(false);
 
   useEffect(() => {
     const searchApi = async () => {
-      if (!apiSearchQuery.trim()) {
-        setTmdbResults([]);
-        setYoutubeResults([]);
-        setJikanResults([]);
+      if (!apiSearchQuery.trim() || !isOnline) {
+        setSearchResults([]);
         setShowApiDropdown(false);
         return;
       }
       setIsSearchingApi(true);
       setShowApiDropdown(true);
 
-      if (searchPlatform === 'tmdb') {
-        const results = await tmdbService.search(apiSearchQuery);
-        setTmdbResults(results);
-      } else if (searchPlatform === 'youtube') {
-        const results = await youtubeService.search(apiSearchQuery);
-        setYoutubeResults(results);
-      } else if (searchPlatform === 'jikan') {
-        const results = await jikanService.search(apiSearchQuery);
-        setJikanResults(results);
-      }
-      
+      const results = await mediaService.search(apiSearchQuery, searchPlatform);
+      setSearchResults(results);
       setIsSearchingApi(false);
     };
 
     const debounce = setTimeout(searchApi, 500);
     return () => clearTimeout(debounce);
-  }, [apiSearchQuery, searchPlatform]);
+  }, [apiSearchQuery, searchPlatform, isOnline]);
 
-  const handleTmdbSelect = async (result: TMDBResult) => {
+  const handleResultSelect = async (result: any) => {
     setShowApiDropdown(false);
     setIsSearchingApi(true);
     
     try {
-      const details = await tmdbService.getDetails(result.id, result.media_type);
-      if (details) {
-        let category: StoryCategory = result.media_type === 'tv' ? 'series' : 'movie';
-        if (details.genres.some(g => g.name.toLowerCase() === 'animation') && 
-            (details.genres.some(g => g.name.toLowerCase() === 'action') || details.genres.some(g => g.name.toLowerCase() === 'sci-fi') || details.genres.some(g => g.name.toLowerCase() === 'fantasy'))) {
-          category = 'anime';
+      if (result.source === 'youtube') {
+        const details = await youtubeService.getVideoDetails(result.id);
+        if (details) {
+          setFormData(prev => ({
+            ...prev,
+            title: details.title || prev.title,
+            category: 'youtube',
+            platform: 'YouTube',
+            releaseYear: details.publishedAt ? parseInt((details.publishedAt.split('-')[0]) || '') : prev.releaseYear,
+            posterUrl: details.thumbnailUrl,
+            notes: details.description ? `[YouTube Description]\nChannel: ${details.channelTitle}\nViews: ${Number(details.viewCount).toLocaleString()}\n\n${details.description}\n\n${prev.notes}` : prev.notes,
+            watchTimeMinutes: details.durationMinutes || prev.watchTimeMinutes,
+          }));
         }
-
-        const releaseYear = details.release_date ? parseInt((details.release_date.split('-')[0]) || '') : 
-                           details.first_air_date ? parseInt((details.first_air_date.split('-')[0]) || '') : undefined;
-                           
-        const mappedGenres = details.genres.map(g => g.name).filter(g => GENRES.includes(g));
-
-
-        let omdbNotes = '';
-        let finalRating = details.vote_average ? Math.round(details.vote_average) : 0;
-        try {
-          const title = details.title || details.name || '';
-          if (title) {
-             const omdbData = await omdbService.getByTitle(title, releaseYear?.toString());
-             if (omdbData) {
-               const ratingsString = omdbService.formatRatingsString(omdbData);
-               if (ratingsString) {
-                 omdbNotes = `[Critical Ratings]\n${ratingsString}\n\n`;
-               }
-               if (omdbData.imdbRating && omdbData.imdbRating !== 'N/A') {
-                 finalRating = Math.round(parseFloat(omdbData.imdbRating));
-               }
-             }
+      } else {
+        const type = result.mediaType === 'tv' ? 'tv' : result.mediaType === 'movie' ? 'movie' : result.mediaType === 'anime' ? 'anime' : 'game';
+        const richDetails = await mediaService.getRichMediaDetails(result.id, type);
+        
+        if (richDetails) {
+          let category: StoryCategory = richDetails.type === 'tv' ? 'series' : richDetails.type === 'movie' ? 'movie' : richDetails.type === 'anime' ? 'anime' : 'game';
+          
+          let notes = '';
+          if (richDetails.ratings.metacritic) notes += `Metacritic: ${richDetails.ratings.metacritic}\n`;
+          if (richDetails.ratings.rottenTomatoes) notes += `Rotten Tomatoes: ${richDetails.ratings.rottenTomatoes}\n`;
+          if (richDetails.ratings.imdb) notes += `IMDB: ${richDetails.ratings.imdb}\n`;
+          if (richDetails.trailerUrl) notes += `Trailer: ${richDetails.trailerUrl}\n`;
+          if (notes) notes = `[Rich Metadata]\n${notes}\n\n`;
+          if (richDetails.overview) notes += `[Synopsis]\n${richDetails.overview}\n\n`;
+          
+          let finalRating = richDetails.ratings.tmdb ? Math.round(richDetails.ratings.tmdb) : 0;
+          if (!finalRating && richDetails.ratings.imdb && richDetails.ratings.imdb !== 'N/A') {
+            finalRating = Math.round(parseFloat(richDetails.ratings.imdb));
           }
-        } catch (e) {
-          console.error("OMDB API Error:", e);
+
+          setFormData(prev => ({
+            ...prev,
+            title: richDetails.title || prev.title,
+            category,
+            platform: prev.platform, // Could be auto-filled by watchmode later if added to MediaService
+            releaseYear: richDetails.releaseYear || prev.releaseYear,
+            posterUrl: richDetails.posterUrl || prev.posterUrl,
+            genre: richDetails.genres.length > 0 ? richDetails.genres.filter(g => GENRES.includes(g)) : prev.genre,
+            notes: `${notes}${prev.notes}`,
+            rating: finalRating || prev.rating,
+          }));
         }
-
-        try {
-          const type = result.media_type === 'tv' ? 'show' : 'movie';
-          const traktRating = await traktService.getRatingByTmdbId(result.id, type);
-          if (traktRating && traktRating.rating) {
-            const traktScore = `${Math.round(traktRating.rating * 10)}%`;
-            if (omdbNotes) {
-              omdbNotes = omdbNotes.replace('\n\n', `\nTrakt Community: ${traktScore} (${traktRating.votes.toLocaleString()} votes)\n\n`);
-            } else {
-              omdbNotes = `[Critical Ratings]\nTrakt Community: ${traktScore} (${traktRating.votes.toLocaleString()} votes)\n\n`;
-            }
-          }
-        } catch (e) {
-          console.error("Trakt API Error:", e);
-        }
-
-        let watchmodeNotes = '';
-        let watchmodePlatform = '';
-        try {
-          const type = result.media_type === 'tv' ? 'tv' : 'movie';
-          const sources = await watchmodeService.getSourcesByTmdbId(result.id, type);
-          const processed = watchmodeService.processSources(sources);
-          watchmodePlatform = processed.primaryPlatform;
-          watchmodeNotes = processed.allSourcesText;
-        } catch (e) {
-          console.error("Watchmode API Error:", e);
-        }
-
-        const tmdbSynopsis = details.overview ? `[TMDB Synopsis]\n${details.overview}\n\n` : '';
-
-        setFormData(prev => ({
-          ...prev,
-          title: details.title || details.name || prev.title,
-          category,
-          platform: watchmodePlatform || prev.platform,
-          releaseYear: releaseYear || prev.releaseYear,
-          posterUrl: tmdbService.getImageUrl(details.poster_path),
-          genre: mappedGenres.length > 0 ? mappedGenres : prev.genre,
-          notes: `${watchmodeNotes}${omdbNotes}${tmdbSynopsis}${prev.notes}`,
-          totalEpisodes: details.number_of_episodes || prev.totalEpisodes,
-          totalSeasons: details.number_of_seasons || prev.totalSeasons,
-          rating: finalRating || prev.rating,
-        }));
       }
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setIsSearchingApi(false);
-      setApiSearchQuery('');
-    }
-  };
-
-  const handleYoutubeSelect = async (result: YouTubeSearchResult) => {
-    setShowApiDropdown(false);
-    setIsSearchingApi(true);
-    
-    try {
-      const details = await youtubeService.getVideoDetails(result.id);
-      if (details) {
-
-
-        setFormData(prev => ({
-          ...prev,
-          title: details.title || prev.title,
-          category: 'youtube',
-          platform: 'YouTube',
-          releaseYear: details.publishedAt ? parseInt((details.publishedAt.split('-')[0]) || '') : prev.releaseYear,
-          posterUrl: details.thumbnailUrl,
-          notes: details.description ? `[YouTube Description]\nChannel: ${details.channelTitle}\nViews: ${Number(details.viewCount).toLocaleString()}\n\n${details.description}\n\n${prev.notes}` : prev.notes,
-          watchTimeMinutes: details.durationMinutes || prev.watchTimeMinutes,
-        }));
-      }
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setIsSearchingApi(false);
-      setApiSearchQuery('');
-    }
-  };
-
-  const handleJikanSelect = async (result: JikanSearchResult) => {
-    setShowApiDropdown(false);
-    setIsSearchingApi(true);
-    
-    try {
-
-      
-      const mappedGenres = result.genres?.map(g => g.name).filter(g => GENRES.includes(g)) || [];
-      const studios = result.studios?.map(s => s.name).join(', ') || '';
-      
-      let jikanNotes = '';
-      if (studios) jikanNotes += `Studio: ${studios}\n`;
-      if (result.score) jikanNotes += `MyAnimeList Score: ${result.score}/10\n`;
-      if (result.title_japanese) jikanNotes += `Japanese Title: ${result.title_japanese}\n`;
-      
-      if (jikanNotes) jikanNotes = `[Anime Details]\n${jikanNotes}\n\n`;
-      const synopsis = result.synopsis ? `[Synopsis]\n${result.synopsis}\n\n` : '';
-
-      setFormData(prev => ({
-        ...prev,
-        title: result.title_english || result.title || prev.title,
-        category: 'anime',
-        releaseYear: result.year || (result.title ? undefined : prev.releaseYear),
-        posterUrl: result.images?.jpg?.large_image_url || result.images?.jpg?.image_url || '',
-        genre: mappedGenres.length > 0 ? mappedGenres : prev.genre,
-        notes: `${jikanNotes}${synopsis}${prev.notes}`,
-        totalEpisodes: result.episodes || prev.totalEpisodes,
-        rating: result.score ? Math.round(result.score) : prev.rating,
-      }));
     } catch (e) {
       console.error(e);
     } finally {
@@ -436,7 +327,11 @@ export default function AddStoryPage() {
         }
       }, 1500);
     } catch (error) {
-      alert('Failed to save story. Please try again.');
+      if (error instanceof Error) {
+        alert(error.message); // Will display the specific duplicate error
+      } else {
+        alert('Failed to save story. Please try again.');
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -487,10 +382,31 @@ export default function AddStoryPage() {
                 <div className="flex bg-midnight-surface rounded-lg p-1 border border-text-primary/5">
                   <button
                     type="button"
-                    onClick={() => { setSearchPlatform('tmdb'); setApiSearchQuery(''); }}
-                    className={`px-3 py-1 text-xs rounded-md transition-colors ${searchPlatform === 'tmdb' ? 'bg-accent-cyan/20 text-accent-cyan' : 'text-muted hover:text-secondary'}`}
+                    onClick={() => { setSearchPlatform('movie'); setApiSearchQuery(''); }}
+                    className={`px-3 py-1 text-xs rounded-md transition-colors ${searchPlatform === 'movie' ? 'bg-accent-cyan/20 text-accent-cyan' : 'text-muted hover:text-secondary'}`}
                   >
-                    Movies/TV
+                    Movies
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setSearchPlatform('tv'); setApiSearchQuery(''); }}
+                    className={`px-3 py-1 text-xs rounded-md transition-colors ${searchPlatform === 'tv' ? 'bg-accent-cyan/20 text-accent-cyan' : 'text-muted hover:text-secondary'}`}
+                  >
+                    TV
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setSearchPlatform('anime'); setApiSearchQuery(''); }}
+                    className={`px-3 py-1 text-xs rounded-md transition-colors ${searchPlatform === 'anime' ? 'bg-purple/20 text-purple' : 'text-muted hover:text-secondary'}`}
+                  >
+                    Anime
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setSearchPlatform('game'); setApiSearchQuery(''); }}
+                    className={`px-3 py-1 text-xs rounded-md transition-colors ${searchPlatform === 'game' ? 'bg-emerald/20 text-emerald' : 'text-muted hover:text-secondary'}`}
+                  >
+                    Games
                   </button>
                   <button
                     type="button"
@@ -499,50 +415,44 @@ export default function AddStoryPage() {
                   >
                     YouTube
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => { setSearchPlatform('jikan'); setApiSearchQuery(''); }}
-                    className={`px-3 py-1 text-xs rounded-md transition-colors ${searchPlatform === 'jikan' ? 'bg-purple/20 text-purple' : 'text-muted hover:text-secondary'}`}
-                  >
-                    Anime
-                  </button>
                 </div>
               </div>
 
               <div className="relative">
                 <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-                  {searchPlatform === 'tmdb' ? <Film className="w-4 h-4 text-muted" /> : searchPlatform === 'youtube' ? <Youtube className="w-4 h-4 text-muted" /> : <Star className="w-4 h-4 text-muted" />}
+                  {searchPlatform === 'movie' || searchPlatform === 'tv' ? <Film className="w-4 h-4 text-muted" /> : searchPlatform === 'youtube' ? <Youtube className="w-4 h-4 text-muted" /> : searchPlatform === 'game' ? <Video className="w-4 h-4 text-muted" /> : <Star className="w-4 h-4 text-muted" />}
                 </div>
                 <input
                   type="text"
                   value={apiSearchQuery}
                   onChange={(e) => setApiSearchQuery(e.target.value)}
-                  onFocus={() => { if(tmdbResults.length > 0 || youtubeResults.length > 0 || jikanResults.length > 0) setShowApiDropdown(true); }}
-                  className="w-full pl-10 pr-4 py-3 bg-midnight-surface border border-accent-cyan/30 rounded-button text-primary placeholder-text-muted focus:outline-none focus:border-accent-cyan focus:ring-2 focus:ring-accent-cyan/20 transition-all"
-                  placeholder={searchPlatform === 'tmdb' ? "Search movies and series..." : searchPlatform === 'youtube' ? "Search YouTube videos..." : "Search anime..."}
+                  onFocus={() => { if(searchResults.length > 0) setShowApiDropdown(true); }}
+                  disabled={!isOnline}
+                  className="w-full pl-10 pr-4 py-3 bg-midnight-surface border border-accent-cyan/30 rounded-button text-primary placeholder-text-muted focus:outline-none focus:border-accent-cyan focus:ring-2 focus:ring-accent-cyan/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  placeholder={!isOnline ? "Smart Search Disabled (Offline Mode)" : `Search ${searchPlatform}...`}
                 />
               </div>
 
               {/* API Dropdown */}
               <AnimatePresence>
-                {showApiDropdown && ((searchPlatform === 'tmdb' && tmdbResults.length > 0) || (searchPlatform === 'youtube' && youtubeResults.length > 0) || (searchPlatform === 'jikan' && jikanResults.length > 0)) && (
+                {showApiDropdown && searchResults.length > 0 && (
                   <motion.div
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
                     className="absolute top-full left-0 w-full mt-2 bg-midnight-surface border border-midnight-border rounded-lg shadow-2xl overflow-hidden max-h-64 overflow-y-auto"
                   >
-                    {searchPlatform === 'tmdb' && tmdbResults.map((result) => (
+                    {searchResults.map((result, idx) => (
                       <button
-                        key={result.id}
+                        key={`${result.id}-${idx}`}
                         type="button"
-                        onClick={() => handleTmdbSelect(result)}
+                        onClick={() => handleResultSelect(result)}
                         className="w-full flex items-center gap-3 p-3 hover:bg-text-primary/5 transition-colors text-left border-b border-text-primary/5 last:border-0"
                       >
-                        {result.poster_path ? (
+                        {result.posterUrl ? (
                           <img 
-                            src={tmdbService.getImageUrl(result.poster_path)} 
-                            alt={result.title || result.name} 
+                            src={result.posterUrl} 
+                            alt={result.title} 
                             className="w-10 h-14 object-cover rounded"
                           />
                         ) : (
@@ -551,67 +461,10 @@ export default function AddStoryPage() {
                           </div>
                         )}
                         <div className="flex-1 min-w-0">
-                          <h4 className="text-primary font-medium truncate">{result.title || result.name}</h4>
-                          <p className="text-small text-secondary flex items-center gap-2">
-                            <span className="uppercase text-[10px] bg-text-primary/10 px-1.5 py-0.5 rounded">{result.media_type}</span>
-                            <span>{(result.release_date || result.first_air_date || '').split('-')[0]}</span>
-                          </p>
-                        </div>
-                      </button>
-                    ))}
-
-                    {searchPlatform === 'youtube' && youtubeResults.map((result) => (
-                      <button
-                        key={result.id}
-                        type="button"
-                        onClick={() => handleYoutubeSelect(result)}
-                        className="w-full flex items-center gap-3 p-3 hover:bg-text-primary/5 transition-colors text-left border-b border-text-primary/5 last:border-0"
-                      >
-                        {result.thumbnailUrl ? (
-                          <img 
-                            src={result.thumbnailUrl} 
-                            alt={result.title} 
-                            className="w-16 h-12 object-cover rounded"
-                          />
-                        ) : (
-                          <div className="w-16 h-12 bg-midnight-border rounded flex items-center justify-center">
-                            <Youtube className="w-4 h-4 text-muted" />
-                          </div>
-                        )}
-                        <div className="flex-1 min-w-0">
                           <h4 className="text-primary font-medium truncate">{result.title}</h4>
                           <p className="text-small text-secondary flex items-center gap-2">
-                            <span className="text-[10px] text-muted truncate max-w-[120px]">{result.channelTitle}</span>
-                            <span>•</span>
-                            <span className="text-xs">{(result.publishedAt || '').split('-')[0]}</span>
-                          </p>
-                        </div>
-                      </button>
-                    ))}
-
-                    {searchPlatform === 'jikan' && jikanResults.map((result) => (
-                      <button
-                        key={result.mal_id}
-                        type="button"
-                        onClick={() => handleJikanSelect(result)}
-                        className="w-full flex items-center gap-3 p-3 hover:bg-text-primary/5 transition-colors text-left border-b border-text-primary/5 last:border-0"
-                      >
-                        {result.images?.jpg?.image_url ? (
-                          <img 
-                            src={result.images.jpg.image_url} 
-                            alt={result.title} 
-                            className="w-10 h-14 object-cover rounded"
-                          />
-                        ) : (
-                          <div className="w-10 h-14 bg-midnight-border rounded flex items-center justify-center">
-                            <Star className="w-4 h-4 text-muted" />
-                          </div>
-                        )}
-                        <div className="flex-1 min-w-0">
-                          <h4 className="text-primary font-medium truncate">{result.title_english || result.title}</h4>
-                          <p className="text-small text-secondary flex items-center gap-2">
-                            <span className="uppercase text-[10px] bg-purple/20 text-purple px-1.5 py-0.5 rounded">{result.type}</span>
-                            <span className="text-xs">{result.year || 'Unknown Year'}</span>
+                            <span className="uppercase text-[10px] bg-text-primary/10 px-1.5 py-0.5 rounded">{result.mediaType}</span>
+                            <span>{result.releaseYear}</span>
                           </p>
                         </div>
                       </button>

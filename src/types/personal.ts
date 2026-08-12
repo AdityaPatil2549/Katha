@@ -64,6 +64,14 @@ export interface MoodEntry {
   duration?: number; // minutes
 }
 
+export interface JournalEntry {
+  id: string;
+  timestamp: Date;
+  content: string;
+  tags: string[];
+  embedding?: number[]; // Vector embedding for semantic search
+}
+
 export interface StoryPreferences {
   // Content preferences
   preferredCategories: string[];
@@ -178,9 +186,11 @@ export interface PersonalIntelligenceEngine {
   recordViewing(viewing: Omit<ViewingHistory, 'id' | 'timestamp'>): Promise<void>;
   recordMood(mood: Omit<MoodEntry, 'id' | 'timestamp'>): Promise<void>;
   recordImpact(impact: Omit<ImpactResponse, 'id' | 'timestamp'>): Promise<void>;
+  addJournalEntry(content: string, tags?: string[]): Promise<string>;
   
   // Personalization
   getPersonalizedRecommendations(context: RecommendationContext): Promise<PersonalizedRecommendation[]>;
+  semanticSearchJournals(query: string, limit?: number): Promise<any[]>;
   analyzeEmotionalTrends(timeframe: TimeFrame): Promise<EmotionalAnalysis>;
   predictOptimalViewingTime(): Promise<ViewingRecommendation>;
   
