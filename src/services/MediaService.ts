@@ -7,6 +7,7 @@ import { anilistService } from './AniListService';
 import { tvmazeService } from './TVMazeService';
 import { kitsuService } from './KitsuService';
 import { fanartService } from './FanartService';
+import { mdblistService } from './MDBListService';
 
 // ─── Unified search result shape ─────────────────────────────────────────────
 export interface KathaSearchResult {
@@ -34,6 +35,7 @@ export interface KathaMediaObject {
     imdb?: string;
     rottenTomatoes?: string;
     metacritic?: string;
+    letterboxd?: string;
   };
   trailerUrl?: string;
   rawDetails: {
@@ -147,6 +149,7 @@ class MediaService {
     let overview = '';
     let genres: string[] = [];
     let tmdbDetails: TMDBDetails | undefined;
+    let omdbDetails: any | undefined;
     const ratings: KathaMediaObject['ratings'] = {};
 
     // ── 1. Fetch primary metadata ─────────────────────────────────────────────
@@ -253,20 +256,39 @@ class MediaService {
       ratings.metacritic = game.metacritic?.toString();
     }
 
-    // ── 2. Concurrently enrich with OMDB ratings, Fanart poster, + YouTube trailer ────────────
-    const [omdbDetails, youtubeResults, fanartData] = await Promise.all([
-      omdbService.getByTitle(title, releaseYear?.toString()),
+    // ── 2. Concurrently enrich with MDBList ratings, Fanart poster, + YouTube trailer ────────────
+    const [mdblistData, youtubeResults, fanartData] = await Promise.all([
+      (type === 'movie' || type === 'tv') && tmdbDetails?.id 
+        ? mdblistService.getRatings(tmdbDetails.id) 
+        : Promise.resolve(null),
       youtubeService.search(`${title} ${releaseYear ?? ''} official trailer`),
       (type === 'movie' || type === 'tv') && tmdbDetails?.id 
         ? fanartService.getImages(tmdbDetails.id, type === 'movie' ? 'movies' : 'tv') 
         : Promise.resolve(null)
     ]);
 
-    if (omdbDetails?.Ratings) {
-      for (const r of omdbDetails.Ratings) {
-        if (r.Source === 'Internet Movie Database') ratings.imdb = r.Value;
-        if (r.Source === 'Rotten Tomatoes') ratings.rottenTomatoes = r.Value;
-        if (r.Source === 'Metacritic') ratings.metacritic = r.Value;
+    // ── 3. Ratings Cascade: MDBList -> fallback to OMDB ────────────────────────
+    if (mdblistData?.ratings && mdblistData.ratings.length > 0) {
+      for (const r of mdblistData.ratings) {
+        if (r.source === 'imdb') ratings.imdb = r.value.toString();
+        if (r.source === 'tomatoes') ratings.rottenTomatoes = r.value.toString() + '%';
+        if (r.source === 'metacritic') ratings.metacritic = r.score.toString();
+        if (r.source === 'letterboxd') ratings.letterboxd = r.value.toString();
+        if (r.source === 'tmdb' && !ratings.tmdb) ratings.tmdb = r.value;
+      }
+    } else if (type === 'movie' || type === 'tv') {
+      // Fallback to OMDB
+      try {
+        omdbDetails = await omdbService.getByTitle(title, releaseYear?.toString());
+        if (omdbDetails?.Ratings) {
+          for (const r of omdbDetails.Ratings) {
+            if (r.Source === 'Internet Movie Database') ratings.imdb = r.Value;
+            if (r.Source === 'Rotten Tomatoes') ratings.rottenTomatoes = r.Value;
+            if (r.Source === 'Metacritic') ratings.metacritic = r.Value;
+          }
+        }
+      } catch (e) {
+        console.warn('OMDB fallback failed');
       }
     }
     
