@@ -52,7 +52,7 @@ interface GoogleUser {
 }
 
 export default function SettingsVaultPage() {
-  const [activeSection, setActiveSection] = useState<'appearance' | 'privacy' | 'data' | 'backup' | 'about' | 'advanced' | 'cloud'>('appearance');
+  const [activeSection, setActiveSection] = useState<'appearance' | 'notifications' | 'privacy' | 'data' | 'backup' | 'about' | 'advanced' | 'cloud'>('appearance');
   const [user, setUser] = useState<GoogleUser | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
 
@@ -86,8 +86,20 @@ export default function SettingsVaultPage() {
   const [encryptionEnabled, setEncryptionEnabled] = useState(false);
   const [autoLockTime, setAutoLockTime] = useState('30');
   const [backupReminder, setBackupReminder] = useState(true);
-  const { theme, setTheme, accentColor, setAccentColor, notificationsEnabled, setNotificationsEnabled } = useSettingsStore();
+  const { 
+    theme, setTheme, 
+    accentColor, setAccentColor, 
+    notificationsEnabled, setNotificationsEnabled,
+    globalMute, setGlobalMute,
+    notificationPreferences, updateNotificationPreference
+  } = useSettingsStore();
   const navigate = useNavigate();
+  const [showSaveToast, setShowSaveToast] = useState(false);
+
+  const triggerSaveToast = () => {
+    setShowSaveToast(true);
+    setTimeout(() => setShowSaveToast(false), 2000);
+  };
 
   const [storageInfo, setStorageInfo] = useState({
     stories: 0,
@@ -157,6 +169,7 @@ export default function SettingsVaultPage() {
 
   const sections = [
     { id: 'appearance', label: 'Appearance', icon: <Palette className="w-4 h-4" /> },
+    { id: 'notifications', label: 'Notifications', icon: <Bell className="w-4 h-4" /> },
     { id: 'cloud', label: 'Cloud & Auth', icon: <Cloud className="w-4 h-4" /> },
     { id: 'privacy', label: 'Privacy & Security', icon: <Shield className="w-4 h-4" /> },
     { id: 'data', label: 'Data & Storage', icon: <Database className="w-4 h-4" /> },
@@ -310,7 +323,7 @@ export default function SettingsVaultPage() {
                 {sections.map((section) => (
                   <button
                     key={section.id}
-                    onClick={() => setActiveSection(section.id as 'appearance' | 'privacy' | 'data' | 'backup' | 'about' | 'advanced' | 'cloud')}
+                    onClick={() => setActiveSection(section.id as any)}
                     className={`w-full p-3 rounded-card transition-all duration-fast flex items-center gap-3 ${
                       activeSection === section.id
                         ? 'bg-accent-primary text-white'
@@ -394,27 +407,130 @@ export default function SettingsVaultPage() {
                       </div>
                     </div>
 
-                    {/* Notifications */}
-                    <div className="surface-elevated p-6 rounded-card space-y-4">
-                      <h3 className="heading-3 text-primary">Notifications</h3>
+                    </div>
+                  </div>
+                )}
+
+                {/* Notifications Settings */}
+                {activeSection === 'notifications' && (
+                  <div className="space-y-page relative">
+                    <h2 className="heading-2 text-primary flex items-center gap-tight">
+                      <Bell className="w-5 h-5 text-accent-primary" />
+                      Notifications
+                    </h2>
+                    
+                    <AnimatePresence>
+                      {showSaveToast && (
+                        <motion.div 
+                          initial={{ opacity: 0, y: -20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -20 }}
+                          className="absolute top-0 right-0 bg-accent-emerald text-white px-4 py-2 rounded-full flex items-center gap-2 text-small font-medium shadow-glow-emerald z-10"
+                        >
+                          <Check className="w-4 h-4" />
+                          Saved
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+
+                    {/* Global Mute */}
+                    <div className="surface-elevated p-6 rounded-card space-y-4 border-l-4 border-accent-rose">
                       <div className="flex items-center justify-between">
                         <div>
-                          <div className="font-medium text-primary">Enable Notifications</div>
+                          <div className="font-medium text-primary">Global Mute</div>
                           <div className="text-small text-secondary">
-                            Get reminded about backup and memory resurfacing
+                            Temporarily silence all notifications across all channels.
                           </div>
                         </div>
                         <button
-                          onClick={toggleNotifications}
+                          onClick={() => {
+                            setGlobalMute(!globalMute);
+                            triggerSaveToast();
+                          }}
                           className={`relative w-12 h-6 rounded-full transition-colors ${
-                            notificationsEnabled ? 'bg-accent-emerald' : 'bg-midnight-border'
+                            globalMute ? 'bg-accent-rose' : 'bg-midnight-border'
                           }`}
                         >
                           <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${
-                            notificationsEnabled ? 'translate-x-7' : 'translate-x-1'
+                            globalMute ? 'translate-x-7' : 'translate-x-1'
                           }`} />
                         </button>
                       </div>
+                    </div>
+
+                    <div className="space-y-6 opacity-100 transition-opacity" style={{ opacity: globalMute ? 0.5 : 1, pointerEvents: globalMute ? 'none' : 'auto' }}>
+                      {[
+                        { id: 'activity', label: 'Product Activity', desc: 'Updates on your stories and moments' },
+                        { id: 'mentions', label: 'Mentions', desc: 'When you are tagged or referenced' },
+                        { id: 'billing', label: 'Billing & Account', desc: 'Subscription and payment updates' },
+                        { id: 'security', label: 'Security Alerts', desc: 'New logins, suspicious activity' },
+                        { id: 'marketing', label: 'Marketing & News', desc: 'New features and promotions' }
+                      ].map(cat => {
+                        const prefs = notificationPreferences[cat.id as keyof typeof notificationPreferences];
+                        return (
+                          <div key={cat.id} className="surface-elevated p-6 rounded-card space-y-4">
+                            <div>
+                              <h3 className="heading-3 text-primary">{cat.label}</h3>
+                              <p className="text-small text-secondary">{cat.desc}</p>
+                            </div>
+
+                            <div className="pt-4 border-t border-midnight-divider grid grid-cols-1 md:grid-cols-2 gap-6">
+                              {/* Channels */}
+                              <div className="space-y-3">
+                                <span className="text-xs uppercase tracking-wider text-secondary font-medium">Delivery Channels</span>
+                                {['inApp', 'email', 'push', 'sms'].map(channel => {
+                                  // Logic: Billing alerts usually shouldn't be push or SMS. Security is important everywhere.
+                                  if ((cat.id === 'billing' || cat.id === 'marketing') && (channel === 'push' || channel === 'sms')) return null;
+
+                                  const isEnabled = prefs.channels[channel as keyof typeof prefs.channels];
+                                  return (
+                                    <div key={channel} className="flex items-center justify-between">
+                                      <span className="text-small capitalize text-primary">
+                                        {channel === 'inApp' ? 'In-App' : channel}
+                                      </span>
+                                      <button
+                                        onClick={() => {
+                                          updateNotificationPreference(cat.id as any, { 
+                                            channels: { [channel]: !isEnabled } 
+                                          } as any);
+                                          triggerSaveToast();
+                                        }}
+                                        className={`relative w-10 h-5 rounded-full transition-colors ${
+                                          isEnabled ? 'bg-accent-primary' : 'bg-midnight-border'
+                                        }`}
+                                      >
+                                        <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-transform ${
+                                          isEnabled ? 'translate-x-6' : 'translate-x-1'
+                                        }`} />
+                                      </button>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+
+                              {/* Frequency */}
+                              {['activity', 'marketing'].includes(cat.id) && (
+                                <div className="space-y-3">
+                                  <span className="text-xs uppercase tracking-wider text-secondary font-medium">Frequency</span>
+                                  <Dropdown
+                                    value={prefs.frequency || 'immediate'}
+                                    onChange={(val) => {
+                                      updateNotificationPreference(cat.id as any, { frequency: val as any });
+                                      triggerSaveToast();
+                                    }}
+                                    options={[
+                                      { value: 'immediate', label: 'Immediately' },
+                                      { value: 'daily', label: 'Daily Digest' },
+                                      { value: 'weekly', label: 'Weekly Summary' }
+                                    ]}
+                                    className="w-full"
+                                  />
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 )}
