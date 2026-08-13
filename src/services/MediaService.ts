@@ -6,6 +6,7 @@ import { rawgService } from './RawgService';
 import { anilistService } from './AniListService';
 import { tvmazeService } from './TVMazeService';
 import { kitsuService } from './KitsuService';
+import { fanartService } from './FanartService';
 
 // ─── Unified search result shape ─────────────────────────────────────────────
 export interface KathaSearchResult {
@@ -252,10 +253,13 @@ class MediaService {
       ratings.metacritic = game.metacritic?.toString();
     }
 
-    // ── 2. Concurrently enrich with OMDB ratings + YouTube trailer ────────────
-    const [omdbDetails, youtubeResults] = await Promise.all([
+    // ── 2. Concurrently enrich with OMDB ratings, Fanart poster, + YouTube trailer ────────────
+    const [omdbDetails, youtubeResults, fanartData] = await Promise.all([
       omdbService.getByTitle(title, releaseYear?.toString()),
       youtubeService.search(`${title} ${releaseYear ?? ''} official trailer`),
+      (type === 'movie' || type === 'tv') && tmdbDetails?.id 
+        ? fanartService.getImages(tmdbDetails.id, type === 'movie' ? 'movies' : 'tv') 
+        : Promise.resolve(null)
     ]);
 
     if (omdbDetails?.Ratings) {
@@ -263,6 +267,14 @@ class MediaService {
         if (r.Source === 'Internet Movie Database') ratings.imdb = r.Value;
         if (r.Source === 'Rotten Tomatoes') ratings.rottenTomatoes = r.Value;
         if (r.Source === 'Metacritic') ratings.metacritic = r.Value;
+      }
+    }
+    
+    // Override standard TMDB poster with high-res Fanart if available
+    if (fanartData) {
+      const bestFanartPoster = fanartService.getBestPoster(fanartData, type === 'movie' ? 'movies' : 'tv');
+      if (bestFanartPoster) {
+        posterUrl = bestFanartPoster;
       }
     }
 
