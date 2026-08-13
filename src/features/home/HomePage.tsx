@@ -78,7 +78,7 @@ export function HomePage() {
               <FadeIn delay={0.9} className="flex items-center gap-6">
                 <Magnetic>
                   <button 
-                    className="bg-high-contrast text-text-high-contrast hover:bg-gray-200 px-8 py-4 rounded-xl font-bold tracking-wide transition-transform hover:scale-105 active:scale-95 flex items-center gap-3 text-lg"
+                    className="bg-high-contrast text-text-high-contrast hover:bg-text-secondary px-8 py-4 rounded-xl font-bold tracking-wide transition-transform hover:scale-105 active:scale-95 flex items-center gap-3 text-lg"
                     onClick={() => navigate(`/story/${featuredStory.id}`)}
                   >
                     <Play className="w-6 h-6 fill-current" />
@@ -117,7 +117,7 @@ export function HomePage() {
               <FadeIn delay={0.9}>
                 <Magnetic>
                   <button 
-                    className="bg-high-contrast text-text-high-contrast hover:bg-gray-200 px-8 py-4 rounded-xl font-bold tracking-wide transition-transform hover:scale-105 active:scale-95 flex items-center gap-3 text-lg"
+                    className="bg-high-contrast text-text-high-contrast hover:bg-text-secondary px-8 py-4 rounded-xl font-bold tracking-wide transition-transform hover:scale-105 active:scale-95 flex items-center gap-3 text-lg"
                     onClick={() => navigate(`/add-story`)}
                   >
                     <Plus className="w-6 h-6" />

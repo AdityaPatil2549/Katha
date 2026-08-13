@@ -309,7 +309,7 @@ export default function AchievementsSystem() {
         bg: 'from-white/10 to-white/5',
         border: 'border-white/20',
         text: 'text-primary',
-        progress: 'bg-white',
+        progress: 'bg-accent-primary',
         glow: 'shadow-glass'
       };
     }

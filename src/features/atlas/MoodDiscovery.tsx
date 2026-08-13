@@ -95,8 +95,8 @@ export function MoodDiscovery() {
       'lost': {
         gradient: 'from-blue-500/20 to-indigo-500/20',
         borderColor: 'border-blue',
-        iconColor: 'text-blue',
-        bgColor: 'bg-blue/10',
+        iconColor: 'text-accent-cyan',
+        bgColor: 'bg-accent-cyan/10',
         title: 'Feeling Lost',
         description: 'Find your direction'
       },
@@ -395,7 +395,7 @@ export function MoodDiscovery() {
             <div className="grid gap-6 md:grid-cols-3">
               <div className="text-center">
                 <div className="p-4 bg-gradient-blue/20 rounded-xl mb-4 inline-block">
-                  <Heart className="w-8 h-8 text-blue" />
+                  <Heart className="w-8 h-8 text-accent-cyan" />
                 </div>
                 <h3 className="text-lg font-semibold text-text-primary mb-2">Emotional Matching</h3>
                 <p className="text-text-primary/70 text-sm">
@@ -448,7 +448,7 @@ export function MoodDiscovery() {
               </div>
               
               <div className="flex items-start gap-3">
-                <Moon className="w-5 h-5 text-blue mt-1" />
+                <Moon className="w-5 h-5 text-accent-cyan mt-1" />
                 <div>
                   <h3 className="text-text-primary font-medium mb-1">Consider Your Desired State</h3>
                   <p className="text-text-primary/70 text-sm">Think about how you want to feel after watching the story.</p>

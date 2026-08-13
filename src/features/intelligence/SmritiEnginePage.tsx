@@ -134,6 +134,7 @@ export default function SmritiEnginePage() {
   const [lastAnalysis, setLastAnalysis] = useState(new Date());
   const [selectedTimeframe, setSelectedTimeframe] = useState('6months');
   const [insights, setInsights] = useState<KathaIntelligenceResult>(INTELLIGENCE_INSIGHTS as unknown as KathaIntelligenceResult);
+  const [isFallback, setIsFallback] = useState(false);
 
   useEffect(() => {
     loadSessions();
@@ -165,6 +166,7 @@ export default function SmritiEnginePage() {
           ...INTELLIGENCE_INSIGHTS,
           ...result
         });
+        setIsFallback(false);
       } else {
         throw new Error('No result from Gemini');
       }
@@ -182,8 +184,13 @@ export default function SmritiEnginePage() {
         emotionalJourney: {
           ...(prev.emotionalJourney || {}),
           dominantMood
+        },
+        tasteEvolution: {
+          ...(prev.tasteEvolution || {}),
+          sophisticationScore: Math.min(100, (allStories.length * 2) + 40)
         }
       } as KathaIntelligenceResult));
+      setIsFallback(true);
     } finally {
       setIsAnalyzing(false);
       setLastAnalysis(new Date());
@@ -722,25 +729,24 @@ export default function SmritiEnginePage() {
     <div className="min-h-screen bg-transparent pt-24 pb-32">
       <div className="max-w-7xl mx-auto px-4 py-page">
         
-        {/* Header */}
-        <div className="flex flex-col lg:flex-row items-start lg:items-end justify-between gap-6 mb-12">
-          <div>
-            <TextEffect
-              preset="blur"
-              per="word"
-              className="font-serif text-5xl md:text-7xl font-bold text-text-primary leading-none mb-4 drop-shadow-2xl flex items-center gap-4"
-              delay={0.1}
-            >
-              Smriti Engine
-            </TextEffect>
-            <TextEffect
-              preset="fade-in-blur"
-              per="line"
-              className="font-sans text-lg text-text-muted max-w-xl font-light"
-              delay={0.2}
-            >
-              Advanced AI analysis of your entertainment journey. Discover patterns, extract wisdom, and understand yourself through the stories you love.
-            </TextEffect>
+        {/* Header Section */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+          <div className="space-y-4">
+            <BlurReveal>
+              <div className="flex items-center gap-3">
+                <h1 className="heading-1">Smriti Engine</h1>
+                {isFallback && (
+                  <span className="px-3 py-1 rounded-full bg-accent-amber/10 border border-accent-amber/30 text-accent-amber text-xs font-bold uppercase tracking-wider">
+                    Heuristic Mode
+                  </span>
+                )}
+              </div>
+            </BlurReveal>
+            <FadeIn delay={0.2}>
+              <p className="text-secondary text-lg max-w-2xl">
+                {isFallback ? 'AI analysis unavailable. Showing heuristic patterns from your journey.' : 'Advanced pattern recognition and intelligence extraction from your cinematic journey.'}
+              </p>
+            </FadeIn>
           </div>
         </div>
 

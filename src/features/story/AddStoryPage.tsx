@@ -94,6 +94,7 @@ export default function AddStoryPage() {
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [isSearchingApi, setIsSearchingApi] = useState(false);
   const [showApiDropdown, setShowApiDropdown] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
 
   useEffect(() => {
     const searchApi = async () => {
@@ -104,10 +105,17 @@ export default function AddStoryPage() {
       }
       setIsSearchingApi(true);
       setShowApiDropdown(true);
+      setApiError(null);
 
-      const results = await mediaService.search(apiSearchQuery, searchPlatform);
-      setSearchResults(results);
-      setIsSearchingApi(false);
+      try {
+        const results = await mediaService.search(apiSearchQuery, searchPlatform);
+        setSearchResults(results);
+      } catch (err) {
+        setApiError('Failed to fetch results. Please try again.');
+        setSearchResults([]);
+      } finally {
+        setIsSearchingApi(false);
+      }
     };
 
     const debounce = setTimeout(searchApi, 500);
@@ -435,19 +443,26 @@ export default function AddStoryPage() {
 
               {/* API Dropdown */}
               <AnimatePresence>
-                {showApiDropdown && searchResults.length > 0 && (
+                {showApiDropdown && (apiSearchQuery.trim() !== '') && (
                   <motion.div
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
                     className="absolute top-full left-0 w-full mt-2 bg-midnight-surface border border-midnight-border rounded-lg shadow-2xl overflow-hidden max-h-64 overflow-y-auto"
                   >
-                    {searchResults.map((result, idx) => (
-                      <button
-                        key={`${result.id}-${idx}`}
-                        type="button"
-                        onClick={() => handleResultSelect(result)}
-                        className="w-full flex items-center gap-3 p-3 hover:bg-text-primary/5 transition-colors text-left border-b border-text-primary/5 last:border-0"
+                    {isSearchingApi ? (
+                      <div className="p-4 text-center text-sm text-text-muted">Searching...</div>
+                    ) : apiError ? (
+                      <div className="p-4 text-center text-sm text-accent-rose">{apiError}</div>
+                    ) : searchResults.length === 0 ? (
+                      <div className="p-4 text-center text-sm text-text-muted">No results found for "{apiSearchQuery}"</div>
+                    ) : (
+                      searchResults.map((result, idx) => (
+                        <button
+                          key={`${result.id}-${idx}`}
+                          type="button"
+                          onClick={() => handleResultSelect(result)}
+                          className="w-full flex items-center gap-3 p-3 hover:bg-text-primary/5 transition-colors text-left border-b border-text-primary/5 last:border-0"
                       >
                         {result.posterUrl ? (
                           <img 
@@ -468,7 +483,7 @@ export default function AddStoryPage() {
                           </p>
                         </div>
                       </button>
-                    ))}
+                    )))}
                   </motion.div>
                 )}
               </AnimatePresence>
