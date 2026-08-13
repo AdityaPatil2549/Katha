@@ -79,3 +79,5 @@ DESIGN.md
 .gitnexusignore
 .firebaserc
 firebase.json
+.vercel
+.env*

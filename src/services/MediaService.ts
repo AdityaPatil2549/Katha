@@ -3,6 +3,9 @@ import { omdbService, type OMDBDetails } from './OMDBService';
 import { youtubeService } from './YouTubeService';
 import { jikanService } from './JikanService';
 import { rawgService } from './RawgService';
+import { anilistService } from './AniListService';
+import { tvmazeService } from './TVMazeService';
+import { kitsuService } from './KitsuService';
 
 // ─── Unified search result shape ─────────────────────────────────────────────
 export interface KathaSearchResult {
@@ -148,29 +151,92 @@ class MediaService {
     // ── 1. Fetch primary metadata ─────────────────────────────────────────────
     if (type === 'movie' || type === 'tv') {
       const tmdbId = typeof idOrTitle === 'string' ? parseInt(idOrTitle, 10) : idOrTitle;
-      tmdbDetails = (await tmdbService.getDetails(tmdbId, type)) ?? undefined;
-      if (!tmdbDetails) return null;
-
-      const dateStr = tmdbDetails.release_date ?? tmdbDetails.first_air_date ?? '';
-      releaseYear = dateStr ? parseInt(dateStr.split('-')[0]!, 10) : null;
-      title = tmdbDetails.title ?? tmdbDetails.name ?? '';
-      posterUrl = tmdbService.getImageUrl(tmdbDetails.poster_path);
-      overview = tmdbDetails.overview;
-      genres = tmdbDetails.genres.map(g => g.name);
-      ratings.tmdb = tmdbDetails.vote_average;
+      
+      // TV/Documentary Fallback Chain: TMDB -> TVMaze
+      try {
+        tmdbDetails = (await tmdbService.getDetails(tmdbId, type)) ?? undefined;
+      } catch (e) {
+        console.warn('TMDB failed, checking TVMaze fallback...');
+      }
+      
+      if (tmdbDetails) {
+        const dateStr = tmdbDetails.release_date ?? tmdbDetails.first_air_date ?? '';
+        releaseYear = dateStr ? parseInt(dateStr.split('-')[0]!, 10) : null;
+        title = tmdbDetails.title ?? tmdbDetails.name ?? '';
+        posterUrl = tmdbService.getImageUrl(tmdbDetails.poster_path);
+        overview = tmdbDetails.overview;
+        genres = tmdbDetails.genres.map(g => g.name);
+        ratings.tmdb = tmdbDetails.vote_average;
+      } else if (type === 'tv') {
+        // Fallback to TVMaze
+        const tvmazeRes = await tvmazeService.search(idOrTitle.toString());
+        if (!tvmazeRes.length) return null;
+        const show = tvmazeRes[0]!.show;
+        
+        title = show.name;
+        releaseYear = show.premiered ? parseInt(show.premiered.split('-')[0]!, 10) : null;
+        posterUrl = show.image?.original ?? show.image?.medium ?? null;
+        overview = show.summary?.replace(/<[^>]+>/g, '') ?? ''; // strip html
+        genres = show.genres ?? [];
+        ratings.tmdb = show.rating?.average ?? undefined; // store under tmdb for compatibility
+      } else {
+        return null;
+      }
 
     } else if (type === 'anime') {
-      // Falls back to title search — best available without a dedicated ID endpoint.
-      const res = await jikanService.search(idOrTitle.toString());
-      if (!res.length) return null;
-      const anime = res[0]!;
+      // Anime Fallback Chain: Jikan -> AniList -> Kitsu
+      let animeFound = false;
+      const searchStr = idOrTitle.toString();
 
-      title = anime.title_english ?? anime.title;
-      releaseYear = anime.year ?? null;
-      posterUrl = anime.images?.jpg?.large_image_url ?? '';
-      overview = anime.synopsis ?? '';
-      genres = anime.genres?.map(g => g.name) ?? [];
-      ratings.tmdb = anime.score; // Jikan score stored under tmdb key as primary score
+      try {
+        const res = await jikanService.search(searchStr);
+        if (res.length > 0) {
+          const anime = res[0]!;
+          title = anime.title_english ?? anime.title;
+          releaseYear = anime.year ?? null;
+          posterUrl = anime.images?.jpg?.large_image_url ?? '';
+          overview = anime.synopsis ?? '';
+          genres = anime.genres?.map(g => g.name) ?? [];
+          ratings.tmdb = anime.score;
+          animeFound = true;
+        }
+      } catch (e) {
+        console.warn('Jikan failed, falling back to AniList...');
+      }
+
+      if (!animeFound) {
+        try {
+          const res = await anilistService.search(searchStr);
+          if (res.length > 0) {
+            const anime = res[0]!;
+            title = anime.title.english ?? anime.title.romaji;
+            releaseYear = anime.startDate?.year ?? null;
+            posterUrl = anime.coverImage?.large ?? '';
+            overview = anime.description?.replace(/<[^>]+>/g, '') ?? '';
+            genres = anime.genres ?? [];
+            ratings.tmdb = anime.averageScore ? anime.averageScore / 10 : undefined;
+            animeFound = true;
+          }
+        } catch (e) {
+          console.warn('AniList failed, falling back to Kitsu...');
+        }
+      }
+
+      if (!animeFound) {
+        const res = await kitsuService.search(searchStr);
+        if (res.length > 0) {
+          const anime = res[0]!;
+          title = anime.attributes.titles.en ?? anime.attributes.canonicalTitle;
+          releaseYear = anime.attributes.startDate ? parseInt(anime.attributes.startDate.split('-')[0]!, 10) : null;
+          posterUrl = anime.attributes.posterImage?.original ?? anime.attributes.posterImage?.large ?? '';
+          overview = anime.attributes.synopsis ?? '';
+          genres = []; // Kitsu doesn't return genres in the edge search payload natively without includes
+          ratings.tmdb = anime.attributes.averageRating ? parseFloat(anime.attributes.averageRating) / 10 : undefined;
+          animeFound = true;
+        }
+      }
+
+      if (!animeFound) return null;
 
     } else if (type === 'game') {
       // Falls back to title search — best available without a dedicated ID endpoint.
