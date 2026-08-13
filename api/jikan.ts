@@ -1,9 +1,13 @@
+import { checkRateLimit, rateLimitResponse } from './_lib/rate-limit';
 export const config = {
   runtime: 'edge',
 };
 
 export default async function handler(req: Request) {
   try {
+    const limitCheck = checkRateLimit(req, 60, 60); // 60 requests per 60s
+    if (!limitCheck.success) return rateLimitResponse(limitCheck.ip);
+
     const url = new URL(req.url);
     const path = url.searchParams.get('path');
 

@@ -1,3 +1,4 @@
+import { checkRateLimit, rateLimitResponse } from './_lib/rate-limit';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 export const config = {
@@ -13,6 +14,9 @@ export default async function handler(req: Request) {
   }
 
   try {
+    const limitCheck = checkRateLimit(req, 60, 60); // 60 requests per 60s
+    if (!limitCheck.success) return rateLimitResponse(limitCheck.ip);
+
     const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
     if (!GEMINI_API_KEY) {
       return new Response(JSON.stringify({ error: 'Gemini API key not configured' }), {
