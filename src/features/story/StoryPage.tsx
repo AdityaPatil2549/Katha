@@ -609,7 +609,9 @@ export default function StoryPage() {
                                 </button>
                                 {pendingIds.includes(moment.id) && (
                                   <div className="p-3">
-                                    <Cloud className="w-4 h-4 text-accent-cyan animate-pulse" title="Pending Sync" />
+                                  <div title="Pending Sync">
+                                    <Cloud className="w-4 h-4 text-accent-cyan animate-pulse" />
+                                  </div>
                                   </div>
                                 )}
                               </div>

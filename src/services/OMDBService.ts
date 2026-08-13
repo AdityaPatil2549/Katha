@@ -36,7 +36,7 @@ class OMDBService {
     
     const cacheKey = `omdb_id_${imdbId}`;
     const cached = await dbService.apiCache.get(cacheKey);
-    if (cached) return cached;
+    if (cached && !cached.isStale) return cached.data;
 
     try {
       const response = await fetch(`${BASE_URL}?i=${imdbId}`);
@@ -57,7 +57,7 @@ class OMDBService {
     
     const cacheKey = `omdb_title_${title.toLowerCase()}_${year || 'any'}`;
     const cached = await dbService.apiCache.get(cacheKey);
-    if (cached) return cached;
+    if (cached && !cached.isStale) return cached.data;
 
     try {
       let url = `${BASE_URL}?t=${encodeURIComponent(title)}`;

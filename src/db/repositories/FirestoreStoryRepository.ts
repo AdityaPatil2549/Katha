@@ -126,18 +126,6 @@ export class FirestoreStoryRepository implements StoryRepository {
     return snap.docs.map(d => d.data() as Story);
   }
 
-  async search(searchQuery: string): Promise<Story[]> {
-    // Firestore lacks native full-text search.
-    // For a production app, use Algolia/Typesense.
-    // Here we just fetch all and filter in memory, though we shouldn't even call this
-    // because reads are handled by Dexie.
-    const all = await this.findAll();
-    const lowerQuery = searchQuery.toLowerCase();
-    return all.filter(story => 
-      story.title.toLowerCase().includes(lowerQuery) ||
-      story.genre.some(g => g.toLowerCase().includes(lowerQuery))
-    );
-  }
 
   async findWatching(): Promise<Story[]> {
     return await this.findByStatus('watching');

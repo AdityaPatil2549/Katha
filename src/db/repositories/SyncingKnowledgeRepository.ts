@@ -27,6 +27,22 @@ export class SyncingKnowledgeRepository implements KnowledgeRepository {
     return this.localRepo.search(query);
   }
 
+  async findByDateRange(startDate: string, endDate: string): Promise<Knowledge[]> {
+    return this.localRepo.findByDateRange(startDate, endDate);
+  }
+
+  async getTotalCount(): Promise<number> {
+    return this.localRepo.getTotalCount();
+  }
+
+  async getRecentKnowledge(limit?: number): Promise<Knowledge[]> {
+    return this.localRepo.getRecentKnowledge(limit);
+  }
+
+  async getTopPrinciples(limit?: number): Promise<Array<{ principle: string; count: number }>> {
+    return this.localRepo.getTopPrinciples(limit);
+  }
+
   private async queueSync(action: 'CREATE' | 'UPDATE' | 'DELETE', data: any) {
     if (!this.cloudRepo) return;
     

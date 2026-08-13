@@ -90,15 +90,6 @@ export class DexieStoryRepository implements StoryRepository {
     return await db.stories.filter(story => (story.moods || []).includes(mood)).toArray();
   }
 
-  async search(query: string): Promise<Story[]> {
-    const lowerQuery = query.toLowerCase();
-    return await db.stories.filter(story => 
-      story.title.toLowerCase().includes(lowerQuery) ||
-      story.genre.some(g => g.toLowerCase().includes(lowerQuery)) ||
-      (story.tags || []).some(t => t.toLowerCase().includes(lowerQuery)) ||
-      (story.description || '').toLowerCase().includes(lowerQuery)
-    ).toArray();
-  }
 
   async findWatching(): Promise<Story[]> {
     return await this.findByStatus('watching');

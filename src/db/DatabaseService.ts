@@ -80,6 +80,7 @@ export class DatabaseService {
   get sessions() { return this._sessions; }
   get knowledge() { return this._knowledge; }
   get timeline() { return this._timeline; }
+  get syncManager() { return syncManager; }
   get apiCache() { return this._apiCache; }
 
   // Health check

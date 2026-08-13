@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Cloud, RefreshCw, AlertCircle, Trash2 } from 'lucide-react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/db/KathaDb';
-import { SyncManager } from '@/db/SyncManager';
+import { dbService } from '@/db/DatabaseService';
 
 interface OutboxModalProps {
   isOpen: boolean;
@@ -21,11 +21,10 @@ export function OutboxModal({ isOpen, onClose, isOnline, isSyncing }: OutboxModa
       alert("You are offline. Reconnect to sync.");
       return;
     }
-    const syncManager = SyncManager.getInstance();
-    await syncManager.flushQueue();
+    await dbService.syncManager.flushQueue();
   };
 
-  const handleRemoveItem = async (id: number) => {
+  const handleRemoveItem = async (id: string) => {
     if (confirm("Are you sure? Removing this item will discard your local changes permanently.")) {
       await db.syncQueue.delete(id);
     }
@@ -80,7 +79,7 @@ export function OutboxModal({ isOpen, onClose, isOnline, isSyncing }: OutboxModa
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {syncItems.map((item) => (
+                  {syncItems.map((item: any) => (
                     <div key={item.id} className="flex items-center justify-between p-4 bg-midnight-surface border border-midnight-border/50 rounded-xl">
                       <div>
                         <div className="text-sm font-medium text-text-primary uppercase tracking-wider mb-1">

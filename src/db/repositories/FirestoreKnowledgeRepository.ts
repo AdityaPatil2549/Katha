@@ -80,9 +80,44 @@ export class FirestoreKnowledgeRepository implements KnowledgeRepository {
     const all = await this.findAll();
     const lowerQuery = queryStr.toLowerCase();
     return all.filter(k => 
-      k.title.toLowerCase().includes(lowerQuery) ||
-      k.content.toLowerCase().includes(lowerQuery) ||
-      k.tags.some(t => t.toLowerCase().includes(lowerQuery))
+      k.lesson.toLowerCase().includes(lowerQuery) ||
+      k.reflection.toLowerCase().includes(lowerQuery) ||
+      k.principle.toLowerCase().includes(lowerQuery)
     );
+  }
+
+  async findByDateRange(startDate: string, endDate: string): Promise<Knowledge[]> {
+    const q = query(
+      this.collectionRef,
+      where('date', '>=', startDate),
+      where('date', '<=', endDate),
+      orderBy('date', 'desc')
+    );
+    const snap = await getDocs(q);
+    return snap.docs.map(d => d.data() as Knowledge);
+  }
+
+  async getTotalCount(): Promise<number> {
+    const snap = await getDocs(this.collectionRef);
+    return snap.size;
+  }
+
+  async getRecentKnowledge(limitCount?: number): Promise<Knowledge[]> {
+    const all = await this.findAll();
+    return limitCount ? all.slice(0, limitCount) : all;
+  }
+
+  async getTopPrinciples(limitCount?: number): Promise<Array<{ principle: string; count: number }>> {
+    const all = await this.findAll();
+    const counts: Record<string, number> = {};
+    all.forEach(k => {
+      if (k.principle) {
+        counts[k.principle] = (counts[k.principle] || 0) + 1;
+      }
+    });
+    const sorted = Object.entries(counts)
+      .map(([principle, count]) => ({ principle, count }))
+      .sort((a, b) => b.count - a.count);
+    return limitCount ? sorted.slice(0, limitCount) : sorted;
   }
 }

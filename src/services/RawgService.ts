@@ -19,7 +19,7 @@ class RawgService {
     
     const cacheKey = `rawg_search_${query.toLowerCase()}`;
     const cached = await dbService.apiCache.get(cacheKey);
-    if (cached) return cached;
+    if (cached && !cached.isStale) return cached.data;
 
     // Respect RAWG rate limits — only on cache miss before real request.
     await new Promise(resolve => setTimeout(resolve, 350));

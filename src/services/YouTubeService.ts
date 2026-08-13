@@ -22,7 +22,7 @@ class YouTubeService {
     
     const cacheKey = `youtube_search_${query.toLowerCase()}`;
     const cached = await dbService.apiCache.get(cacheKey);
-    if (cached) return cached;
+    if (cached && !cached.isStale) return cached.data;
 
     try {
       const response = await fetch(
@@ -54,7 +54,7 @@ class YouTubeService {
     
     const cacheKey = `youtube_details_${videoId}`;
     const cached = await dbService.apiCache.get(cacheKey);
-    if (cached) return cached;
+    if (cached && !cached.isStale) return cached.data;
 
     try {
       const response = await fetch(

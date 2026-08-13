@@ -307,7 +307,9 @@ export default function LibraryPage() {
                     </div>
                     {pendingIds.includes(story.id) && (
                       <div className="absolute top-4 left-4 z-10 p-2 bg-midnight-bg/80 backdrop-blur-md rounded-full border border-midnight-border/50 shadow-sm">
-                        <Cloud className="w-4 h-4 text-accent-cyan animate-pulse" title="Pending Sync" />
+                      <div title="Pending Sync">
+                        <Cloud className="w-4 h-4 text-accent-cyan animate-pulse" />
+                      </div>
                       </div>
                     )}
                   </div>
@@ -339,7 +341,9 @@ export default function LibraryPage() {
                     <div className="flex items-center gap-3">
                       <h3 className="font-serif text-3xl font-medium text-text-primary truncate">{story.title}</h3>
                       {pendingIds.includes(story.id) && (
-                        <Cloud className="w-5 h-5 text-accent-cyan animate-pulse shrink-0" title="Pending Sync" />
+                      <div title="Pending Sync">
+                        <Cloud className="w-5 h-5 text-accent-cyan animate-pulse shrink-0" />
+                      </div>
                       )}
                     </div>
                     <div className="flex flex-wrap items-center gap-4 text-xs font-sans tracking-[0.1em] text-text-secondary uppercase">

@@ -24,6 +24,7 @@
         "crypto-js": "^4.2.0",
         "date-fns": "^4.1.0",
         "dexie": "^4.3.0",
+        "dexie-react-hooks": "^4.4.0",
         "docx": "^9.5.1",
         "dompurify": "^3.1.6",
         "firebase": "^12.17.1",

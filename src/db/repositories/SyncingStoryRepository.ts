@@ -17,20 +17,24 @@ export class SyncingStoryRepository implements StoryRepository {
     return this.localRepo.findAll();
   }
 
-  async findById(id: string): Promise<Story | null> {
+  async findById(id: string): Promise<Story | undefined> {
     return this.localRepo.findById(id);
   }
 
-  async findByCategory(category: StoryCategory): Promise<Story[]> {
+  async findByCategory(category: string): Promise<Story[]> {
     return this.localRepo.findByCategory(category);
   }
 
-  async findByStatus(status: StoryStatus): Promise<Story[]> {
+  async findByStatus(status: string): Promise<Story[]> {
     return this.localRepo.findByStatus(status);
   }
 
-  async getFavorites(): Promise<Story[]> {
-    return this.localRepo.getFavorites();
+  async findFavorites(): Promise<Story[]> {
+    return this.localRepo.findFavorites();
+  }
+
+  async findByTag(tag: string): Promise<Story[]> {
+    return this.localRepo.findByTag(tag);
   }
 
   async findByMood(mood: string): Promise<Story[]> {
@@ -41,8 +45,32 @@ export class SyncingStoryRepository implements StoryRepository {
     return this.localRepo.search(query);
   }
 
+  async findWatching(): Promise<Story[]> {
+    return this.localRepo.findWatching();
+  }
+
+  async findCompleted(): Promise<Story[]> {
+    return this.localRepo.findCompleted();
+  }
+
+  async findHighImpact(minImpact?: number): Promise<Story[]> {
+    return this.localRepo.findHighImpact(minImpact);
+  }
+
   async getTotalWatchTime(): Promise<number> {
     return this.localRepo.getTotalWatchTime();
+  }
+
+  async getAverageRating(): Promise<number> {
+    return this.localRepo.getAverageRating();
+  }
+
+  async getTopCategories(limit?: number): Promise<Array<{ category: string; count: number }>> {
+    return this.localRepo.getTopCategories(limit);
+  }
+
+  async getMoodDistribution(): Promise<Array<{ mood: string; count: number }>> {
+    return this.localRepo.getMoodDistribution();
   }
 
   // --- WRITES (Local First, then Cloud) ---
@@ -145,13 +173,11 @@ export class SyncingStoryRepository implements StoryRepository {
     }
   }
 
-  // Note: Batch import/export skips sync to avoid quota bombs. 
-  // Should trigger a full-sync manually later.
-  async importBatch(stories: Story[]): Promise<void> {
-    await this.localRepo.importBatch(stories);
+  async bulkUpsert(stories: Story[]): Promise<void> {
+    await this.localRepo.bulkUpsert(stories);
     if (this.cloudRepo && navigator.onLine) {
-      this.cloudRepo.importBatch(stories).catch(err => {
-        console.error('Background sync batch import failed:', err);
+      this.cloudRepo.bulkUpsert(stories).catch(err => {
+        console.error('Background sync bulkUpsert failed:', err);
       });
     }
   }

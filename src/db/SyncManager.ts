@@ -40,7 +40,7 @@ export class SyncManager {
     try {
       const pendingSyncs = await db.syncQueue.orderBy('timestamp').toArray();
       useSyncStore.getState().setPendingCount(pendingSyncs.length);
-      useSyncStore.getState().setPendingIds(pendingSyncs.map(item => item.documentId));
+      useSyncStore.getState().setPendingIds(pendingSyncs.map(item => item.data?.id).filter(Boolean) as string[]);
       
       if (!navigator.onLine) {
         return; // We update count but don't flush if offline
@@ -121,7 +121,7 @@ export class SyncManager {
       if (successCount > 0) {
         const remaining = await db.syncQueue.toArray();
         useSyncStore.getState().setPendingCount(remaining.length);
-        useSyncStore.getState().setPendingIds(remaining.map(item => item.documentId));
+        useSyncStore.getState().setPendingIds(remaining.map(item => item.data?.id).filter(Boolean) as string[]);
         toast(`${successCount} item${successCount > 1 ? 's' : ''} synced to Katha Cloud`, 'success');
       }
 

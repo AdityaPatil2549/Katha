@@ -29,7 +29,7 @@ class JikanService {
     
     const cacheKey = `jikan_search_${query.toLowerCase()}`;
     const cached = await dbService.apiCache.get(cacheKey);
-    if (cached) return cached;
+    if (cached && !cached.isStale) return cached.data;
 
     // Respect Jikan rate limit (3 req/s) — only on cache miss before real request.
     await new Promise(resolve => setTimeout(resolve, 350));

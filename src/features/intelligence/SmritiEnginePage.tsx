@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import type { KathaIntelligenceResult } from '@/services/GeminiService';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar, Cell } from 'recharts';
 import { BlurReveal } from '@/components/ui/motion/BlurReveal';
@@ -37,57 +38,40 @@ import { useStoriesStore, useMomentsStore, useSessionsStore, useKnowledgeStore }
 const INTELLIGENCE_INSIGHTS = {
   emotionalJourney: {
     dominantMood: 'inspired',
-    moodEvolution: [
-      { month: 'Jan', moods: { inspired: 45, emotional: 30, thoughtful: 25 } },
-      { month: 'Feb', moods: { inspired: 52, emotional: 28, thoughtful: 20 } },
-      { month: 'Mar', moods: { inspired: 48, emotional: 35, thoughtful: 17 } },
-      { month: 'Apr', moods: { inspired: 55, emotional: 25, thoughtful: 20 } },
-      { month: 'May', moods: { inspired: 60, emotional: 22, thoughtful: 18 } },
-      { month: 'Jun', moods: { inspired: 58, emotional: 24, thoughtful: 18 } }
-    ],
-    emotionalGrowth: {
-      current: 85,
-      previous: 72,
-      growth: 18
-    }
+    moodRange: ['inspired', 'emotional', 'thoughtful'],
+    emotionalGrowth: { growth: 18, trend: 'up' },
+    catharticMoments: ['interstellar-climax', 'vinland-farmland']
   },
   tasteEvolution: {
     genres: [
-      { genre: 'Drama', current: 35, previous: 25, trend: 'up' },
-      { genre: 'Sci-Fi', current: 20, previous: 30, trend: 'down' },
-      { genre: 'Documentary', current: 15, previous: 10, trend: 'up' },
-      { genre: 'Comedy', current: 12, previous: 15, trend: 'down' },
-      { genre: 'Thriller', current: 18, previous: 20, trend: 'stable' }
+      { genre: 'Drama', current: 35, previous: 25 },
+      { genre: 'Sci-Fi', current: 20, previous: 30 },
+      { genre: 'Documentary', current: 15, previous: 10 },
+      { genre: 'Comedy', current: 12, previous: 15 },
+      { genre: 'Thriller', current: 18, previous: 20 }
     ],
     sophisticationScore: 78,
-    diversityIndex: 0.73
+    undergroundRatio: 0.22,
+    decadePreference: '2010s'
   },
   lifePatterns: {
     viewingHabits: {
       peakTime: 'Evening (8-10 PM)',
-      averageSession: '2.3 hours',
-      bingeTendency: 0.4,
-      consistency: 0.85
+      consistency: 0.85,
+      bingeTendency: 0.4
     },
-    lifePhaseCorrelation: {
-      'college-era': { stories: 45, avgRating: 7.2, dominantMood: 'thoughtful' },
-      'early-career': { stories: 32, avgRating: 8.1, dominantMood: 'inspired' },
-      'growth-phase': { stories: 28, avgRating: 8.5, dominantMood: 'emotional' }
-    }
+    socialVsSolo: 0.8,
+    moodInfluence: 'high'
   },
   wisdomExtraction: {
-    totalLessons: 147,
     topLessons: [
-      { lesson: 'Love transcends time and space', frequency: 12, stories: ['Interstellar', 'The Time Traveler\'s Wife'] },
-      { lesson: 'True strength lies in compassion', frequency: 8, stories: ['Vinland Saga', 'Avatar'] },
-      { lesson: 'Face your fears to grow', frequency: 7, stories: ['The Wizard of Oz', 'Inside Out'] },
-      { lesson: 'Every choice creates new possibilities', frequency: 6, stories: ['The Matrix', 'Sliding Doors'] }
+      { lesson: 'Love transcends time and space', stories: ['Interstellar', 'The Time Traveler\'s Wife'], frequency: 12 },
+      { lesson: 'True strength lies in compassion', stories: ['Vinland Saga', 'Avatar'], frequency: 8 },
+      { lesson: 'Face your fears to grow', stories: ['The Wizard of Oz', 'Inside Out'], frequency: 7 },
+      { lesson: 'Every choice creates new possibilities', stories: ['The Matrix', 'Sliding Doors'], frequency: 6 }
     ],
-    personalPrinciples: [
-      { principle: 'Choose compassion over revenge', strength: 0.92, source: 'Vinland Saga' },
-      { principle: 'Embrace uncertainty', strength: 0.88, source: 'Arrival' },
-      { principle: 'Find beauty in ordinary moments', strength: 0.85, source: 'Paterson' }
-    ]
+    philosophyScore: 82,
+    recurringThemes: ['compassion', 'time', 'growth']
   },
   predictions: {
     nextFavoriteGenre: 'Philosophical Drama',
@@ -149,7 +133,7 @@ export default function SmritiEnginePage() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [lastAnalysis, setLastAnalysis] = useState(new Date());
   const [selectedTimeframe, setSelectedTimeframe] = useState('6months');
-  const [insights, setInsights] = useState(INTELLIGENCE_INSIGHTS);
+  const [insights, setInsights] = useState<KathaIntelligenceResult>(INTELLIGENCE_INSIGHTS as unknown as KathaIntelligenceResult);
 
   useEffect(() => {
     loadSessions();
@@ -196,10 +180,10 @@ export default function SmritiEnginePage() {
       setInsights(prev => ({
         ...prev,
         emotionalJourney: {
-          ...prev.emotionalJourney,
+          ...(prev.emotionalJourney || {}),
           dominantMood
         }
-      }));
+      } as KathaIntelligenceResult));
     } finally {
       setIsAnalyzing(false);
       setLastAnalysis(new Date());
@@ -218,22 +202,17 @@ export default function SmritiEnginePage() {
   };
 
   const renderEmotionalIntelligence = () => {
-    const chartData = insights.emotionalJourney.moodEvolution.map(m => ({
-      name: m.month,
-      ...m.moods
-    }));
-
     return (
     <div className="space-y-page">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-page">
-        {/* Emotional Journey Chart */}
+        {/* Emotional Journey */}
         <div className="glass-card shadow-glass p-6 rounded-card">
           <h3 className="heading-3 text-primary mb-section">Your Emotional Journey</h3>
           <div className="space-y-4">
             <div className="flex items-center justify-between group">
               <span className="text-small font-bold text-text-secondary group-hover:text-white transition-colors duration-300">Dominant Mood</span>
               <span className="px-4 py-1.5 rounded-full bg-accent-primary/10 border border-accent-primary/30 text-transparent bg-clip-text bg-gradient-to-r from-accent-primary to-purple-400 font-bold shadow-[0_0_15px_rgba(139,92,246,0.3)] capitalize">
-                {insights.emotionalJourney.dominantMood}
+                {insights.emotionalJourney?.dominantMood || 'N/A'}
               </span>
             </div>
             
@@ -241,14 +220,14 @@ export default function SmritiEnginePage() {
               <div className="flex justify-between items-end">
                 <span className="text-sm font-bold text-text-secondary group-hover:text-white transition-colors duration-300">Emotional Growth</span>
                 <span className="text-h3 font-bold text-transparent bg-clip-text bg-gradient-to-r from-accent-emerald to-teal-400 drop-shadow-[0_0_8px_rgba(16,185,129,0.5)] tabular-nums leading-none">
-                  +{insights.emotionalJourney.emotionalGrowth.growth}%
+                  +{insights.emotionalJourney?.emotionalGrowth?.growth || 0}%
                 </span>
               </div>
               <div className="h-3.5 bg-black/40 rounded-full border border-white/5 relative overflow-visible">
                 <div className="absolute inset-0 rounded-full shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)] pointer-events-none" />
                 <motion.div 
                   initial={{ width: 0, opacity: 0 }}
-                  animate={{ width: `${insights.emotionalJourney.emotionalGrowth.current}%`, opacity: 1 }}
+                  animate={{ width: `${Math.min(insights.emotionalJourney?.emotionalGrowth?.growth || 0, 100)}%`, opacity: 1 }}
                   transition={{ duration: 1.2, delay: 0.1, type: "spring", bounce: 0.4 }}
                   className="h-full rounded-full bg-gradient-to-r from-accent-emerald to-teal-400 shadow-[0_0_20px_rgba(16,185,129,0.6)] relative"
                 >
@@ -259,50 +238,28 @@ export default function SmritiEnginePage() {
             </div>
 
             <div className="pt-8 border-t border-white/5 mt-8">
-              <div className="flex items-center justify-between mb-8">
-                <h4 className="text-sm font-bold text-text-secondary">Monthly Mood Distribution</h4>
-                <div className="flex gap-4">
-                  <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-[#A78BFA] shadow-[0_0_8px_#A78BFA]" /><span className="text-xs text-white font-bold">Inspired</span></div>
-                  <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-[#FB7185] shadow-[0_0_8px_#FB7185]" /><span className="text-xs text-white font-bold">Emotional</span></div>
-                  <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-[#22D3EE] shadow-[0_0_8px_#22D3EE]" /><span className="text-xs text-white font-bold">Thoughtful</span></div>
-                </div>
-              </div>
-              
-              <div className="h-72 w-full mt-4 -ml-4 relative group">
-                {/* Ambient backdrop glow */}
-                <div className="absolute inset-0 bg-gradient-to-t from-white/[0.03] to-transparent pointer-events-none rounded-b-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-                
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={chartData} margin={{ top: 20, right: 10, left: 0, bottom: 0 }}>
-                    <defs>
-                      <linearGradient id="colorThoughtful" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#22D3EE" stopOpacity={0.5}/>
-                        <stop offset="100%" stopColor="#22D3EE" stopOpacity={0}/>
-                      </linearGradient>
-                      <linearGradient id="colorEmotional" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#FB7185" stopOpacity={0.5}/>
-                        <stop offset="100%" stopColor="#FB7185" stopOpacity={0}/>
-                      </linearGradient>
-                      <linearGradient id="colorInspired" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#A78BFA" stopOpacity={0.5}/>
-                        <stop offset="100%" stopColor="#A78BFA" stopOpacity={0}/>
-                      </linearGradient>
-                    </defs>
-                    <XAxis dataKey="name" stroke="rgba(255,255,255,0.2)" fontSize={12} tickLine={false} axisLine={false} dy={10} fontFamily="inherit" fontWeight="600" />
-                    <Tooltip 
-                      contentStyle={{ backgroundColor: 'rgba(19, 17, 28, 0.85)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', boxShadow: '0 8px 32px 0 rgba(0,0,0,0.5)' }}
-                      itemStyle={{ color: '#E4E4E5', fontWeight: 600, padding: '4px 0', textTransform: 'capitalize' }}
-                      cursor={{ stroke: 'rgba(255,255,255,0.2)', strokeWidth: 1, strokeDasharray: '4 4' }}
-                    />
-                    
-                    {/* Layering back-to-front */}
-                    <Area type="monotoneX" dataKey="thoughtful" stroke="#22D3EE" strokeWidth={3} fillOpacity={1} fill="url(#colorThoughtful)" style={{ filter: "drop-shadow(0 0 10px rgba(34, 211, 238, 0.5))" }} animationDuration={1500} />
-                    <Area type="monotoneX" dataKey="emotional" stroke="#FB7185" strokeWidth={3} fillOpacity={1} fill="url(#colorEmotional)" style={{ filter: "drop-shadow(0 0 10px rgba(251, 113, 133, 0.5))" }} animationDuration={1500} />
-                    <Area type="monotoneX" dataKey="inspired" stroke="#A78BFA" strokeWidth={3} fillOpacity={1} fill="url(#colorInspired)" style={{ filter: "drop-shadow(0 0 10px rgba(167, 139, 250, 0.5))" }} animationDuration={1500} />
-                  </AreaChart>
-                </ResponsiveContainer>
+              <h4 className="text-sm font-bold text-text-secondary mb-4">Mood Range</h4>
+              <div className="flex flex-wrap gap-2">
+                {insights.emotionalJourney?.moodRange?.map((mood, idx) => (
+                  <span key={idx} className="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-xs text-text-secondary capitalize">
+                    {mood}
+                  </span>
+                ))}
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Cathartic Moments */}
+        <div className="glass-card shadow-glass p-6 rounded-card">
+          <h3 className="heading-3 text-primary mb-section">Cathartic Moments</h3>
+          <div className="space-y-4">
+            {insights.emotionalJourney?.catharticMoments?.map((moment, idx) => (
+              <div key={idx} className="p-4 rounded-xl bg-white/5 border border-white/10 flex items-start gap-3">
+                <Sparkles className="w-5 h-5 text-accent-amber shrink-0 mt-0.5" />
+                <p className="text-sm text-text-secondary">{moment}</p>
+              </div>
+            ))}
           </div>
         </div>
 
@@ -386,12 +343,14 @@ export default function SmritiEnginePage() {
             <div className="flex items-center justify-between">
               <span className="text-small text-secondary">Sophistication Score</span>
               <span className="text-h3 font-bold text-transparent bg-clip-text bg-gradient-to-r from-accent-primary via-purple-400 to-accent-cyan drop-shadow-[0_0_8px_rgba(139,92,246,0.5)]">
-                {insights.tasteEvolution.sophisticationScore}/100
+                {insights.tasteEvolution?.sophisticationScore || 0}/100
               </span>
             </div>
             
             <div className="flex flex-col gap-6 mt-8">
-              {insights.tasteEvolution.genres.map((entry, index) => {
+              {insights.tasteEvolution?.genres?.map((entry, index) => {
+                // Determine trend based on current vs previous
+                const trend = entry.current > entry.previous ? 'up' : entry.current < entry.previous ? 'down' : 'stable';
                 const colorMap = {
                   up: {
                     gradient: 'from-accent-primary to-purple-400',
@@ -409,10 +368,10 @@ export default function SmritiEnginePage() {
                     glow: 'bg-emerald-300'
                   }
                 };
-                const style = colorMap[entry.trend as keyof typeof colorMap] || colorMap.stable;
+                const style = colorMap[trend] || colorMap.stable;
                 
                 // Calculate relative width based on max value to ensure the largest bar fills the space
-                const maxVal = Math.max(...insights.tasteEvolution.genres.map(g => g.current));
+                const maxVal = Math.max(...(insights.tasteEvolution?.genres || []).map(g => g.current), 1);
                 const percentage = (entry.current / maxVal) * 100;
 
                 return (
@@ -422,7 +381,6 @@ export default function SmritiEnginePage() {
                     </span>
                     
                     <div className="flex-1 h-3.5 bg-black/40 rounded-full border border-white/5 relative overflow-visible">
-                      {/* Inner track shadow */}
                       <div className="absolute inset-0 rounded-full shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)] pointer-events-none" />
                       
                       <motion.div 
@@ -431,7 +389,6 @@ export default function SmritiEnginePage() {
                         transition={{ duration: 1.2, delay: index * 0.15, type: "spring", bounce: 0.4 }}
                         className={`h-full rounded-full bg-gradient-to-r ${style.gradient} ${style.shadow} relative`}
                       >
-                        {/* Glowing Energy Tip */}
                         <div className={`absolute right-0 top-0 bottom-0 w-3 rounded-full ${style.glow} blur-[2px] opacity-80`} />
                         <div className="absolute right-0 top-0 bottom-0 w-1 bg-white rounded-full opacity-90 shadow-[0_0_8px_white]" />
                       </motion.div>
@@ -463,9 +420,9 @@ export default function SmritiEnginePage() {
                   <Compass className="w-5 h-5 text-violet-400" />
                 </div>
                 <div>
-                  <h4 className="font-bold text-white mb-2 group-hover:text-violet-300 transition-colors">Maturing Palate</h4>
+                  <h4 className="font-bold text-white mb-2 group-hover:text-violet-300 transition-colors">Decade Preference</h4>
                   <p className="text-secondary text-sm leading-relaxed">
-                    Your shift toward drama and documentary content indicates evolving taste and desire for more meaningful storytelling experiences.
+                    You seem to gravitate towards stories from the <strong className="text-violet-400 font-bold">{insights.tasteEvolution?.decadePreference}</strong>.
                   </p>
                 </div>
               </div>
@@ -483,19 +440,19 @@ export default function SmritiEnginePage() {
                   <div className="w-10 h-10 rounded-full bg-cyan-500/10 flex items-center justify-center border border-cyan-500/20 group-hover:shadow-[0_0_15px_rgba(6,182,212,0.4)] group-hover:bg-cyan-500/20 transition-all duration-300 flex-shrink-0">
                     <PieChart className="w-5 h-5 text-cyan-400" />
                   </div>
-                  <h4 className="font-bold text-white mt-2 group-hover:text-cyan-300 transition-colors">Diversity Index</h4>
+                  <h4 className="font-bold text-white mt-2 group-hover:text-cyan-300 transition-colors">Underground Ratio</h4>
                 </div>
                 
                 <div className="flex items-center gap-4">
                   <div className="text-h3 font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 drop-shadow-[0_0_8px_rgba(6,182,212,0.5)] tabular-nums">
-                    {(insights.tasteEvolution.diversityIndex * 100).toFixed(0)}%
+                    {((insights.tasteEvolution?.undergroundRatio || 0) * 100).toFixed(0)}%
                   </div>
                   <div className="flex-1">
                     <div className="h-3.5 bg-black/40 rounded-full border border-white/5 relative overflow-visible">
                       <div className="absolute inset-0 rounded-full shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)] pointer-events-none" />
                       <motion.div 
                         initial={{ width: 0, opacity: 0 }}
-                        animate={{ width: `${insights.tasteEvolution.diversityIndex * 100}%`, opacity: 1 }}
+                        animate={{ width: `${(insights.tasteEvolution?.undergroundRatio || 0) * 100}%`, opacity: 1 }}
                         transition={{ duration: 1.2, delay: 0.1, type: "spring", bounce: 0.4 }}
                         className="h-full rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 shadow-[0_0_20px_rgba(6,182,212,0.6)] relative"
                       >
@@ -506,28 +463,8 @@ export default function SmritiEnginePage() {
                   </div>
                 </div>
                 <p className="text-secondary text-sm mt-4 leading-relaxed">
-                  Excellent genre diversity - you're exploring across different storytelling formats.
+                  Shows how often you explore independent or less mainstream content.
                 </p>
-              </div>
-            </motion.div>
-
-            <motion.div 
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="relative group p-5 bg-black/40 border border-white/5 rounded-2xl overflow-hidden transition-all duration-300 hover:border-amber-500/30 hover:shadow-[0_0_20px_rgba(245,158,11,0.15)]"
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-amber-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <div className="flex gap-4 relative z-10">
-                <div className="w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center border border-amber-500/20 group-hover:shadow-[0_0_15px_rgba(245,158,11,0.4)] group-hover:bg-amber-500/20 transition-all duration-300 flex-shrink-0">
-                  <Lightbulb className="w-5 h-5 text-amber-400" />
-                </div>
-                <div>
-                  <h4 className="font-bold text-white mb-2 group-hover:text-amber-300 transition-colors">Recommendation</h4>
-                  <p className="text-secondary text-sm leading-relaxed">
-                    Consider exploring philosophical dramas and foreign cinema to further expand your horizons.
-                  </p>
-                </div>
               </div>
             </motion.div>
           </div>
@@ -551,7 +488,7 @@ export default function SmritiEnginePage() {
                 </div>
                 <div className="text-center z-10">
                   <div className="text-xs font-bold text-text-muted uppercase tracking-wider mb-1">Peak Time</div>
-                  <div className="text-lg font-bold text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]">{insights.lifePatterns.viewingHabits.peakTime}</div>
+                  <div className="text-lg font-bold text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]">{insights.lifePatterns?.viewingHabits?.peakTime || 'N/A'}</div>
                 </div>
               </div>
               <div className="relative group overflow-hidden p-6 bg-black/40 border border-white/5 rounded-2xl flex flex-col items-center justify-center gap-3 transition-all duration-300 hover:border-purple-500/30 hover:bg-purple-500/5">
@@ -560,8 +497,8 @@ export default function SmritiEnginePage() {
                   <Activity className="w-6 h-6 text-purple-400" />
                 </div>
                 <div className="text-center z-10">
-                  <div className="text-xs font-bold text-text-muted uppercase tracking-wider mb-1">Avg Session</div>
-                  <div className="text-lg font-bold text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]">{insights.lifePatterns.viewingHabits.averageSession}</div>
+                  <div className="text-xs font-bold text-text-muted uppercase tracking-wider mb-1">Mood Influence</div>
+                  <div className="text-lg font-bold text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.3)] capitalize">{insights.lifePatterns?.moodInfluence || 'N/A'}</div>
                 </div>
               </div>
             </div>
@@ -571,14 +508,14 @@ export default function SmritiEnginePage() {
                 <div className="flex justify-between items-end">
                   <span className="text-sm font-bold text-text-secondary group-hover:text-white transition-colors duration-300">Binge Tendency</span>
                   <span className="text-h3 font-bold text-transparent bg-clip-text bg-gradient-to-r from-accent-rose to-pink-400 drop-shadow-[0_0_8px_rgba(244,63,94,0.5)] tabular-nums leading-none">
-                    {(insights.lifePatterns.viewingHabits.bingeTendency * 100).toFixed(0)}%
+                    {((insights.lifePatterns?.viewingHabits?.bingeTendency || 0) * 100).toFixed(0)}%
                   </span>
                 </div>
                 <div className="h-3.5 bg-black/40 rounded-full border border-white/5 relative overflow-visible">
                   <div className="absolute inset-0 rounded-full shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)] pointer-events-none" />
                   <motion.div 
                     initial={{ width: 0, opacity: 0 }}
-                    animate={{ width: `${insights.lifePatterns.viewingHabits.bingeTendency * 100}%`, opacity: 1 }}
+                    animate={{ width: `${(insights.lifePatterns?.viewingHabits?.bingeTendency || 0) * 100}%`, opacity: 1 }}
                     transition={{ duration: 1.2, delay: 0.2, type: "spring", bounce: 0.4 }}
                     className="h-full rounded-full bg-gradient-to-r from-accent-rose to-pink-400 shadow-[0_0_20px_rgba(244,63,94,0.6)] relative"
                   >
@@ -592,14 +529,14 @@ export default function SmritiEnginePage() {
                 <div className="flex justify-between items-end">
                   <span className="text-sm font-bold text-text-secondary group-hover:text-white transition-colors duration-300">Consistency</span>
                   <span className="text-h3 font-bold text-transparent bg-clip-text bg-gradient-to-r from-accent-emerald to-teal-400 drop-shadow-[0_0_8px_rgba(16,185,129,0.5)] tabular-nums leading-none">
-                    {(insights.lifePatterns.viewingHabits.consistency * 100).toFixed(0)}%
+                    {((insights.lifePatterns?.viewingHabits?.consistency || 0) * 100).toFixed(0)}%
                   </span>
                 </div>
                 <div className="h-3.5 bg-black/40 rounded-full border border-white/5 relative overflow-visible">
                   <div className="absolute inset-0 rounded-full shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)] pointer-events-none" />
                   <motion.div 
                     initial={{ width: 0, opacity: 0 }}
-                    animate={{ width: `${insights.lifePatterns.viewingHabits.consistency * 100}%`, opacity: 1 }}
+                    animate={{ width: `${(insights.lifePatterns?.viewingHabits?.consistency || 0) * 100}%`, opacity: 1 }}
                     transition={{ duration: 1.2, delay: 0.35, type: "spring", bounce: 0.4 }}
                     className="h-full rounded-full bg-gradient-to-r from-accent-emerald to-teal-400 shadow-[0_0_20px_rgba(16,185,129,0.6)] relative"
                   >
@@ -612,49 +549,28 @@ export default function SmritiEnginePage() {
           </div>
         </div>
 
-        {/* Life Phase Correlation */}
+        {/* Social Patterns */}
         <div className="glass-card shadow-glass p-6 rounded-card">
-          <h3 className="heading-3 text-primary mb-section">Life Phase Insights</h3>
+          <h3 className="heading-3 text-primary mb-section">Social Trends</h3>
           <div className="space-y-4">
-            {Object.entries(insights.lifePatterns.lifePhaseCorrelation).map(([phase, data], index) => {
-              const colorMap = {
-                'college-era': 'from-cyan-500 to-blue-500 shadow-[0_0_15px_rgba(6,182,212,0.3)]',
-                'early-career': 'from-purple-500 to-pink-500 shadow-[0_0_15px_rgba(168,85,247,0.3)]',
-                'growth-phase': 'from-emerald-500 to-teal-500 shadow-[0_0_15px_rgba(16,185,129,0.3)]'
-              };
-              const bgGradient = colorMap[phase as keyof typeof colorMap] || 'from-gray-500 to-slate-500';
-              return (
-              <motion.div 
+             <motion.div 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-                key={phase} 
                 className="relative overflow-hidden p-5 bg-black/40 border border-white/5 rounded-2xl group transition-all duration-500 hover:scale-[1.02] hover:border-white/20"
               >
-                <div className={`absolute inset-0 bg-gradient-to-r ${bgGradient} opacity-0 group-hover:opacity-10 transition-opacity duration-500`} />
-                <h4 className="font-bold text-white capitalize mb-4 text-lg">{phase.replace('-', ' ')}</h4>
-                <div className="grid grid-cols-3 gap-normal text-small relative z-10">
+                <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <h4 className="font-bold text-white capitalize mb-4 text-lg">Social vs Solo</h4>
+                <div className="grid grid-cols-2 gap-normal text-small relative z-10">
                   <div>
-                    <span className="text-secondary text-xs uppercase tracking-wider font-bold block mb-1">Stories</span>
-                    <div className="text-xl font-bold text-white drop-shadow-md">{data.stories}</div>
+                    <span className="text-secondary text-xs uppercase tracking-wider font-bold block mb-1">Solo</span>
+                    <div className="text-xl font-bold text-white drop-shadow-md">{((insights.lifePatterns?.socialVsSolo || 0) * 100).toFixed(0)}%</div>
                   </div>
                   <div>
-                    <span className="text-secondary text-xs uppercase tracking-wider font-bold block mb-1">Avg Rating</span>
-                    <div className="text-xl font-bold text-white drop-shadow-md">{data.avgRating}</div>
-                  </div>
-                  <div>
-                    <span className="text-secondary text-xs uppercase tracking-wider font-bold block mb-2">Mood</span>
-                    <div className={`px-3 py-1 rounded-full text-xs font-bold inline-block shadow-lg capitalize ${
-                      data.dominantMood === 'inspired' ? 'bg-purple-500/20 text-purple-300 border border-purple-500/50' :
-                      data.dominantMood === 'emotional' ? 'bg-pink-500/20 text-pink-300 border border-pink-500/50' :
-                      data.dominantMood === 'thoughtful' ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/50' : 'bg-gray-500/20 text-gray-300 border border-gray-500/50'
-                    }`}>
-                      {data.dominantMood}
-                    </div>
+                    <span className="text-secondary text-xs uppercase tracking-wider font-bold block mb-1">Social</span>
+                    <div className="text-xl font-bold text-white drop-shadow-md">{((1 - (insights.lifePatterns?.socialVsSolo || 0)) * 100).toFixed(0)}%</div>
                   </div>
                 </div>
               </motion.div>
-            )})}
           </div>
         </div>
       </div>
@@ -669,14 +585,14 @@ export default function SmritiEnginePage() {
           <h3 className="heading-3 text-primary mb-section">Life Lessons Discovered</h3>
           <div className="space-y-4">
             <div className="flex items-center justify-between group">
-              <span className="text-small font-bold text-secondary group-hover:text-white transition-colors duration-300">Total Lessons</span>
+              <span className="text-small font-bold text-secondary group-hover:text-white transition-colors duration-300">Philosophy Score</span>
               <span className="text-h3 font-bold text-transparent bg-clip-text bg-gradient-to-r from-accent-emerald to-teal-400 drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]">
-                {insights.wisdomExtraction.totalLessons}
+                {insights.wisdomExtraction?.philosophyScore || 0}/100
               </span>
             </div>
             
             <div className="space-y-4 mt-6">
-              {insights.wisdomExtraction.topLessons.map((lesson, index) => (
+              {insights.wisdomExtraction?.topLessons?.map((lesson, index) => (
                 <motion.div 
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -703,47 +619,14 @@ export default function SmritiEnginePage() {
           </div>
         </div>
 
-        {/* Personal Principles */}
+        {/* Recurring Themes */}
         <div className="glass-card shadow-glass p-6 rounded-card">
-          <h3 className="heading-3 text-primary mb-section">Your Personal Principles</h3>
-          <div className="space-y-6">
-            {insights.wisdomExtraction.personalPrinciples.map((principle, index) => (
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-                key={index} 
-                className="group p-5 bg-black/40 border border-white/5 rounded-2xl transition-all duration-300 hover:bg-black/60 hover:border-purple-500/20"
-              >
-                <div className="space-y-4">
-                  <h4 className="font-bold text-white text-base group-hover:text-purple-300 transition-colors">{principle.principle}</h4>
-                  
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-end">
-                      <span className="text-xs font-bold text-text-secondary uppercase tracking-wider">Strength</span>
-                      <span className="text-sm font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 drop-shadow-[0_0_8px_rgba(168,85,247,0.5)] tabular-nums">
-                        {(principle.strength * 100).toFixed(0)}%
-                      </span>
-                    </div>
-                    <div className="h-2.5 bg-black/60 rounded-full border border-white/5 relative overflow-visible">
-                      <div className="absolute inset-0 rounded-full shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)] pointer-events-none" />
-                      <motion.div 
-                        initial={{ width: 0, opacity: 0 }}
-                        animate={{ width: `${principle.strength * 100}%`, opacity: 1 }}
-                        transition={{ duration: 1.2, delay: index * 0.1 + 0.2, type: "spring", bounce: 0.4 }}
-                        className="h-full rounded-full bg-gradient-to-r from-purple-500 to-pink-500 shadow-[0_0_15px_rgba(168,85,247,0.5)] relative"
-                      >
-                        <div className="absolute right-0 top-0 bottom-0 w-2.5 rounded-full bg-pink-300 blur-[2px] opacity-80" />
-                        <div className="absolute right-0 top-0 bottom-0 w-1 bg-white rounded-full opacity-90 shadow-[0_0_5px_white]" />
-                      </motion.div>
-                    </div>
-                  </div>
-                  
-                  <p className="text-xs font-medium text-secondary pt-2 border-t border-white/5">
-                    Source: <span className="text-white/80">{principle.source}</span>
-                  </p>
-                </div>
-              </motion.div>
+          <h3 className="heading-3 text-primary mb-section">Recurring Themes</h3>
+          <div className="flex flex-wrap gap-3 mt-4">
+            {insights.wisdomExtraction?.recurringThemes?.map((theme, index) => (
+              <span key={index} className="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-sm text-text-secondary capitalize group-hover:text-white transition-colors">
+                {theme}
+              </span>
             ))}
           </div>
         </div>

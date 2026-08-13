@@ -1,5 +1,5 @@
 import { MomentRepository } from './index';
-import type { StoryMoment } from '@/types/models';
+import type { Moment, UUID } from '@/types/models';
 
 export class SyncingMomentRepository implements MomentRepository {
   constructor(
@@ -13,21 +13,57 @@ export class SyncingMomentRepository implements MomentRepository {
 
   // --- READS (Always Local) ---
 
-  async findAll(): Promise<StoryMoment[]> {
+  async findAll(): Promise<Moment[]> {
     return this.localRepo.findAll();
   }
 
-  async findByStoryId(storyId: string): Promise<StoryMoment[]> {
-    return this.localRepo.findByStoryId(storyId);
+  async findByStory(storyId: string): Promise<Moment[]> {
+    return this.localRepo.findByStory(storyId);
   }
 
-  async findById(id: string): Promise<StoryMoment | null> {
+  async findById(id: string): Promise<Moment | undefined> {
     return this.localRepo.findById(id);
+  }
+
+  async findByMood(mood: string): Promise<Moment[]> {
+    return this.localRepo.findByMood(mood);
+  }
+
+  async findByDateRange(startDate: string, endDate: string): Promise<Moment[]> {
+    return this.localRepo.findByDateRange(startDate, endDate);
+  }
+
+  async findPrivate(): Promise<Moment[]> {
+    return this.localRepo.findPrivate();
+  }
+
+  async findPublic(): Promise<Moment[]> {
+    return this.localRepo.findPublic();
+  }
+
+  async search(query: string): Promise<Moment[]> {
+    return this.localRepo.search(query);
+  }
+
+  async getTotalCount(): Promise<number> {
+    return this.localRepo.getTotalCount();
+  }
+
+  async getMoodDistribution(): Promise<Array<{ mood: string; count: number }>> {
+    return this.localRepo.getMoodDistribution();
+  }
+
+  async getRecentMoments(limit?: number): Promise<Moment[]> {
+    return this.localRepo.getRecentMoments(limit);
+  }
+
+  async getOnThisDay(month: number, day: number): Promise<Moment[]> {
+    return this.localRepo.getOnThisDay(month, day);
   }
 
   // --- WRITES (Local First, then Cloud) ---
 
-  async create(momentData: Omit<StoryMoment, 'id' | 'createdAt' | 'updatedAt'>): Promise<StoryMoment> {
+  async create(momentData: Omit<Moment, 'id'>): Promise<Moment> {
     const moment = await this.localRepo.create(momentData);
     if (this.cloudRepo) {
       if (navigator.onLine) {
@@ -60,7 +96,7 @@ export class SyncingMomentRepository implements MomentRepository {
     return moment;
   }
 
-  async update(id: string, updates: Partial<StoryMoment>): Promise<StoryMoment> {
+  async update(id: string, updates: Partial<Moment>): Promise<Moment> {
     const updated = await this.localRepo.update(id, updates);
     if (this.cloudRepo) {
       if (navigator.onLine) {
@@ -125,19 +161,10 @@ export class SyncingMomentRepository implements MomentRepository {
     }
   }
 
-  async deleteByStoryId(storyId: string): Promise<void> {
-    await this.localRepo.deleteByStoryId(storyId);
+  async bulkUpsert(moments: Moment[]): Promise<void> {
+    await this.localRepo.bulkUpsert(moments);
     if (this.cloudRepo && navigator.onLine) {
-      this.cloudRepo.deleteByStoryId(storyId).catch(err => {
-        console.error('Background sync deleteByStoryId failed:', err);
-      });
-    }
-  }
-
-  async importBatch(moments: StoryMoment[]): Promise<void> {
-    await this.localRepo.importBatch(moments);
-    if (this.cloudRepo && navigator.onLine) {
-      this.cloudRepo.importBatch(moments).catch(err => {
+      this.cloudRepo.bulkUpsert(moments).catch(err => {
         console.error('Background sync batch import failed:', err);
       });
     }
