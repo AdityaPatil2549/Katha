@@ -407,7 +407,6 @@ export default function SettingsVaultPage() {
                       </div>
                     </div>
 
-                    </div>
                   </div>
                 )}
 
