@@ -109,14 +109,15 @@
     }
     /* Scrollbar */
      ::-webkit-scrollbar {
-        width: 8px;
+        width: 6px;
+        height: 6px;
     }
      ::-webkit-scrollbar-track {
         background: theme('colors.midnight.surface');
     }
      ::-webkit-scrollbar-thumb {
         background: theme('colors.midnight.border');
-        border-radius: 4px;
+        border-radius: 999px;
     }
      ::-webkit-scrollbar-thumb:hover {
         background: theme('colors.text.muted');
@@ -169,11 +170,11 @@
 }
 
 .heading-1 {
-    @apply font-serif text-h1 font-semibold tracking-tight;
+    @apply font-serif text-h1 font-semibold tracking-tighter;
 }
 
 .heading-2 {
-    @apply font-sans text-h2 font-semibold;
+    @apply font-sans text-h2 font-semibold tracking-tight;
 }
 
 .heading-3 {
@@ -383,8 +384,8 @@
     }
     
     .glass-card {
-        @apply backdrop-blur-2xl bg-midnight-surface/40 border border-white/10 shadow-card rounded-card;
-        backdrop-filter: blur(40px) saturate(180%);
+        @apply backdrop-blur-2xl bg-midnight-surface/30 border border-white/5 shadow-card rounded-card;
+        backdrop-filter: blur(24px) saturate(180%);
     }
 
     /* Premium Accessible Focus States */

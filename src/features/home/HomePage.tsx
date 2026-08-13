@@ -60,8 +60,8 @@ export function HomePage() {
               <TextEffect
                 preset="blur"
                 per="word"
-                className="font-serif text-6xl md:text-8xl lg:text-9xl font-bold text-gradient-cinematic leading-none mb-6 drop-shadow-[0_0_30px_rgba(0,242,254,0.3)]"
-                delay={0.1}
+                className="font-serif text-6xl md:text-8xl lg:text-9xl font-bold text-gradient-cinematic leading-none mb-6 drop-shadow-[0_0_40px_rgba(0,242,254,0.4)] tracking-tighter"
+                delay={0.3}
               >
                 {featuredStory.title}
               </TextEffect>
@@ -75,7 +75,7 @@ export function HomePage() {
                 {featuredStory.notes?.split('\n')[1] || `A fantastic ${featuredStory.category} tracking your cinematic journey.`}
               </TextEffect>
               
-              <FadeIn delay={0.3} className="flex items-center gap-6">
+              <FadeIn delay={0.9} className="flex items-center gap-6">
                 <Magnetic>
                   <button 
                     className="bg-high-contrast text-text-high-contrast hover:bg-gray-200 px-8 py-4 rounded-xl font-bold tracking-wide transition-transform hover:scale-105 active:scale-95 flex items-center gap-3 text-lg"
@@ -101,20 +101,20 @@ export function HomePage() {
               <TextEffect
                 preset="blur"
                 per="word"
-                className="font-serif text-6xl md:text-8xl lg:text-9xl font-bold text-gradient-cinematic leading-none mb-6 drop-shadow-[0_0_30px_rgba(0,242,254,0.3)]"
-                delay={0.1}
+                className="font-serif text-6xl md:text-8xl lg:text-9xl font-bold text-gradient-cinematic leading-none mb-6 drop-shadow-[0_0_40px_rgba(0,242,254,0.4)] tracking-tighter"
+                delay={0.3}
               >
                 {`Welcome, ${userName}`}
               </TextEffect>
               <TextEffect
                 preset="fade-in-blur"
                 per="line"
-                className="font-sans text-lg md:text-xl text-text-muted max-w-2xl mb-10 leading-relaxed font-light"
-                delay={0.2}
+                className="font-sans text-lg md:text-xl text-text-muted max-w-2xl mb-10 leading-relaxed font-light tracking-wide"
+                delay={0.6}
               >
                 Your cinematic journey begins here. Start tracking your favorite movies, series, and books.
               </TextEffect>
-              <FadeIn delay={0.2}>
+              <FadeIn delay={0.9}>
                 <Magnetic>
                   <button 
                     className="bg-high-contrast text-text-high-contrast hover:bg-gray-200 px-8 py-4 rounded-xl font-bold tracking-wide transition-transform hover:scale-105 active:scale-95 flex items-center gap-3 text-lg"
@@ -156,8 +156,8 @@ export function HomePage() {
                   whileInView={{ rotateY: 0, opacity: 1, scale: 1 }}
                   viewport={{ once: true, margin: "-50px" }}
                   transition={{ duration: 0.8, delay: index * 0.1, ease: [0.25, 0.46, 0.45, 0.94] }}
-                  whileHover={{ scale: 1.05, rotateY: -5, zIndex: 40 }}
-                  className="flex-none w-[280px] aspect-[16/9] bg-midnight-surface rounded-xl overflow-hidden cursor-pointer group snap-start relative border border-midnight-border/50 shadow-card transition-all duration-500 hover:border-accent-cyan/50 hover:shadow-glow-cyan z-10 [transform-style:preserve-3d]"
+                  whileHover={{ scale: 1.05, rotateY: -2, zIndex: 40, transition: { type: 'spring', stiffness: 300, damping: 20 } }}
+                  className="flex-none w-[280px] aspect-[16/9] bg-midnight-surface rounded-xl overflow-hidden cursor-pointer group snap-start relative shadow-card transition-all duration-300 hover:shadow-glow-cyan z-10 [transform-style:preserve-3d]"
                   onClick={() => navigate(`/story/${item.id}`)}
                 >
                   <div className="absolute inset-0 bg-gradient-to-t from-midnight-bg via-midnight-bg/40 to-transparent z-10 opacity-90 group-hover:opacity-100 transition-opacity duration-700 [transform:translateZ(10px)]" />

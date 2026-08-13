@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import { Dropdown } from '@/components/ui/Dropdown';
 import { 
   Heart, 
@@ -74,6 +74,9 @@ export default function StoryPage() {
   const [editingMoment, setEditingMoment] = useState<Moment | null>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'moments' | 'sessions' | 'knowledge'>('overview');
   const [copied, setCopied] = useState(false);
+  const { scrollY } = useScroll();
+  const posterY = useTransform(scrollY, [0, 500], [0, 100]);
+  const posterOpacity = useTransform(scrollY, [0, 300], [1, 0.4]);
 
   const [newMoment, setNewMoment] = useState<Partial<Moment>>({
     context: '',
@@ -279,8 +282,8 @@ export default function StoryPage() {
       {/* Hero Section */}
       <motion.div variants={staggerItemVariants} className="flex flex-col lg:flex-row items-center lg:items-start gap-12 lg:gap-20 border-b border-midnight-border/20 pb-20">
         {/* Poster */}
-        <div className="w-64 sm:w-80 shrink-0">
-          <div className="aspect-[2/3] rounded-[2.5rem] overflow-hidden bg-midnight-surface/20 border border-midnight-border/20 shadow-2xl relative group">
+        <motion.div style={{ y: posterY, opacity: posterOpacity }} className="w-64 sm:w-80 shrink-0">
+          <div className="aspect-[2/3] rounded-[2.5rem] overflow-hidden bg-midnight-surface/20 border border-midnight-border/20 shadow-glow-cyan relative group">
             {story.posterUrl ? (
               <img src={story.posterUrl} alt={story.title} className="w-full h-full object-cover transition-transform duration-[1.5s] ease-[cubic-bezier(0.25,0.46,0.45,0.94)] group-hover:scale-105" />
             ) : (
@@ -301,7 +304,7 @@ export default function StoryPage() {
                 </button>
             </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Story Info */}
         <div className="flex-1 space-y-10 min-w-0 text-center lg:text-left pt-4">
