@@ -641,7 +641,7 @@ export default function AddStoryPage() {
                     <label className="block text-sm font-semibold text-secondary mb-3">
                       Platform <span className="text-accent-rose">*</span>
                     </label>
-                    <div className="relative z-[45]">
+                    <div className="relative z-50">
                       <Dropdown
                         value={showPlatformOther ? 'Other' : formData.platform}
                         onChange={handlePlatformChange}
@@ -922,7 +922,7 @@ export default function AddStoryPage() {
                         ))}
                       </AnimatePresence>
                     </div>
-                    <div className="flex gap-3 relative z-[40]">
+                    <div className="flex gap-3 relative z-50">
                       <Dropdown
                         value={customGenre}
                         onChange={setCustomGenre}
@@ -1052,7 +1052,7 @@ export default function AddStoryPage() {
                   </div>
 
                   {/* Life Phase */}
-                  <div className="relative z-30">
+                  <div className="relative z-50">
                     <label className="block text-sm font-semibold text-secondary mb-3">
                       Associated Life Phase
                     </label>
@@ -1087,7 +1087,7 @@ export default function AddStoryPage() {
         </form>
 
         {/* Wizard Navigation */}
-        <div className="mt-8 mb-20 md:mb-12 relative z-50">
+        <div className="mt-8 mb-20 md:mb-12 relative z-20">
           <div className="glass-card p-4 rounded-2xl flex items-center justify-between border-t border-white/5">
             <button
               type="button"
