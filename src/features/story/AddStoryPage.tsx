@@ -371,12 +371,12 @@ export default function AddStoryPage() {
         </div>
 
         <StaggerContainer>
-        <form className="space-y-page" onSubmit={(e) => { e.preventDefault(); handleSubmit('save'); }}>
+        <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); handleSubmit('save'); }}>
           
           {/* SECTION 1: STORY BASICS */}
           <div className="relative z-50">
           <FadeIn>
-          <section className="glass-card p-8 md:p-12 space-y-section">
+          <section className="glass-card p-6 md:p-8 space-y-section">
             <h2 className="heading-2 text-primary flex items-center justify-between">
               Story Basics
               {isSearchingApi && <span className="text-small text-accent-cyan animate-pulse">Fetching details...</span>}
@@ -566,7 +566,7 @@ export default function AddStoryPage() {
           {/* SECTION 2: STATUS & INTENT */}
           <div className="relative z-40">
           <FadeIn>
-          <section className="glass-card p-8 md:p-12 space-y-section">
+          <section className="glass-card p-6 md:p-8 space-y-section">
             <h2 className="heading-2 text-primary">Status & Intent</h2>
             
             {/* Status */}
@@ -732,7 +732,7 @@ export default function AddStoryPage() {
           {/* SECTION 3: VISUAL IDENTITY */}
           <div className="relative z-30">
           <FadeIn>
-          <section className="glass-card p-8 md:p-12 space-y-section">
+          <section className="glass-card p-6 md:p-8 space-y-section">
             <h2 className="heading-2 text-primary">Visual Identity</h2>
             
             <div>
@@ -792,7 +792,7 @@ export default function AddStoryPage() {
           {/* SECTION 4: GENRE & TAGS */}
           <div className="relative z-20">
           <FadeIn>
-          <section className="glass-card p-8 md:p-12 space-y-section">
+          <section className="glass-card p-6 md:p-8 space-y-section">
             <h2 className="heading-2 text-primary">Genre & Tags</h2>
             
             {/* Genre */}
@@ -891,7 +891,7 @@ export default function AddStoryPage() {
           {/* SECTION 5: REFLECTION */}
           <div className="relative z-10">
           <FadeIn>
-          <section className="glass-card p-8 md:p-12 space-y-section">
+          <section className="glass-card p-6 md:p-8 space-y-section">
             <h2 className="heading-2 text-primary">Reflection</h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-normal">
