@@ -559,15 +559,9 @@ export default function AddStoryPage() {
                 />
               )}
             </div>
-          </section>
-          </FadeIn>
-          </div>
-
-          {/* SECTION 2: STATUS & INTENT */}
-          <div className="relative z-40">
-          <FadeIn>
-          <section className="glass-card p-6 md:p-8 space-y-section">
-            <h2 className="heading-2 text-primary">Status & Intent</h2>
+            <div className="pt-2 mt-4 border-t border-midnight-border/30">
+              <h2 className="heading-2 text-primary">Status & Intent</h2>
+            </div>
             
             {/* Status */}
             <div>
