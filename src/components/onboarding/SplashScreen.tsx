@@ -190,112 +190,110 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
 
   return (
     <motion.div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-[#04050C]"
+      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overflow-x-hidden bg-[#04050C]"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
       exit="exit"
     >
-      {/* Dynamic Background matching step color */}
+      {/* Dynamic Background matching step color with deep cinematic feel */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none transition-colors duration-1000">
         <motion.div
           key={`bg-${onboardingStep}`}
           initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 0.15, scale: 1 }}
+          animate={{ opacity: 0.2, scale: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 1.5 }}
-          className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full blur-[120px] bg-gradient-to-br ${screen.color}`}
+          className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full blur-[120px] bg-gradient-to-br ${screen.color}`}
         />
+        <div className="absolute inset-0 bg-black/40 mix-blend-overlay" />
       </div>
 
-      <div className="relative z-10 w-full max-w-lg px-6 flex flex-col items-center">
+      <div className="relative z-10 w-full min-h-screen py-10 max-w-lg px-6 flex flex-col items-center justify-center text-center">
         
-        {/* Glassmorphic Card Container */}
-        <div 
-          className="w-full p-8 md:p-12 rounded-[2.5rem] relative overflow-hidden"
-          style={{
-            background: 'rgba(255,255,255,0.02)',
-            boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.05), 0 20px 40px rgba(0,0,0,0.4)',
-            backdropFilter: 'blur(24px)'
-          }}
-        >
-          <AnimatePresence initial={false} custom={direction} mode="wait">
+        <AnimatePresence initial={false} custom={direction} mode="wait">
+          <motion.div
+            key={onboardingStep}
+            custom={direction}
+            variants={slideVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            className="flex flex-col items-center w-full"
+          >
+            {/* Glowing 3D Orb Icon */}
             <motion.div
-              key={onboardingStep}
-              custom={direction}
-              variants={slideVariants}
-              initial="enter"
-              animate="center"
-              exit="exit"
-              className="flex flex-col items-center text-center"
+              animate={{ y: [-8, 8, -8] }}
+              transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+              className="relative w-40 h-40 flex items-center justify-center mb-10 md:mb-12"
             >
-              {/* Icon floating */}
-              <motion.div
-                animate={{ y: [-5, 5, -5] }}
-                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                className={`w-24 h-24 rounded-3xl mb-8 flex items-center justify-center bg-gradient-to-br ${screen.color} shadow-2xl relative`}
-              >
-                <div className="absolute inset-0 bg-white/20 rounded-3xl mix-blend-overlay" />
+              <div className={`absolute inset-0 bg-gradient-to-br ${screen.color} rounded-full blur-3xl opacity-40 animate-pulse mix-blend-screen`} />
+              <div className="absolute inset-4 rounded-full border border-white/20 bg-white/5 backdrop-blur-2xl shadow-[inset_0_0_30px_rgba(255,255,255,0.2)]" />
+              <div className="relative z-10 scale-150 drop-shadow-[0_0_15px_rgba(255,255,255,0.8)]">
                 {screen.icon}
-              </motion.div>
+              </div>
+            </motion.div>
 
-              <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-white/60 mb-2 drop-shadow-md">
-                {screen.subtitle}
-              </h2>
-              <h3 className="text-3xl font-black text-white mb-4 tracking-tight drop-shadow-lg">
-                {screen.title}
-              </h3>
-              <p className="text-white/80 text-sm md:text-base leading-relaxed max-w-[300px] mx-auto font-medium">
+            {/* Typography matching Splash Screen */}
+            <div className="space-y-3 md:space-y-4 mb-10 md:mb-16">
+              <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-white mb-2">{screen.title}</h1>
+              <p className="text-[10px] md:text-xs uppercase tracking-[0.4em] text-white/50 font-semibold mb-4 md:mb-6">{screen.subtitle}</p>
+              <p className="text-base md:text-lg text-white/50 max-w-sm mx-auto font-light leading-relaxed">
                 {screen.description}
               </p>
-            </motion.div>
-          </AnimatePresence>
-
-          {/* Navigation & Progress */}
-          <div className="mt-12 flex flex-col items-center gap-8">
-            
-            {/* Dots */}
-            <div className="flex justify-center gap-2">
-              {onboardingScreens.map((_, idx) => (
-                <div
-                  key={idx}
-                  className={`h-1.5 rounded-full transition-all duration-500 ${
-                    idx === onboardingStep
-                      ? `w-8 bg-gradient-to-r ${screen.color}`
-                      : 'w-2 bg-white/10'
-                  }`}
-                />
-              ))}
             </div>
+          </motion.div>
+        </AnimatePresence>
 
-            {/* Buttons */}
-            <div className="flex w-full gap-3 mt-4">
-              {onboardingStep > 0 && (
-                <button
-                  onClick={() => paginate(-1)}
-                  className="flex-1 h-12 rounded-xl text-sm font-bold transition-all duration-300 border border-white/10 bg-white/5 hover:bg-white/10 text-white/70 hover:text-white shadow-sm flex items-center justify-center"
-                >
-                  Back
-                </button>
-              )}
-              
-              <button
-                onClick={() => paginate(1)}
-                className={`${onboardingStep === 0 ? 'w-full' : 'flex-1'} h-12 rounded-xl text-sm font-bold text-white flex items-center justify-center gap-2 bg-gradient-to-r ${screen.color} shadow-[0_0_20px_rgba(255,255,255,0.1)] transition-transform hover:scale-105 hover:shadow-[0_0_30px_rgba(255,255,255,0.2)]`}
-              >
+        {/* Navigation & Progress */}
+        <div className="w-full flex flex-col items-center gap-8">
+          
+          {/* Dots */}
+          <div className="flex justify-center gap-2">
+            {onboardingScreens.map((_, idx) => (
+              <div
+                key={idx}
+                className={`h-1.5 rounded-full transition-all duration-500 ${
+                  idx === onboardingStep
+                    ? `w-8 bg-gradient-to-r ${screen.color}`
+                    : 'w-2 bg-white/20'
+                }`}
+              />
+            ))}
+          </div>
+
+          {/* Action Buttons */}
+          <div className="w-full max-w-[280px] flex flex-col gap-4 items-center">
+            <button
+              onClick={() => paginate(1)}
+              className="relative group w-full h-14 rounded-2xl flex items-center justify-center gap-3 overflow-hidden transition-all duration-300"
+            >
+              <div className="absolute inset-0 bg-white text-black flex items-center justify-center gap-2 font-bold text-sm transition-transform duration-300 group-hover:scale-105">
                 {onboardingStep === onboardingScreens.length - 1 ? (
                   <>
-                    <Sparkles className="w-4 h-4" /> Finish
+                    Finish
+                    <Sparkles className="w-4 h-4" />
                   </>
                 ) : (
                   <>
-                    Next <ArrowRight className="w-4 h-4" />
+                    Next
+                    <ArrowRight className="w-4 h-4" />
                   </>
                 )}
-              </button>
-            </div>
+              </div>
+              <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-r ${screen.color} mix-blend-overlay`} />
+            </button>
             
+            <button
+              onClick={() => paginate(-1)}
+              className={`text-xs text-white/30 hover:text-white/70 transition-colors uppercase tracking-widest font-medium h-8 ${
+                onboardingStep === 0 ? 'opacity-0 pointer-events-none' : 'opacity-100'
+              }`}
+            >
+              Back
+            </button>
           </div>
+          
         </div>
       </div>
     </motion.div>
