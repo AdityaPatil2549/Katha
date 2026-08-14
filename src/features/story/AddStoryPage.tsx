@@ -466,7 +466,7 @@ export default function AddStoryPage() {
         </div>
 
         {/* Wizard Form Area */}
-        <form className="relative min-h-[500px]" onSubmit={(e) => { e.preventDefault(); }}>
+        <form className="relative w-full" onSubmit={(e) => { e.preventDefault(); }}>
           <AnimatePresence mode="wait" custom={slideDirection} initial={false}>
             
             {/* STEP 1: ESSENTIALS */}
@@ -479,7 +479,7 @@ export default function AddStoryPage() {
                 animate="center"
                 exit="exit"
                 transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                className="absolute top-0 left-0 w-full"
+                className="w-full"
               >
                 <section className="glass-card p-6 md:p-8 space-y-section">
                   <h2 className="heading-2 text-primary flex items-center justify-between">
@@ -680,7 +680,7 @@ export default function AddStoryPage() {
                 animate="center"
                 exit="exit"
                 transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                className="absolute top-0 left-0 w-full"
+                className="w-full"
               >
                 <section className="glass-card p-6 md:p-8 space-y-section">
                   <h2 className="heading-2 text-primary">Progress & Details</h2>
@@ -841,7 +841,7 @@ export default function AddStoryPage() {
                 animate="center"
                 exit="exit"
                 transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                className="absolute top-0 left-0 w-full"
+                className="w-full"
               >
                 <section className="glass-card p-6 md:p-8 space-y-section">
                   <h2 className="heading-2 text-primary">Visuals & Tags</h2>
@@ -1004,7 +1004,7 @@ export default function AddStoryPage() {
                 animate="center"
                 exit="exit"
                 transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                className="absolute top-0 left-0 w-full"
+                className="w-full"
               >
                 <section className="glass-card p-6 md:p-8 space-y-section">
                   <h2 className="heading-2 text-primary">Vibe & Reflection</h2>
