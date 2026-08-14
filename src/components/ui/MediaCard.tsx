@@ -45,7 +45,10 @@ export function MediaCard({ id, title, year, type, posterUrl, watchers, onClick 
             // Find clearart (logo)
             const cleararts = type === 'movie' ? fanartRes.hdmovieclearart : fanartRes.hdtvclearart;
             if (cleararts && cleararts.length > 0) {
-              setFanartLogo(cleararts[0].url);
+              const first = cleararts[0];
+              if (first && first.url) {
+                setFanartLogo(first.url);
+              }
             }
             
             // Find a nice background or poster replacement if we want

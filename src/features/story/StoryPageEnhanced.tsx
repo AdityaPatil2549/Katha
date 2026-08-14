@@ -73,8 +73,10 @@ export default function StoryPageEnhanced() {
       try {
         // 1. Get TMDB ID
         const searchRes = await tmdbService.search(story.title);
-        if (searchRes.length > 0) {
+        if (searchRes && searchRes.length > 0) {
           const match = searchRes[0];
+          if (!match) return;
+
           setTmdbId(match.id);
           
           const type = match.media_type === 'tv' ? 'tv' : 'movie';
@@ -91,7 +93,7 @@ export default function StoryPageEnhanced() {
           if (fanartData) setFanart(fanartData);
           if (ratingsData && ratingsData.ratings) setRatings(ratingsData.ratings);
           if (streamData) setStreaming(watchmodeService.processSources(streamData));
-          if (trailerData && trailerData.length > 0) setTrailer(trailerData[0]);
+          if (trailerData && trailerData.length > 0 && trailerData[0]) setTrailer(trailerData[0]);
         }
       } catch (err) {
         console.error("Failed to load rich data", err);
