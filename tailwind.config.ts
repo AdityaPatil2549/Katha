@@ -49,8 +49,8 @@ export default {
       
       // Typography System
       fontFamily: {
-        sans: ['Space Grotesk', 'system-ui', '-apple-system', 'sans-serif'],
-        serif: ['Syne', 'Playfair Display', 'serif'],
+        sans: ['Outfit', 'system-ui', '-apple-system', 'sans-serif'],
+        serif: ['Playfair Display', 'serif'],
       },
       
       fontSize: {

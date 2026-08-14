@@ -207,7 +207,7 @@ export function UserOnboarding() {
                   initial={{ opacity: 0, y: 10, filter: 'blur(4px)' }}
                   animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
                   exit={{ opacity: 0, y: -10, filter: 'blur(4px)' }}
-                  className="text-7xl font-black tabular-nums leading-none select-none relative"
+                  className="text-8xl font-black tabular-nums leading-none select-none relative tracking-tighter"
                 >
                   <span 
                     className="absolute inset-0 blur-md"
@@ -259,7 +259,7 @@ export function UserOnboarding() {
 
             {/* Top bar */}
             <div className="flex items-center justify-between px-10 pt-8 pb-2 relative z-10 flex-shrink-0">
-              <div className="text-white/30 text-xs font-semibold tracking-widest uppercase">Step {currentStep + 1} of {steps.length}</div>
+              <div className="text-white/40 text-[10px] font-bold tracking-[0.25em] uppercase">Step {currentStep + 1} of {steps.length}</div>
               <button
                 onClick={handleComplete}
                 className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/40 hover:text-white transition-all border border-white/5"
@@ -299,10 +299,10 @@ export function UserOnboarding() {
                 >
                   {/* Title */}
                   <div className="mb-8 flex-shrink-0">
-                    <h2 className="font-serif italic tracking-wide text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white to-white/70 mb-3 drop-shadow-md">
+                    <h2 className="font-sans tracking-tight text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white to-white/60 mb-3 drop-shadow-lg leading-tight">
                       {step.title}
                     </h2>
-                    <p className="text-white/50 text-sm font-medium">{step.subtitle}</p>
+                    <p className="text-white/60 text-base font-medium tracking-wide">{step.subtitle}</p>
                   </div>
 
                   {/* Step-specific content */}
@@ -481,14 +481,14 @@ function StepContent({
           >
             <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity" />
             <span
-              className="text-5xl font-black tabular-nums leading-none w-14 flex-shrink-0 opacity-80 group-hover:opacity-100 transition-opacity"
+              className="text-5xl font-black tabular-nums leading-none w-14 flex-shrink-0 opacity-80 group-hover:opacity-100 transition-opacity tracking-tighter"
               style={{ color: item.color, textShadow: `0 0 30px ${item.color}80` }}
             >
               {item.num}
             </span>
             <div className="relative z-10">
-              <h4 className="text-white font-bold text-base mb-1">{item.title}</h4>
-              <p className="text-white/40 text-sm font-medium">{item.desc}</p>
+              <h4 className="text-white/90 font-bold text-lg mb-1 tracking-tight">{item.title}</h4>
+              <p className="text-white/50 text-sm font-medium">{item.desc}</p>
             </div>
           </motion.div>
         ))}
@@ -526,10 +526,10 @@ function StepContent({
         </motion.div>
 
         <div>
-          <h3 className="text-3xl font-serif italic tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-white to-white/70 mb-3">
+          <h3 className="text-4xl font-sans tracking-tight font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white to-white/70 mb-4">
             {username ? `Welcome, ${username}!` : 'Welcome aboard!'}
           </h3>
-          <p className="text-white/50 text-base leading-relaxed max-w-sm mx-auto font-medium">
+          <p className="text-white/60 text-base leading-relaxed max-w-sm mx-auto font-medium">
             Your personal story universe is ready. Start adding your favorites and let Smriti do the rest.
           </p>
         </div>
@@ -590,7 +590,7 @@ function StepContent({
             {feature.icon}
           </div>
           <div className="relative z-10 flex-1 pt-1">
-            <h4 className="text-white font-bold text-base mb-1 tracking-wide">{feature.label}</h4>
+            <h4 className="text-white/90 font-bold text-lg mb-1 tracking-tight">{feature.label}</h4>
             <p className="text-white/50 text-sm leading-relaxed font-medium">{feature.desc}</p>
           </div>
         </motion.div>
