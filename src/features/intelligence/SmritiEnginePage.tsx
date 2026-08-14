@@ -8,6 +8,7 @@ import { StaggerContainer } from '@/components/ui/motion/StaggerContainer';
 import { TextEffect } from '@/components/ui/motion/TextEffect';
 import { Magnetic } from '@/components/ui/motion/Magnetic';
 import { Dropdown } from '@/components/ui/Dropdown';
+import { SmritiChat } from '@/components/ui/SmritiChat';
 import { 
   Brain, 
   Sparkles, 
@@ -880,6 +881,13 @@ export default function SmritiEnginePage() {
             </motion.div>
           )}
         </AnimatePresence>
+        </FadeIn>
+
+        {/* Smriti Chat Layer */}
+        <FadeIn>
+          <div className="mt-page">
+            <SmritiChat />
+          </div>
         </FadeIn>
 
         {/* Export Insights */}

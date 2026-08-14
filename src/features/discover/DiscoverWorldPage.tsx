@@ -30,6 +30,7 @@ import {
 } from 'lucide-react';
 import { useStoriesStore } from '@/store';
 import { traktService, TraktTrendingItem } from '../../services/TraktService';
+import { MediaCard } from '@/components/ui/MediaCard';
 
 
 const MOOD_ENGINE_RESPONSES = {
@@ -296,12 +297,14 @@ export default function DiscoverWorldPage() {
                       </h2>
                       <div className="flex gap-normal overflow-x-auto pb-4 snap-x snap-mandatory hide-scrollbar">
                         {trendingMovies.map((item, index) => (
-                          <motion.div
+                          <MediaCard
                             key={item.movie?.ids?.trakt || index}
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ delay: index * 0.05 }}
-                            className="min-w-[160px] max-w-[160px] snap-start shrink-0 cursor-pointer group"
+                            id={item.movie?.ids?.tmdb || item.movie?.ids?.imdb || ''}
+                            title={item.movie?.title || ''}
+                            year={item.movie?.year}
+                            type="movie"
+                            posterUrl={item.posterUrl}
+                            watchers={item.watchers}
                             onClick={() => {
                               useStoriesStore.getState().addStory({
                                 title: item.movie?.title || '',
@@ -321,22 +324,7 @@ export default function DiscoverWorldPage() {
                               });
                               alert(`Added ${item.movie?.title} to your library!`);
                             }}
-                          >
-                            <div className="h-[240px] bg-midnight-surface rounded-card overflow-hidden relative mb-2 shadow-lg group-hover:ring-2 ring-accent-cyan transition-all">
-                              {item.posterUrl ? (
-                                <img src={item.posterUrl} alt={item.movie?.title} className="w-full h-full object-cover" />
-                              ) : (
-                                <div className="absolute inset-0 flex items-center justify-center">
-                                  <Film className="w-8 h-8 text-muted" />
-                                </div>
-                              )}
-                              <div className="absolute top-2 right-2 bg-black/60 px-2 py-1 rounded text-xs font-bold text-accent-cyan backdrop-blur-sm">
-                                {item.watchers} watching
-                              </div>
-                            </div>
-                            <h4 className="text-primary font-medium truncate group-hover:text-accent-cyan transition-colors">{item.movie?.title}</h4>
-                            <p className="text-small text-secondary">{item.movie?.year}</p>
-                          </motion.div>
+                          />
                         ))}
                       </div>
                     </div>
@@ -348,12 +336,14 @@ export default function DiscoverWorldPage() {
                       </h2>
                       <div className="flex gap-normal overflow-x-auto pb-4 snap-x snap-mandatory hide-scrollbar">
                         {trendingShows.map((item, index) => (
-                          <motion.div
+                          <MediaCard
                             key={item.show?.ids?.trakt || index}
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ delay: index * 0.05 }}
-                            className="min-w-[160px] max-w-[160px] snap-start shrink-0 cursor-pointer group"
+                            id={item.show?.ids?.tmdb || item.show?.ids?.imdb || ''}
+                            title={item.show?.title || ''}
+                            year={item.show?.year}
+                            type="show"
+                            posterUrl={item.posterUrl}
+                            watchers={item.watchers}
                             onClick={() => {
                               useStoriesStore.getState().addStory({
                                 title: item.show?.title || '',
@@ -373,22 +363,7 @@ export default function DiscoverWorldPage() {
                               });
                               alert(`Added ${item.show?.title} to your library!`);
                             }}
-                          >
-                            <div className="h-[240px] bg-midnight-surface rounded-card overflow-hidden relative mb-2 shadow-lg group-hover:ring-2 ring-accent-cyan transition-all">
-                              {item.posterUrl ? (
-                                <img src={item.posterUrl} alt={item.show?.title} className="w-full h-full object-cover" />
-                              ) : (
-                                <div className="absolute inset-0 flex items-center justify-center">
-                                  <Film className="w-8 h-8 text-muted" />
-                                </div>
-                              )}
-                              <div className="absolute top-2 right-2 bg-black/60 px-2 py-1 rounded text-xs font-bold text-accent-cyan backdrop-blur-sm">
-                                {item.watchers} watching
-                              </div>
-                            </div>
-                            <h4 className="text-primary font-medium truncate group-hover:text-accent-cyan transition-colors">{item.show?.title}</h4>
-                            <p className="text-small text-secondary">{item.show?.year}</p>
-                          </motion.div>
+                          />
                         ))}
                       </div>
                     </div>

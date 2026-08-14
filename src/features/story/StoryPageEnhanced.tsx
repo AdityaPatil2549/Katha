@@ -26,6 +26,12 @@ import { useStoriesStore, useMomentsStore } from '@/store';
 import type { Story, Moment } from '@/types/models';
 import { DataEntryModal, EntryType } from '@/components/modals/DataEntryModal';
 
+import { tmdbService } from '@/services/TMDBService';
+import { fanartService, FanartResult } from '@/services/FanartService';
+import { mdblistService, MDBListRating } from '@/services/MDBListService';
+import { watchmodeService } from '@/services/WatchmodeService';
+import { youtubeService, YouTubeSearchResult } from '@/services/YouTubeService';
+
 export default function StoryPageEnhanced() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -40,6 +46,12 @@ export default function StoryPageEnhanced() {
   const [showDataModal, setShowDataModal] = useState(false);
   const [modalType, setModalType] = useState<EntryType>('session');
 
+  const [tmdbId, setTmdbId] = useState<number | null>(null);
+  const [fanart, setFanart] = useState<FanartResult | null>(null);
+  const [ratings, setRatings] = useState<MDBListRating[] | null>(null);
+  const [trailer, setTrailer] = useState<YouTubeSearchResult | null>(null);
+  const [streaming, setStreaming] = useState<{ primaryPlatform: string; allSourcesText: string } | null>(null);
+
   const handleSaveData = (data: any) => {
     console.log('Saved', modalType, data);
     alert(`${modalType} added successfully to this story!`);
@@ -52,6 +64,42 @@ export default function StoryPageEnhanced() {
       if (id) getMomentsByStory(id);
     }
   }, [id, stories, getMomentsByStory]);
+
+  // Rich Data Fetching
+  useEffect(() => {
+    if (!story) return;
+
+    const fetchRichData = async () => {
+      try {
+        // 1. Get TMDB ID
+        const searchRes = await tmdbService.search(story.title);
+        if (searchRes.length > 0) {
+          const match = searchRes[0];
+          setTmdbId(match.id);
+          
+          const type = match.media_type === 'tv' ? 'tv' : 'movie';
+          const fanartType = type === 'tv' ? 'tv' : 'movies';
+
+          // 2. Fetch everything concurrently
+          const [fanartData, ratingsData, streamData, trailerData] = await Promise.all([
+            fanartService.getImages(match.id, fanartType),
+            mdblistService.getRatings(match.id),
+            watchmodeService.getSourcesByTmdbId(match.id, type),
+            youtubeService.search(`${story.title} official trailer`)
+          ]);
+
+          if (fanartData) setFanart(fanartData);
+          if (ratingsData && ratingsData.ratings) setRatings(ratingsData.ratings);
+          if (streamData) setStreaming(watchmodeService.processSources(streamData));
+          if (trailerData && trailerData.length > 0) setTrailer(trailerData[0]);
+        }
+      } catch (err) {
+        console.error("Failed to load rich data", err);
+      }
+    };
+
+    fetchRichData();
+  }, [story?.id, story?.title]);
 
   if (loading || !story) {
     return (
@@ -70,11 +118,27 @@ export default function StoryPageEnhanced() {
         <motion.div layoutId={`story-card-${story.id}`} className="glass-card overflow-hidden relative shadow-[0_0_80px_rgba(138,43,226,0.15)]">
       {/* Hero Header */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-          {story.posterUrl && (
-            <div className="absolute inset-0 bg-cover bg-center opacity-30 blur-3xl mix-blend-overlay"
-                 style={{ backgroundImage: `url(${story.posterUrl})` }} />
+          {(fanart?.movieposter?.[0]?.url || fanart?.tvposter?.[0]?.url || story.posterUrl) && (
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.3 }}
+              transition={{ duration: 1.5 }}
+              className="absolute inset-0 bg-cover bg-center blur-3xl mix-blend-overlay"
+              style={{ backgroundImage: `url(${fanart?.movieposter?.[0]?.url || fanart?.tvposter?.[0]?.url || story.posterUrl})` }} 
+            />
           )}
-          <div className="absolute inset-0 bg-midnight-surface/20 backdrop-blur-3xl" />
+          <div className="absolute inset-0 bg-gradient-to-t from-midnight-bg via-midnight-surface/60 to-midnight-bg/40 backdrop-blur-md" />
+          
+          {/* Fanart HD Background Injection */}
+          {(fanart?.hdmovieclearart?.[0]?.url || fanart?.hdtvclearart?.[0]?.url) && (
+            <motion.div 
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 0.15, y: 0 }}
+              transition={{ duration: 2 }}
+              className="absolute top-10 right-10 w-2/3 h-1/2 bg-contain bg-no-repeat bg-right-top mix-blend-screen"
+              style={{ backgroundImage: `url(${fanart?.hdmovieclearart?.[0]?.url || fanart?.hdtvclearart?.[0]?.url})` }}
+            />
+          )}
         </div>
 
         <div className="relative z-10 px-6 py-12 md:px-12 md:py-16">
@@ -208,6 +272,82 @@ export default function StoryPageEnhanced() {
           <div className="p-section">
             {activeTab === 'overview' && (
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-section">
+                
+                {/* Where to Watch & Trailer Section */}
+                {(streaming?.primaryPlatform || trailer) && (
+                  <section className="grid grid-cols-1 lg:grid-cols-2 gap-normal mb-section">
+                    {/* Where to Watch */}
+                    {streaming?.primaryPlatform && (
+                      <div className="surface-interactive p-6 rounded-card hover:shadow-glow-cyan border border-white/5">
+                        <h3 className="text-small font-bold text-secondary uppercase tracking-wider mb-4 flex items-center gap-2">
+                          <Film className="w-4 h-4 text-accent-cyan" /> Where to Watch
+                        </h3>
+                        <div className="flex items-center gap-4 mb-4">
+                          <div className="px-4 py-2 rounded-lg bg-accent-cyan/10 border border-accent-cyan/30 text-accent-cyan font-bold shadow-[0_0_15px_rgba(0,242,254,0.2)]">
+                            {streaming.primaryPlatform}
+                          </div>
+                          <span className="text-small text-secondary">Primary Platform</span>
+                        </div>
+                        {streaming.allSourcesText && (
+                          <div className="text-sm text-secondary/80 whitespace-pre-wrap font-medium p-3 bg-black/40 rounded-lg">
+                            {streaming.allSourcesText.replace('[Where to Watch]\n', '')}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Official Trailer */}
+                    {trailer && (
+                      <div className="surface-interactive p-6 rounded-card hover:shadow-glow-rose border border-white/5 flex flex-col justify-between">
+                        <h3 className="text-small font-bold text-secondary uppercase tracking-wider mb-4 flex items-center gap-2">
+                          <Play className="w-4 h-4 text-accent-rose" /> Official Trailer
+                        </h3>
+                        <div className="relative aspect-video rounded-lg overflow-hidden bg-black mb-3 group cursor-pointer border border-white/10" 
+                             onClick={() => window.open(`https://youtube.com/watch?v=${trailer.id}`, '_blank')}>
+                          <img src={trailer.thumbnailUrl} alt="Trailer" className="w-full h-full object-cover opacity-60 group-hover:opacity-40 transition-opacity" />
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="w-12 h-12 rounded-full bg-accent-rose/20 backdrop-blur-sm border border-accent-rose/50 flex items-center justify-center group-hover:scale-110 transition-transform shadow-[0_0_20px_rgba(244,63,94,0.4)]">
+                              <Play className="w-6 h-6 text-white ml-1" />
+                            </div>
+                          </div>
+                        </div>
+                        <p className="text-xs text-text-muted truncate">{trailer.title}</p>
+                      </div>
+                    )}
+                  </section>
+                )}
+
+                {/* Deep Analytics (MDBList) */}
+                {ratings && ratings.length > 0 && (
+                  <section className="mb-section">
+                     <h3 className="text-small font-bold text-secondary uppercase tracking-wider mb-4 flex items-center gap-2">
+                        <BarChart3 className="w-4 h-4 text-accent-emerald" /> Critical Consensus
+                     </h3>
+                     <div className="flex flex-wrap gap-3">
+                       {ratings.map((r, i) => {
+                         const getColors = (src: string) => {
+                           switch(src.toLowerCase()) {
+                             case 'imdb': return 'from-[#f5c518]/20 to-[#f5c518]/5 border-[#f5c518]/40 text-[#f5c518]';
+                             case 'tomatoes': return 'from-[#fa320a]/20 to-[#fa320a]/5 border-[#fa320a]/40 text-[#fa320a]';
+                             case 'metacritic': return 'from-[#66cc33]/20 to-[#66cc33]/5 border-[#66cc33]/40 text-[#66cc33]';
+                             case 'letterboxd': return 'from-[#00e054]/20 to-[#00e054]/5 border-[#00e054]/40 text-[#00e054]';
+                             case 'trakt': return 'from-[#ed1c24]/20 to-[#ed1c24]/5 border-[#ed1c24]/40 text-[#ed1c24]';
+                             case 'tmdb': return 'from-[#01b4e4]/20 to-[#01b4e4]/5 border-[#01b4e4]/40 text-[#01b4e4]';
+                             default: return 'from-white/10 to-transparent border-white/20 text-white';
+                           }
+                         };
+                         const style = getColors(r.source);
+                         return (
+                           <div key={i} className={`flex items-center gap-3 px-4 py-2 rounded-xl bg-gradient-to-br ${style} border backdrop-blur-sm`}>
+                             <span className="font-bold uppercase tracking-wider text-xs opacity-80">{r.source === 'imdb' ? 'IMDB' : r.source}</span>
+                             <span className="text-lg font-bold">{r.value}{r.source === 'metacritic' || r.source === 'tomatoes' ? '%' : ''}</span>
+                           </div>
+                         );
+                       })}
+                     </div>
+                  </section>
+                )}
+
                 <section>
                   <h2 className="heading-2 text-primary mb-section flex items-center gap-tight">
                     <Heart className="w-5 h-5 text-accent-rose" />
@@ -219,6 +359,7 @@ export default function StoryPageEnhanced() {
                     }
                   </div>
                 </section>
+
 
                 <section>
                   <h3 className="heading-3 text-primary mb-section">Story Details</h3>

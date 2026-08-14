@@ -105,7 +105,7 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
   if (currentScreen === 'splash') {
     return (
       <motion.div
-        className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden bg-[#04050C]"
+        className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overflow-x-hidden bg-[#04050C]"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
@@ -125,12 +125,12 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
           />
         </div>
 
-        <div className="relative z-10 flex flex-col items-center justify-center w-full max-w-lg px-6 text-center">
+        <div className="relative z-10 flex flex-col items-center justify-center w-full min-h-screen py-10 max-w-lg px-6 text-center">
           
-          <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="flex flex-col items-center">
+          <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="flex flex-col items-center w-full">
             
             {/* Hero Illustration */}
-            <motion.div variants={fadeUp} className="relative mb-8 w-full max-w-sm aspect-square">
+            <motion.div variants={fadeUp} className="relative mb-6 md:mb-8 w-full max-w-[200px] md:max-w-xs aspect-square">
               <motion.div
                 animate={{ y: [-8, 8, -8] }}
                 transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
@@ -146,10 +146,10 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
             </motion.div>
 
             {/* Typography */}
-            <motion.div variants={fadeUp} className="space-y-4 mb-16">
-              <h1 className="text-6xl font-bold tracking-tight text-white mb-2">Katha</h1>
-              <p className="text-xs uppercase tracking-[0.4em] text-violet-400/80 font-semibold mb-6">Powered by Smriti</p>
-              <p className="text-lg text-white/50 max-w-sm mx-auto font-light leading-relaxed">
+            <motion.div variants={fadeUp} className="space-y-3 md:space-y-4 mb-10 md:mb-16">
+              <h1 className="text-5xl md:text-6xl font-bold tracking-tight text-white mb-2">Katha</h1>
+              <p className="text-[10px] md:text-xs uppercase tracking-[0.4em] text-violet-400/80 font-semibold mb-4 md:mb-6">Powered by Smriti</p>
+              <p className="text-base md:text-lg text-white/50 max-w-sm mx-auto font-light leading-relaxed">
                 Your personal universe of stories. <br/> Remembered forever.
               </p>
             </motion.div>
