@@ -14,7 +14,7 @@ export function checkRateLimit(req: Request, limit: number = 30, windowSeconds: 
   // Extract IP
   const forwardedFor = req.headers.get('x-forwarded-for');
   const realIp = req.headers.get('x-real-ip');
-  const ip = forwardedFor ? forwardedFor.split(',')[0].trim() : (realIp || 'anonymous-ip');
+  const ip = forwardedFor ? (forwardedFor.split(',')[0]?.trim() || 'anonymous-ip') : (realIp || 'anonymous-ip');
 
   const now = Date.now();
   const windowMs = windowSeconds * 1000;
