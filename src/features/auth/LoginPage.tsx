@@ -3,6 +3,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { motion } from 'framer-motion';
 import { Sparkles, Loader2 } from 'lucide-react';
+import { Tilt } from '@/components/ui/tilt';
+import { Spotlight } from '@/components/ui/spotlight';
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -55,7 +57,14 @@ export default function LoginPage() {
         transition={{ duration: 0.8, ease: "easeOut" }}
         className="relative z-10 w-full max-w-md px-6"
       >
-        <div className="bg-white/5 backdrop-blur-2xl border border-white/10 rounded-[2.5rem] p-10 md:p-12 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5),inset_0_0_20px_rgba(255,255,255,0.05)] flex flex-col items-center text-center">
+        <Tilt rotationFactor={8} isRevese>
+          <div className="relative overflow-hidden bg-white/5 backdrop-blur-[40px] border border-white/10 rounded-[2.5rem] p-10 md:p-12 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.8),inset_0_0_40px_rgba(255,255,255,0.02)] flex flex-col items-center text-center">
+            
+            {/* Interactive Spotlight inside the card */}
+            <Spotlight 
+              className="from-violet-500/20 via-cyan-500/10 to-transparent blur-2xl" 
+              size={300} 
+            />
           
           <motion.div 
             initial={{ scale: 0.5, opacity: 0 }}
@@ -109,7 +118,8 @@ export default function LoginPage() {
             )}
             <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-r from-violet-500/20 to-cyan-500/20 mix-blend-overlay" />
           </button>
-        </div>
+          </div>
+        </Tilt>
       </motion.div>
     </div>
   );
