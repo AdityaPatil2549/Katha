@@ -32,17 +32,18 @@ export default function LoginPage() {
       
       {/* Cinematic Background Layer */}
       <div className="absolute inset-0 z-0">
-        <div className="absolute inset-0 bg-gradient-to-br from-violet-900/20 via-cyan-900/10 to-[#04050C]" />
-        {/* Deep cinematic glowing orbs */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#04050C] via-[#0b041a] to-[#04050C]" />
+        
+        {/* Massive vibrant cinematic orbs */}
         <motion.div
-          animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
+          animate={{ scale: [1, 1.2, 1], opacity: [0.6, 0.9, 0.6] }}
           transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-1/4 -left-1/4 w-[800px] h-[800px] bg-violet-600/20 rounded-full blur-[120px] mix-blend-screen"
+          className="absolute -top-1/4 -left-1/4 w-[1000px] h-[1000px] bg-fuchsia-600/30 rounded-full blur-[140px] mix-blend-screen"
         />
         <motion.div
-          animate={{ scale: [1, 1.5, 1], opacity: [0.2, 0.4, 0.2] }}
+          animate={{ scale: [1, 1.4, 1], opacity: [0.5, 0.8, 0.5] }}
           transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-          className="absolute bottom-1/4 -right-1/4 w-[600px] h-[600px] bg-cyan-600/20 rounded-full blur-[100px] mix-blend-screen"
+          className="absolute -bottom-1/4 -right-1/4 w-[800px] h-[800px] bg-cyan-500/30 rounded-full blur-[120px] mix-blend-screen"
         />
         
         {/* Background Image with intense overlay so it's subtle */}
@@ -58,12 +59,12 @@ export default function LoginPage() {
         className="relative z-10 w-full max-w-md px-6"
       >
         <Tilt rotationFactor={8} isRevese>
-          <div className="relative overflow-hidden bg-white/5 backdrop-blur-[40px] border border-white/10 rounded-[2.5rem] p-10 md:p-12 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.8),inset_0_0_40px_rgba(255,255,255,0.02)] flex flex-col items-center text-center">
+          <div className="relative overflow-hidden bg-black/40 backdrop-blur-3xl border border-white/20 rounded-[2.5rem] p-10 md:p-12 shadow-[0_0_80px_-15px_rgba(236,72,153,0.3),inset_0_0_30px_rgba(255,255,255,0.1)] flex flex-col items-center text-center">
             
             {/* Interactive Spotlight inside the card */}
             <Spotlight 
-              className="from-violet-500/20 via-cyan-500/10 to-transparent blur-2xl" 
-              size={300} 
+              className="from-fuchsia-500/40 via-cyan-500/20 to-transparent blur-3xl" 
+              size={400} 
             />
           
           <motion.div 
@@ -73,21 +74,21 @@ export default function LoginPage() {
             className="w-28 h-28 relative flex items-center justify-center mb-8 mx-auto"
           >
             {/* Glowing 3D Orb Effect */}
-            <div className="absolute inset-0 bg-gradient-to-br from-violet-500 to-cyan-500 rounded-full blur-2xl opacity-40 animate-pulse mix-blend-screen" />
-            <div className="absolute inset-2 rounded-full border border-white/20 bg-white/5 backdrop-blur-2xl shadow-[inset_0_0_30px_rgba(255,255,255,0.2)]" />
+            <div className="absolute inset-0 bg-gradient-to-br from-fuchsia-500 to-cyan-500 rounded-full blur-[20px] opacity-100 animate-pulse mix-blend-screen" />
+            <div className="absolute inset-1.5 rounded-full border border-white/40 bg-white/10 backdrop-blur-3xl shadow-[inset_0_0_30px_rgba(255,255,255,0.6)]" />
             
-            <img src="/icons/logo-dark.png" alt="Katha" className="w-12 h-12 object-contain logo-dark drop-shadow-[0_0_15px_rgba(255,255,255,0.8)] relative z-10" />
-            <img src="/icons/logo-light.png" alt="Katha" className="w-12 h-12 object-contain logo-light drop-shadow-[0_0_15px_rgba(0,0,0,0.1)] relative z-10" />
+            <img src="/icons/logo-dark.png" alt="Katha" className="w-12 h-12 object-contain logo-dark drop-shadow-[0_0_20px_rgba(255,255,255,1)] relative z-10" />
+            <img src="/icons/logo-light.png" alt="Katha" className="w-12 h-12 object-contain logo-light drop-shadow-[0_0_20px_rgba(0,0,0,0.5)] relative z-10" />
           </motion.div>
 
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-white mb-2">
+          <h1 className="text-5xl md:text-6xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-br from-fuchsia-400 via-purple-300 to-cyan-400 mb-2 drop-shadow-[0_0_15px_rgba(236,72,153,0.3)]">
             Katha
           </h1>
-          <p className="text-[10px] uppercase tracking-[0.4em] text-violet-400/80 font-semibold mb-8">
+          <p className="text-[10px] md:text-xs uppercase tracking-[0.4em] text-cyan-300 font-bold mb-10 drop-shadow-md">
             Powered by Smriti
           </p>
           
-          <p className="text-white/70 font-light text-base leading-relaxed mb-10">
+          <p className="text-white font-medium text-base leading-relaxed mb-12 drop-shadow-sm px-2">
             Sign in to synchronize your cinematic universe across all your devices.
           </p>
 
