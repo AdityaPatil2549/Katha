@@ -145,7 +145,7 @@ export function UserOnboarding() {
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.95, opacity: 0, y: 30 }}
           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-          className="relative w-full max-w-[860px] max-h-[85vh] flex rounded-[2rem] overflow-hidden"
+          className="relative w-full max-w-[860px] h-[90vh] max-h-[640px] flex rounded-[2rem] overflow-hidden"
           style={{
             background: 'linear-gradient(135deg, rgba(20,22,35,0.95), rgba(10,11,18,0.98))',
             border: '1px solid rgba(255,255,255,0.08)',
@@ -295,7 +295,7 @@ export function UserOnboarding() {
                   animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
                   exit={{ opacity: 0, x: -20, filter: 'blur(4px)' }}
                   transition={{ duration: 0.3, ease: "easeOut" }}
-                  className="h-full flex flex-col"
+                  className="min-h-full flex flex-col"
                 >
                   {/* Title */}
                   <div className="mb-8 flex-shrink-0">
