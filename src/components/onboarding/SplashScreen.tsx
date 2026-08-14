@@ -239,13 +239,13 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
                 {screen.icon}
               </motion.div>
 
-              <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-white/40 mb-2">
+              <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-white/60 mb-2 drop-shadow-md">
                 {screen.subtitle}
               </h2>
-              <h3 className="text-3xl font-black text-white mb-4 tracking-tight">
+              <h3 className="text-3xl font-black text-white mb-4 tracking-tight drop-shadow-lg">
                 {screen.title}
               </h3>
-              <p className="text-white/50 text-sm leading-relaxed max-w-[280px] mx-auto">
+              <p className="text-white/80 text-sm md:text-base leading-relaxed max-w-[300px] mx-auto font-medium">
                 {screen.description}
               </p>
             </motion.div>
@@ -269,21 +269,19 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
             </div>
 
             {/* Buttons */}
-            <div className="flex w-full gap-3">
-              <button
-                onClick={() => paginate(-1)}
-                className={`flex-1 h-12 rounded-xl text-sm font-semibold transition-all duration-300 ${
-                  onboardingStep === 0 
-                    ? 'opacity-0 pointer-events-none' 
-                    : 'text-white/40 hover:text-white hover:bg-white/5'
-                }`}
-              >
-                Back
-              </button>
+            <div className="flex w-full gap-3 mt-4">
+              {onboardingStep > 0 && (
+                <button
+                  onClick={() => paginate(-1)}
+                  className="flex-1 h-12 rounded-xl text-sm font-bold transition-all duration-300 border border-white/10 bg-white/5 hover:bg-white/10 text-white/70 hover:text-white shadow-sm flex items-center justify-center"
+                >
+                  Back
+                </button>
+              )}
               
               <button
                 onClick={() => paginate(1)}
-                className={`flex-1 h-12 rounded-xl text-sm font-bold text-white flex items-center justify-center gap-2 bg-gradient-to-r ${screen.color} shadow-lg transition-transform hover:scale-105`}
+                className={`${onboardingStep === 0 ? 'w-full' : 'flex-1'} h-12 rounded-xl text-sm font-bold text-white flex items-center justify-center gap-2 bg-gradient-to-r ${screen.color} shadow-[0_0_20px_rgba(255,255,255,0.1)] transition-transform hover:scale-105 hover:shadow-[0_0_30px_rgba(255,255,255,0.2)]`}
               >
                 {onboardingStep === onboardingScreens.length - 1 ? (
                   <>
