@@ -11,7 +11,8 @@ import {
   Check,
   Pause,
   Filter,
-  Cloud
+  Cloud,
+  Plus
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useStoriesStore } from '@/store';
@@ -21,6 +22,7 @@ import { FadeIn } from '@/components/ui/motion/FadeIn';
 import { StaggerContainer, staggerItemVariants } from '@/components/ui/motion/StaggerContainer';
 import { BlurReveal } from '@/components/ui/motion/BlurReveal';
 import { Dropdown } from '@/components/ui/Dropdown';
+import { Magnetic } from '@/components/ui/motion/Magnetic';
 
 export default function LibraryPage() {
   const navigate = useNavigate();
@@ -373,24 +375,30 @@ export default function LibraryPage() {
 
       {/* Empty State */}
       {!loading && filteredStories().length === 0 && (
-        <FadeIn delay={0.2} duration={0.8} distance={20} className="text-center py-32 max-w-xl mx-auto flex flex-col items-center">
-          <div className="w-24 h-24 mx-auto mb-10 rounded-[2rem] border border-midnight-border/30 bg-midnight-surface/20 flex items-center justify-center shadow-soft relative overflow-hidden group">
-            <div className="absolute inset-0 bg-gradient-to-br from-accent-cyan/10 to-accent-primary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-            <Search className="w-10 h-10 text-text-muted opacity-50 group-hover:text-accent-cyan transition-colors duration-500 relative z-10" />
+        <FadeIn delay={0.2} duration={0.8} distance={20} className="text-center py-32 max-w-2xl mx-auto flex flex-col items-center">
+          <div className="w-28 h-28 mx-auto mb-10 rounded-[2.5rem] border border-accent-cyan/20 bg-midnight-surface/60 flex items-center justify-center shadow-glow-cyan relative overflow-hidden group backdrop-blur-xl">
+            <div className="absolute inset-0 bg-gradient-to-br from-accent-cyan/20 to-accent-primary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+            <Search className="w-12 h-12 text-accent-cyan group-hover:scale-110 transition-transform duration-500 relative z-10" />
           </div>
-          <h3 className="font-serif text-4xl text-text-primary mb-4 italic tracking-wide">Nothing Found</h3>
-          <p className="font-sans text-lg text-text-secondary leading-relaxed font-light mb-10">
+          <h3 className="font-serif text-5xl text-text-primary mb-6 tracking-tight drop-shadow-lg">
+            {searchQuery || selectedCategory !== 'all' || selectedStatus !== 'all' ? 'Nothing Found' : 'Blank Canvas'}
+          </h3>
+          <p className="font-sans text-xl text-text-muted leading-relaxed font-light mb-12 tracking-wide">
             {searchQuery || selectedCategory !== 'all' || selectedStatus !== 'all'
-              ? 'Your filters returned no stories. Try adjusting them or clear your search.'
-              : 'Your library is a blank canvas. Begin your collection by adding a new story.'}
+              ? 'Your filters returned no stories. Try adjusting them or clear your search to explore the rest.'
+              : 'Your library is currently empty. Begin your cinematic journey by adding your first story.'}
           </p>
           {!(searchQuery || selectedCategory !== 'all' || selectedStatus !== 'all') && (
-            <button
-              onClick={() => navigate('/add-story')}
-              className="px-8 py-3.5 rounded-[1.25rem] bg-text-primary text-midnight-bg font-sans text-sm tracking-wide transition-all duration-300 hover:scale-105 active:scale-95 shadow-soft hover:shadow-glow-cyan"
-            >
-              Add Your First Story
-            </button>
+            <Magnetic>
+              <button
+                onClick={() => navigate('/add-story')}
+                className="bg-gradient-cyan text-midnight-bg px-10 py-5 rounded-[2rem] font-bold tracking-wide transition-all hover:scale-105 hover:shadow-glow-cyan active:scale-95 flex items-center gap-3 text-lg relative overflow-hidden group"
+              >
+                <div className="absolute inset-0 bg-white/20 translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300 ease-out" />
+                <Plus className="w-6 h-6 relative z-10" />
+                <span className="relative z-10">Add Your First Story</span>
+              </button>
+            </Magnetic>
           )}
         </FadeIn>
       )}

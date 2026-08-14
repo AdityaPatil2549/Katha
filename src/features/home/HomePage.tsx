@@ -46,7 +46,7 @@ export function HomePage() {
         </div>
 
         {/* Hero Content */}
-        <div className="relative z-10 max-w-4xl">
+        <div className={`relative z-10 ${featuredStory ? 'max-w-4xl' : 'w-full max-w-6xl mx-auto flex flex-col items-center justify-center'}`}>
           <StaggerContainer>
           {featuredStory ? (
             <>
@@ -97,35 +97,45 @@ export function HomePage() {
               </FadeIn>
             </>
           ) : (
-            <>
+            <div className="flex flex-col items-center text-center mt-12 mb-8">
+              <FadeIn className="mb-10">
+                <div className="inline-flex items-center gap-3 px-6 py-2.5 rounded-full bg-midnight-surface/60 border border-accent-cyan/30 backdrop-blur-xl shadow-glow-cyan">
+                  <Sparkles className="w-4 h-4 text-accent-cyan animate-pulse" />
+                  <span className="text-xs font-sans font-bold tracking-[0.2em] text-accent-cyan uppercase">Your Journey Begins</span>
+                </div>
+              </FadeIn>
+              
               <TextEffect
                 preset="blur"
                 per="word"
-                className="font-serif text-6xl md:text-8xl lg:text-9xl font-bold text-gradient-cinematic leading-none mb-6 drop-shadow-[0_0_40px_rgba(0,242,254,0.4)] tracking-tighter"
+                className="font-serif text-6xl md:text-8xl lg:text-[140px] font-bold text-text-primary leading-none mb-8 tracking-tighter drop-shadow-2xl"
                 delay={0.3}
               >
                 {`Welcome, ${userName}`}
               </TextEffect>
+              
               <TextEffect
                 preset="fade-in-blur"
                 per="line"
-                className="font-sans text-lg md:text-xl text-text-muted max-w-2xl mb-10 leading-relaxed font-light tracking-wide"
+                className="font-sans text-xl md:text-2xl text-text-muted max-w-3xl mb-16 leading-relaxed font-light tracking-wide mx-auto"
                 delay={0.6}
               >
-                Your cinematic journey begins here. Start tracking your favorite movies, series, and books.
+                The canvas is blank. Start curating your cinematic universe by adding your favorite movies, series, and books.
               </TextEffect>
-              <FadeIn delay={0.9}>
+              
+              <FadeIn delay={0.9} className="flex flex-col sm:flex-row items-center gap-6">
                 <Magnetic>
                   <button 
-                    className="bg-high-contrast text-text-high-contrast hover:bg-text-secondary px-8 py-4 rounded-xl font-bold tracking-wide transition-transform hover:scale-105 active:scale-95 flex items-center gap-3 text-lg"
+                    className="bg-gradient-cyan text-midnight-bg px-10 py-5 rounded-[2rem] font-bold tracking-wide transition-all hover:scale-105 hover:shadow-glow-cyan active:scale-95 flex items-center gap-3 text-lg relative overflow-hidden group"
                     onClick={() => navigate(`/add-story`)}
                   >
-                    <Plus className="w-6 h-6" />
-                    Add Your First Story
+                    <div className="absolute inset-0 bg-white/20 translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300 ease-out" />
+                    <Plus className="w-6 h-6 relative z-10" />
+                    <span className="relative z-10">Add Your First Story</span>
                   </button>
                 </Magnetic>
               </FadeIn>
-            </>
+            </div>
           )}
           </StaggerContainer>
         </div>
