@@ -374,6 +374,7 @@ export default function AddStoryPage() {
         <form className="space-y-page" onSubmit={(e) => { e.preventDefault(); handleSubmit('save'); }}>
           
           {/* SECTION 1: STORY BASICS */}
+          <div className="relative z-50">
           <FadeIn>
           <section className="glass-card p-8 md:p-12 space-y-section">
             <h2 className="heading-2 text-primary flex items-center justify-between">
@@ -560,8 +561,10 @@ export default function AddStoryPage() {
             </div>
           </section>
           </FadeIn>
+          </div>
 
           {/* SECTION 2: STATUS & INTENT */}
+          <div className="relative z-40">
           <FadeIn>
           <section className="glass-card p-8 md:p-12 space-y-section">
             <h2 className="heading-2 text-primary">Status & Intent</h2>
@@ -724,8 +727,10 @@ export default function AddStoryPage() {
             )}
           </section>
           </FadeIn>
+          </div>
 
           {/* SECTION 3: VISUAL IDENTITY */}
+          <div className="relative z-30">
           <FadeIn>
           <section className="glass-card p-8 md:p-12 space-y-section">
             <h2 className="heading-2 text-primary">Visual Identity</h2>
@@ -782,8 +787,10 @@ export default function AddStoryPage() {
             </div>
           </section>
           </FadeIn>
+          </div>
 
           {/* SECTION 4: GENRE & TAGS */}
+          <div className="relative z-20">
           <FadeIn>
           <section className="glass-card p-8 md:p-12 space-y-section">
             <h2 className="heading-2 text-primary">Genre & Tags</h2>
@@ -879,8 +886,10 @@ export default function AddStoryPage() {
             </div>
           </section>
           </FadeIn>
+          </div>
 
           {/* SECTION 5: REFLECTION */}
+          <div className="relative z-10">
           <FadeIn>
           <section className="glass-card p-8 md:p-12 space-y-section">
             <h2 className="heading-2 text-primary">Reflection</h2>
@@ -978,6 +987,7 @@ export default function AddStoryPage() {
             </div>
           </section>
           </FadeIn>
+          </div>
 
           {/* SECTION 6: ACTIONS */}
           <FadeIn>
