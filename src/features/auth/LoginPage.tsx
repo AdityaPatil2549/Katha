@@ -25,6 +25,7 @@ export default function LoginPage() {
     }
   };
 
+  return (
     <div className="w-full min-h-screen bg-[#04050C] flex items-center justify-center relative overflow-hidden">
       
       {/* Cinematic Background Layer */}
