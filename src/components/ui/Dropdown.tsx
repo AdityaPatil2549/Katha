@@ -47,7 +47,7 @@ export function Dropdown({ value, onChange, options, className = '' }: DropdownP
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="absolute top-full left-0 mt-2 w-full min-w-max bg-midnight-surface/90 backdrop-blur-xl border border-text-primary/10 rounded-2xl shadow-glow overflow-hidden z-50 py-2"
+            className="absolute top-full left-0 mt-2 w-full min-w-max bg-midnight-surface border border-text-primary/10 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] overflow-hidden z-50 py-2"
           >
             <div className="max-h-60 overflow-y-auto scrollbar-hide">
               {options.map((option) => (
