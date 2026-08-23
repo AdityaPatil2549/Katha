@@ -6,6 +6,8 @@ import { SplashScreen } from '@/components/onboarding/SplashScreen';
 import { UserOnboarding } from '@/features/onboarding/UserOnboarding';
 import { useSettingsStore } from '@/store';
 
+import { ToastContainer } from '@/components/ui/Toast';
+
 export function App() {
   const [showSplash, setShowSplash] = useState(() => !localStorage.getItem('katha_onboarded'));
   const { theme, accentColor } = useSettingsStore();
@@ -28,6 +30,7 @@ export function App() {
   return (
     <AppProviders>
       <RouterProvider router={router} />
+      <ToastContainer />
     </AppProviders>
   );
 }

@@ -8,6 +8,7 @@ import { tvmazeService } from './TVMazeService';
 import { kitsuService } from './KitsuService';
 import { fanartService } from './FanartService';
 import { mdblistService } from './MDBListService';
+import { useToastStore } from '@/store/toastStore';
 
 // ─── Unified search result shape ─────────────────────────────────────────────
 export interface KathaSearchResult {
@@ -156,11 +157,13 @@ class MediaService {
     if (type === 'movie' || type === 'tv') {
       const tmdbId = typeof idOrTitle === 'string' ? parseInt(idOrTitle, 10) : idOrTitle;
       
-      // TV/Documentary Fallback Chain: TMDB -> TVMaze
       try {
         tmdbDetails = (await tmdbService.getDetails(tmdbId, type)) ?? undefined;
       } catch (e) {
         console.warn('TMDB failed, checking TVMaze fallback...');
+        if (type === 'tv') {
+          useToastStore.getState().addToast({ type: 'warning', message: 'TMDB is unreachable. Switching to backup metadata source (TVMaze).' });
+        }
       }
       
       if (tmdbDetails) {
@@ -206,6 +209,7 @@ class MediaService {
         }
       } catch (e) {
         console.warn('Jikan failed, falling back to AniList...');
+        useToastStore.getState().addToast({ type: 'warning', message: 'Jikan (MyAnimeList) is unreachable. Switching to AniList.' });
       }
 
       if (!animeFound) {

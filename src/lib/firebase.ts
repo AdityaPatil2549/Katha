@@ -17,6 +17,7 @@ let app;
 let auth: any = null;
 let googleProvider: any = null;
 let db: any = null;
+export let isOfflineMode = false;
 
 try {
   // Only initialize if we have a real looking API key, otherwise skip to prevent crashes
@@ -27,9 +28,11 @@ try {
     db = getFirestore(app);
   } else {
     console.warn("Firebase config missing - running in local-only mode");
+    isOfflineMode = true;
   }
 } catch (error) {
   console.error("Failed to initialize Firebase:", error);
+  isOfflineMode = true;
 }
 
 export { auth, googleProvider, db };

@@ -59,6 +59,10 @@ export function SmritiChat() {
       if (!response.ok) throw new Error('Network response was not ok');
       const data = await response.json();
       
+      if (!data || data.error) {
+         throw new Error(data?.error || 'Smriti Engine returned null or error');
+      }
+
       setMessages(prev => [...prev, {
         id: (Date.now() + 1).toString(),
         role: 'ai',
@@ -69,7 +73,7 @@ export function SmritiChat() {
       setMessages(prev => [...prev, {
         id: (Date.now() + 1).toString(),
         role: 'ai',
-        text: "My neural pathways are currently clouded. Please try again later."
+        text: "⚠️ My cognitive link to the Smriti Engine was interrupted. Please check your network or API keys."
       }]);
     } finally {
       setIsTyping(false);

@@ -8,6 +8,7 @@ import { useState, useRef, useEffect } from 'react';
 import { User, Settings, Download, Brain, Trophy, Calendar, ChevronDown, Book, Cloud, CloudOff, RefreshCw } from 'lucide-react';
 import { useSyncStore } from '@/store/syncStore';
 import { OutboxModal } from '@/components/system/OutboxModal';
+import { isOfflineMode } from '@/lib/firebase';
 
 const primaryNav = [
   { path: '/', label: 'Home' },
@@ -109,6 +110,14 @@ export function AppShell() {
           {/* Right Actions */}
           <div className="flex items-center gap-5">
             
+            {/* Offline Mode Indicator (Firebase failed to init) */}
+            {isOfflineMode && (
+              <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-accent-rose/20 border border-accent-rose/30 backdrop-blur-sm shadow-glow-sm" title="Firebase configuration missing. Running in local-only mode.">
+                <CloudOff className="w-4 h-4 text-accent-rose animate-pulse" />
+                <span className="text-xs font-bold text-accent-rose uppercase tracking-wider">Local Mode</span>
+              </div>
+            )}
+
             {/* Sync Indicator */}
             <button 
               onClick={() => setShowOutbox(true)}

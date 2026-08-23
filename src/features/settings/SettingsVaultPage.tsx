@@ -43,6 +43,7 @@ import { dbService } from '@/db/DatabaseService';
 import { googleCloudService } from '@/services/GoogleCloudService';
 import { useGoogleLogin } from '@react-oauth/google';
 import { useSettingsStore } from '@/store';
+import { useToastStore } from '@/store/toastStore';
 
 interface GoogleUser {
   access_token: string;
@@ -580,9 +581,9 @@ export default function SettingsVaultPage() {
                                 setIsSyncing(true);
                                 try {
                                   await googleCloudService.backupToCloud();
-                                  alert('Successfully backed up to Google Drive!');
-                                } catch (error) {
-                                  alert('Failed to backup to Drive.');
+                                  useToastStore.getState().addToast({ type: 'success', message: 'Successfully backed up to Google Drive!' });
+                                } catch (error: any) {
+                                  useToastStore.getState().addToast({ type: 'error', message: error?.message || 'Failed to backup to Drive. Please check your connection.' });
                                 } finally {
                                   setIsSyncing(false);
                                 }
@@ -600,10 +601,10 @@ export default function SettingsVaultPage() {
                                   setIsSyncing(true);
                                   try {
                                     await googleCloudService.restoreFromCloud();
-                                    alert('Successfully restored from Google Drive! Refreshing...');
-                                    window.location.reload();
-                                  } catch (error) {
-                                    alert('Failed to restore from Drive.');
+                                    useToastStore.getState().addToast({ type: 'success', message: 'Successfully restored! Refreshing...' });
+                                    setTimeout(() => window.location.reload(), 2000);
+                                  } catch (error: any) {
+                                    useToastStore.getState().addToast({ type: 'error', message: error?.message || 'Failed to restore from Drive. Please try again.' });
                                   } finally {
                                     setIsSyncing(false);
                                   }
