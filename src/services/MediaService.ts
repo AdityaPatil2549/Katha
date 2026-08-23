@@ -124,8 +124,15 @@ class MediaService {
       }
 
       return results;
-    } catch (error) {
+    } catch (error: any) {
       console.error('MediaService Search Error:', error);
+      // If this is a native fetch TypeError, it means the network request completely failed to route (likely offline)
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+         useToastStore.getState().addToast({
+           type: 'info',
+           message: 'You are currently offline. Showing only previously cached results.'
+         });
+      }
       return results; // Return partial results on error
     }
   }

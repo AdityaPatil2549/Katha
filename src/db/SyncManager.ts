@@ -1,23 +1,15 @@
 import { db } from './KathaDb';
 import { dbService } from './DatabaseService';
 import { useSyncStore } from '@/store/syncStore';
-import { toast } from '@/components/system/ToastProvider';
+import { useToastStore } from '@/store/toastStore';
+import { checkIsOnline } from '@/lib/network';
 
 export class SyncManager {
   private isSyncing = false;
   private syncInterval: ReturnType<typeof setInterval> | null = null;
 
   constructor() {
-    // Attempt sync when coming back online
-    if (typeof window !== 'undefined') {
-      window.addEventListener('online', () => {
-        useSyncStore.getState().setOnlineStatus(true);
-        this.flushQueue();
-      });
-      window.addEventListener('offline', () => {
-        useSyncStore.getState().setOnlineStatus(false);
-      });
-    }
+    // Event listeners are now handled centrally in syncStore's startNetworkWatcher
   }
 
   startBackgroundSync(intervalMs: number = 60000) {
@@ -42,8 +34,9 @@ export class SyncManager {
       useSyncStore.getState().setPendingCount(pendingSyncs.length);
       useSyncStore.getState().setPendingIds(pendingSyncs.map(item => item.data?.id).filter(Boolean) as string[]);
       
-      if (!navigator.onLine) {
-        return; // We update count but don't flush if offline
+      const isActuallyOnline = await checkIsOnline();
+      if (!isActuallyOnline) {
+        return; // We update count but don't flush if truly offline
       }
 
       if (pendingSyncs.length === 0) {
@@ -57,9 +50,10 @@ export class SyncManager {
       let successCount = 0;
 
       for (const item of pendingSyncs) {
-        if (!navigator.onLine) {
+        const isStillOnline = await checkIsOnline();
+        if (!isStillOnline) {
           console.warn('[SyncManager] Connection lost during flush. Aborting.');
-          toast('Sync paused. You went offline.', 'error');
+          useToastStore.getState().addToast({ type: 'error', message: 'Sync paused. You went offline.' });
           break; // Stop if we go offline during sync
         }
 
@@ -122,7 +116,7 @@ export class SyncManager {
         const remaining = await db.syncQueue.toArray();
         useSyncStore.getState().setPendingCount(remaining.length);
         useSyncStore.getState().setPendingIds(remaining.map(item => item.data?.id).filter(Boolean) as string[]);
-        toast(`${successCount} item${successCount > 1 ? 's' : ''} synced to Katha Cloud`, 'success');
+        useToastStore.getState().addToast({ type: 'success', message: `${successCount} item${successCount > 1 ? 's' : ''} synced to Katha Cloud` });
       }
 
     } catch (err) {

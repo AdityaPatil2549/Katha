@@ -1,3 +1,6 @@
+import { useSyncStore } from '@/store/syncStore';
+
 export async function bootstrapApp() {
-  // Add any other initialization logic here
+  // Start accurate network polling
+  useSyncStore.getState().startNetworkWatcher();
 }
