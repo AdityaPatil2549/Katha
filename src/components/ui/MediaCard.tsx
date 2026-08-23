@@ -10,11 +10,12 @@ export interface MediaCardProps {
   year?: number;
   type: 'movie' | 'show';
   posterUrl?: string;
+  posterBase64?: string;
   watchers?: number;
   onClick?: () => void;
 }
 
-export function MediaCard({ id, title, year, type, posterUrl, watchers, onClick }: MediaCardProps) {
+export function MediaCard({ id, title, year, type, posterUrl, posterBase64, watchers, onClick }: MediaCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [ratings, setRatings] = useState<MDBListRating[] | null>(null);
   const [fanartBg, setFanartBg] = useState<string | null>(null);
@@ -92,12 +93,17 @@ export function MediaCard({ id, title, year, type, posterUrl, watchers, onClick 
       <div className="h-[240px] sm:h-[300px] bg-midnight-surface rounded-[16px] overflow-hidden relative mb-3 shadow-[0_4px_20px_rgba(0,0,0,0.5)] group-hover:shadow-[0_0_25px_rgba(0,242,254,0.3)] transition-all duration-500 border border-white/5 group-hover:border-accent-cyan/30">
         
         {/* Base Poster */}
-        {posterUrl ? (
+        {(posterUrl || posterBase64) ? (
           <img 
-            src={posterUrl} 
+            src={(typeof navigator !== 'undefined' && !navigator.onLine && posterBase64) ? posterBase64 : (posterUrl || posterBase64)} 
             alt={title} 
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
             loading="lazy"
+            onError={(e) => {
+              if (posterBase64 && e.currentTarget.src !== posterBase64) {
+                e.currentTarget.src = posterBase64;
+              }
+            }}
           />
         ) : (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-text-muted">

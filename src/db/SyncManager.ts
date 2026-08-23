@@ -64,7 +64,14 @@ export class SyncManager {
             const cloudRepo = (dbService.stories as any).cloudRepo;
             if (cloudRepo) {
               if (item.action === 'CREATE') await cloudRepo.create(item.data);
-              if (item.action === 'UPDATE') await cloudRepo.update(item.data.id, item.data.updates);
+              if (item.action === 'UPDATE') {
+                const cloudDoc = await cloudRepo.findById(item.data.id);
+                if (cloudDoc && cloudDoc.updatedAt && new Date(cloudDoc.updatedAt).getTime() > item.timestamp) {
+                  console.warn(`[SyncManager] LWW: Skipping obsolete update for story ${item.data.id}`);
+                } else {
+                  await cloudRepo.update(item.data.id, item.data.updates);
+                }
+              }
               if (item.action === 'DELETE') await cloudRepo.delete(item.data.id);
               success = true;
             }
@@ -72,7 +79,14 @@ export class SyncManager {
             const cloudRepo = (dbService.moments as any).cloudRepo;
             if (cloudRepo) {
               if (item.action === 'CREATE') await cloudRepo.create(item.data);
-              if (item.action === 'UPDATE') await cloudRepo.update(item.data.id, item.data.updates);
+              if (item.action === 'UPDATE') {
+                const cloudDoc = await cloudRepo.findById(item.data.id);
+                if (cloudDoc && cloudDoc.updatedAt && new Date(cloudDoc.updatedAt).getTime() > item.timestamp) {
+                  console.warn(`[SyncManager] LWW: Skipping obsolete update for moment ${item.data.id}`);
+                } else {
+                  await cloudRepo.update(item.data.id, item.data.updates);
+                }
+              }
               if (item.action === 'DELETE') await cloudRepo.delete(item.data.id);
               success = true;
             }
@@ -80,7 +94,14 @@ export class SyncManager {
             const cloudRepo = (dbService.sessions as any).cloudRepo;
             if (cloudRepo) {
               if (item.action === 'CREATE') await cloudRepo.create(item.data);
-              if (item.action === 'UPDATE') await cloudRepo.update(item.data.id, item.data.updates);
+              if (item.action === 'UPDATE') {
+                const cloudDoc = await cloudRepo.findById(item.data.id);
+                if (cloudDoc && cloudDoc.updatedAt && new Date(cloudDoc.updatedAt).getTime() > item.timestamp) {
+                  console.warn(`[SyncManager] LWW: Skipping obsolete update for session ${item.data.id}`);
+                } else {
+                  await cloudRepo.update(item.data.id, item.data.updates);
+                }
+              }
               if (item.action === 'DELETE') await cloudRepo.delete(item.data.id);
               success = true;
             }
@@ -88,7 +109,14 @@ export class SyncManager {
             const cloudRepo = (dbService.knowledge as any).cloudRepo;
             if (cloudRepo) {
               if (item.action === 'CREATE') await cloudRepo.create(item.data);
-              if (item.action === 'UPDATE') await cloudRepo.update(item.data.id, item.data.updates);
+              if (item.action === 'UPDATE') {
+                const cloudDoc = await cloudRepo.findById(item.data.id);
+                if (cloudDoc && cloudDoc.updatedAt && new Date(cloudDoc.updatedAt).getTime() > item.timestamp) {
+                  console.warn(`[SyncManager] LWW: Skipping obsolete update for knowledge ${item.data.id}`);
+                } else {
+                  await cloudRepo.update(item.data.id, item.data.updates);
+                }
+              }
               if (item.action === 'DELETE') await cloudRepo.delete(item.data.id);
               success = true;
             }
@@ -96,7 +124,15 @@ export class SyncManager {
             const cloudRepo = (dbService.timeline as any).cloudRepo;
             if (cloudRepo) {
               if (item.action === 'CREATE') await cloudRepo.create(item.data);
-              if (item.action === 'UPDATE') await cloudRepo.update(item.data.id, item.data.updates);
+              if (item.action === 'UPDATE') {
+                const cloudDoc = await cloudRepo.findById(item.data.id);
+                // Timeline events might not have updatedAt, but we check if it exists
+                if (cloudDoc && cloudDoc.updatedAt && new Date(cloudDoc.updatedAt).getTime() > item.timestamp) {
+                  console.warn(`[SyncManager] LWW: Skipping obsolete update for timeline ${item.data.id}`);
+                } else {
+                  await cloudRepo.update(item.data.id, item.data.updates);
+                }
+              }
               if (item.action === 'DELETE') await cloudRepo.delete(item.data.id);
               success = true;
             }

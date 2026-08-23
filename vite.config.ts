@@ -91,7 +91,8 @@ export default defineConfig({
         ],
         cleanupOutdatedCaches: true,
         skipWaiting: false,
-        clientsClaim: false
+        clientsClaim: false,
+        importScripts: ['sw-sync.js']
       }
     })
   ],

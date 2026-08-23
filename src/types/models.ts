@@ -14,6 +14,7 @@ export type Story = {
   releaseYear?: number;
   posterUrl?: string;
   posterBlurhash?: string;
+  posterBase64?: string;
   watchTimeMinutes: number;
   currentEpisode?: number;
   totalEpisodes?: number;

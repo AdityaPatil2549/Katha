@@ -53,3 +53,17 @@ export async function checkIsOnline(): Promise<boolean> {
     return false;
   }
 }
+
+export async function registerBackgroundSync() {
+  if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {
+    try {
+      const registration = await navigator.serviceWorker.ready;
+      if ('sync' in registration) {
+        await (registration as any).sync.register('katha-sync');
+        console.log('[Background Sync] Registered successfully.');
+      }
+    } catch (err) {
+      console.warn('[Background Sync] Failed to register:', err);
+    }
+  }
+}

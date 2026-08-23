@@ -1,5 +1,7 @@
 import { StoryRepository } from './index';
 import type { Story, StoryCategory, StoryStatus } from '@/types/models';
+import { fetchAndCompressImageToBase64 } from '@/lib/imageUtils';
+import { registerBackgroundSync } from '@/lib/network';
 
 export class SyncingStoryRepository implements StoryRepository {
   constructor(
@@ -77,6 +79,18 @@ export class SyncingStoryRepository implements StoryRepository {
 
   async create(storyData: Omit<Story, 'id' | 'createdAt' | 'updatedAt'>): Promise<Story> {
     const story = await this.localRepo.create(storyData);
+    
+    // Asynchronously fetch and compress poster to base64 for offline persistence
+    if (story.posterUrl && typeof window !== 'undefined') {
+      fetchAndCompressImageToBase64(story.posterUrl).then(async (base64) => {
+        if (base64) {
+          await this.localRepo.update(story.id, { posterBase64: base64 });
+          // We don't necessarily need to sync this to cloud as it's for local offline caching,
+          // but if we want to, we could. Let's just keep it local to save cloud bandwidth!
+        }
+      });
+    }
+
     if (this.cloudRepo) {
       if (navigator.onLine) {
         this.cloudRepo.create({ ...storyData, id: story.id } as any).catch(async (err) => {
@@ -89,19 +103,19 @@ export class SyncingStoryRepository implements StoryRepository {
               action: 'CREATE',
               data: { ...storyData, id: story.id },
               timestamp: Date.now()
-            }).catch(e => console.error('Failed to queue offline sync', e));
+            }).then(() => registerBackgroundSync()).catch(e => console.error('Failed to queue offline sync', e));
           }
         });
       } else {
         const { db } = await import('@/db/KathaDb');
-        if (db.syncQueue) {
+          if (db.syncQueue) {
           await db.syncQueue.add({
             id: crypto.randomUUID(),
             table: 'stories',
             action: 'CREATE',
             data: { ...storyData, id: story.id },
             timestamp: Date.now()
-          }).catch(e => console.error('Failed to queue offline sync', e));
+          }).then(() => registerBackgroundSync()).catch(e => console.error('Failed to queue offline sync', e));
         }
       }
     }
@@ -122,7 +136,7 @@ export class SyncingStoryRepository implements StoryRepository {
               action: 'UPDATE',
               data: { id, updates },
               timestamp: Date.now()
-            }).catch(e => console.error('Failed to queue offline sync', e));
+            }).then(() => registerBackgroundSync()).catch(e => console.error('Failed to queue offline sync', e));
           }
         });
       } else {
@@ -134,7 +148,7 @@ export class SyncingStoryRepository implements StoryRepository {
             action: 'UPDATE',
             data: { id, updates },
             timestamp: Date.now()
-          }).catch(e => console.error('Failed to queue offline sync', e));
+          }).then(() => registerBackgroundSync()).catch(e => console.error('Failed to queue offline sync', e));
         }
       }
     }
@@ -155,7 +169,7 @@ export class SyncingStoryRepository implements StoryRepository {
               action: 'DELETE',
               data: { id },
               timestamp: Date.now()
-            }).catch(e => console.error('Failed to queue offline sync', e));
+            }).then(() => registerBackgroundSync()).catch(e => console.error('Failed to queue offline sync', e));
           }
         });
       } else {
@@ -167,7 +181,7 @@ export class SyncingStoryRepository implements StoryRepository {
             action: 'DELETE',
             data: { id },
             timestamp: Date.now()
-          }).catch(e => console.error('Failed to queue offline sync', e));
+          }).then(() => registerBackgroundSync()).catch(e => console.error('Failed to queue offline sync', e));
         }
       }
     }
