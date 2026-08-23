@@ -165,7 +165,7 @@ export function DecisionEngine() {
       // Calculate real confidence
       const topScore = validEntries[0]?.score ?? 0;
       // Cap max theoretical score at roughly 45 for percentage calculation to ensure reasonable spread
-      const calculatedConfidence = recommendations.length > 0 ? Math.min(99, Math.max(65, Math.floor((topScore / 45) * 100) + 65)) : 0;
+      const calculatedConfidence = recommendations.length > 0 ? Math.min(99, Math.max(65, Math.floor(65 + (topScore / 45) * 34))) : 0;
 
       // Human-readable time mapping for offline reasoning
       const timeLabels: Record<string, string> = {
@@ -309,32 +309,50 @@ export function DecisionEngine() {
               </button>
             </div>
             
-            <div className="surface-elevated rounded-2xl p-8 border-l-4 border-accent-primary">
-              <div className="flex items-center gap-4 mb-6">
-                <div className="p-4 bg-gradient-violet/20 rounded-xl">
-                  <Brain className="w-8 h-8 text-accent-primary" />
+            {result.recommendations.length > 0 ? (
+              <div className="surface-elevated rounded-2xl p-8 border-l-4 border-accent-primary">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="p-4 bg-gradient-violet/20 rounded-xl">
+                    <Brain className="w-8 h-8 text-accent-primary" />
+                  </div>
+                  <div>
+                    <h1 className="text-3xl font-bold text-text-primary mb-2">Your Personal Recommendation</h1>
+                    <p className="text-lg text-accent-primary">Confidence: {result.confidence}%</p>
+                  </div>
                 </div>
-                <div>
-                  <h1 className="text-3xl font-bold text-text-primary mb-2">Your Personal Recommendation</h1>
-                  <p className="text-lg text-accent-primary">Confidence: {result.confidence}%</p>
+                
+                <div className="bg-midnight-surface rounded-xl p-6 mb-6">
+                  <h3 className="text-lg font-semibold text-text-primary mb-3">Why These Stories?</h3>
+                  <p className="text-text-primary/80">{result.reasoning}</p>
                 </div>
               </div>
-              
-              <div className="bg-midnight-surface rounded-xl p-6 mb-6">
-                <h3 className="text-lg font-semibold text-text-primary mb-3">Why These Stories?</h3>
-                <p className="text-text-primary/80">{result.reasoning}</p>
+            ) : (
+              <div className="surface-elevated rounded-2xl p-12 text-center border-2 border-dashed border-midnight-border">
+                <Brain className="w-16 h-16 text-text-primary/40 mx-auto mb-6" />
+                <h1 className="text-3xl font-bold text-text-primary mb-4">No Perfect Matches Found</h1>
+                <p className="text-lg text-text-primary/70 mb-8 max-w-lg mx-auto">
+                  Your constraints might be a bit too strict for our library right now. Try relaxing your time limits or selecting fewer preferences.
+                </p>
+                <button
+                  onClick={editDecision}
+                  className="bg-accent-primary text-text-primary px-8 py-3 rounded-lg font-medium hover:bg-accent-secondary transition-colors"
+                >
+                  Adjust Preferences
+                </button>
               </div>
-            </div>
+            )}
           </motion.div>
           </FadeIn>
 
-          <FadeIn>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-          >
-            <h2 className="text-2xl font-bold text-text-primary mb-6">Recommended Stories</h2>
+          {result.recommendations.length > 0 && (
+            <>
+              <FadeIn>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+              >
+                <h2 className="text-2xl font-bold text-text-primary mb-6">Recommended Stories</h2>
             
             <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-2">
               {result.recommendations.map((entry, index) => (
@@ -416,6 +434,8 @@ export function DecisionEngine() {
             </div>
           </motion.div>
           </FadeIn>
+          </>
+          )}
           </StaggerContainer>
         </div>
       </div>

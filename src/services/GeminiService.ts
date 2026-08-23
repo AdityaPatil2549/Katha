@@ -35,14 +35,22 @@ export interface KathaIntelligenceResult {
 class GeminiService {
   // ─── Private fetch helper — eliminates boilerplate ──────────────────────────
   private async post<T = any>(action: string, payload: Record<string, unknown>): Promise<T | null> {
-    const response = await fetch(BASE_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action, ...payload }),
-    });
-    if (!response.ok) throw new Error(`Gemini action '${action}' failed: ${response.status}`);
-    const data = await response.json();
-    return data.result ?? null;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
+
+    try {
+      const response = await fetch(BASE_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action, ...payload }),
+        signal: controller.signal
+      });
+      if (!response.ok) throw new Error(`Gemini action '${action}' failed: ${response.status}`);
+      const data = await response.json();
+      return data.result ?? null;
+    } finally {
+      clearTimeout(timeoutId);
+    }
   }
 
   /**
@@ -161,7 +169,16 @@ class GeminiService {
    */
   async generateReasoning(context: unknown): Promise<{ reasoning: string, alternatives: string[] } | null> {
     try {
-      return await this.retryPost<{ reasoning: string, alternatives: string[] }>('generate_reasoning', { context });
+      const result = await this.retryPost<{ reasoning?: string, alternatives?: string[] }>('generate_reasoning', { context });
+      if (!result || typeof result !== 'object') return null;
+      
+      // Strict validation to prevent AI hallucination crashes
+      const validReasoning = typeof result.reasoning === 'string' ? result.reasoning : undefined;
+      const validAlternatives = Array.isArray(result.alternatives) ? result.alternatives.filter(a => typeof a === 'string') : undefined;
+      
+      if (!validReasoning || !validAlternatives) return null;
+      
+      return { reasoning: validReasoning, alternatives: validAlternatives };
     } catch (error) {
       console.error('Gemini Reasoning Error:', error);
       return null;
