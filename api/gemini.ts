@@ -173,6 +173,16 @@ User Context: ${JSON.stringify(body.context, null, 2)}`;
       return new Response(JSON.stringify({ result: JSON.parse(cleanJson) }), { headers: { 'Content-Type': 'application/json' } });
     }
 
+    if (action === 'chat') {
+      const prompt = `You are an insightful and philosophical AI companion named Smriti Engine.
+Your job is to answer the user's prompt thoughtfully. Do NOT generate a 'Spotify Wrapped' summary unless explicitly asked.
+Context: ${JSON.stringify(body.userData, null, 2)}`;
+      const result = await model.generateContent(prompt);
+      return new Response(JSON.stringify({ result: result.response.text().trim() }), {
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
     return new Response(JSON.stringify({ error: 'Invalid action' }), {
       status: 400,
       headers: { 'Content-Type': 'application/json' },

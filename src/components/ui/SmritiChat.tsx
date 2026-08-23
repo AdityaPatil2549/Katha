@@ -53,8 +53,7 @@ export function SmritiChat() {
       const response = await fetch('/api/gemini', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'synthesize_memory', userData: contextStr }) 
-        // We reuse synthesize_memory since it returns raw text suitable for chat.
+        body: JSON.stringify({ action: 'chat', userData: contextStr }) 
       });
 
       if (!response.ok) throw new Error('Network response was not ok');
