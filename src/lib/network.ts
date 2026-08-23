@@ -24,7 +24,7 @@ export async function checkIsOnline(): Promise<boolean> {
   try {
     const checkEndpoint = async (url: string) => {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second strict timeout
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second strict timeout
 
       try {
         const response = await fetch(`${url}&_cb=${new Date().getTime()}`, {
