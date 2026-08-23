@@ -27,9 +27,9 @@ import type {
 export class DatabaseService {
   private _stories: SyncingStoryRepository;
   private _moments: SyncingMomentRepository;
-  private _sessions: SessionRepository;
-  private _knowledge: KnowledgeRepository;
-  private _timeline: TimelineRepository;
+  private _sessions: SyncingSessionRepository;
+  private _knowledge: SyncingKnowledgeRepository;
+  private _timeline: SyncingTimelineRepository;
   private _apiCache: ApiCacheRepository;
   
   private userId: string | null = null;
@@ -62,16 +62,16 @@ export class DatabaseService {
       // Connect Cloud Repositories to the Syncing Repositories
       this._stories.setCloudRepo(new FirestoreStoryRepository(userId));
       this._moments.setCloudRepo(new FirestoreMomentRepository(userId));
-      (this._sessions as SyncingSessionRepository).setCloudRepo(new FirestoreSessionRepository(userId));
-      (this._knowledge as SyncingKnowledgeRepository).setCloudRepo(new FirestoreKnowledgeRepository(userId));
-      (this._timeline as SyncingTimelineRepository).setCloudRepo(new FirestoreTimelineRepository(userId));
+      this._sessions.setCloudRepo(new FirestoreSessionRepository(userId));
+      this._knowledge.setCloudRepo(new FirestoreKnowledgeRepository(userId));
+      this._timeline.setCloudRepo(new FirestoreTimelineRepository(userId));
     } else {
       // Disconnect Cloud Repositories
       this._stories.setCloudRepo(null);
       this._moments.setCloudRepo(null);
-      (this._sessions as SyncingSessionRepository).setCloudRepo(null);
-      (this._knowledge as SyncingKnowledgeRepository).setCloudRepo(null);
-      (this._timeline as SyncingTimelineRepository).setCloudRepo(null);
+      this._sessions.setCloudRepo(null);
+      this._knowledge.setCloudRepo(null);
+      this._timeline.setCloudRepo(null);
     }
   }
 
