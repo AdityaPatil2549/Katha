@@ -94,53 +94,118 @@ export function DecisionEngine() {
     try {
       const allEntries = await atlasRepository.getAllEntries();
       
-      // Heuristic calculations run locally on the client using IndexedDB queries
-      let recommendations = allEntries.filter(entry => {
-        if (decisionRequest.timeAvailable === '30min' && entry.runtime && entry.runtime > 45) return false;
-        if (decisionRequest.timeAvailable === '1hour' && entry.runtime && entry.runtime > 150) return false;
+      // Phase 1: Weighted Scoring
+      const scoredEntries = allEntries.map(entry => {
+        let score = 0;
+        let isDisqualified = false;
         
-        if (decisionRequest.mood === 'unmotivated' && !entry.impactTags.includes('inspiring')) return false;
-        if (decisionRequest.mood === 'discouraged' && !entry.themes.includes('hope')) return false;
-        if (decisionRequest.mood === 'contemplative' && entry.difficulty === 'easy') return false;
+        // 1. Hard Time Filter (Missing data is treated as unsafe if strict time requested)
+        if (decisionRequest.timeAvailable === '30min') {
+           if (!entry.runtime || entry.runtime > 45) isDisqualified = true;
+        } else if (decisionRequest.timeAvailable === '1hour') {
+           if (!entry.runtime || entry.runtime > 150) isDisqualified = true;
+        }
+
+        if (isDisqualified) return { entry, score: -1 };
+
+        // 2. Mood Weighting (+10 to +20 pts)
+        const moodMappings: Record<string, { tags: string[], themes: string[] }> = {
+          'lost': { tags: ['inspiring', 'thought-provoking'], themes: ['purpose', 'discovery'] },
+          'unmotivated': { tags: ['inspiring', 'energetic'], themes: ['triumph', 'ambition'] },
+          'discouraged': { tags: ['uplifting', 'emotional'], themes: ['hope', 'resilience'] },
+          'anxious': { tags: ['relaxing', 'calming', 'comforting'], themes: ['peace', 'acceptance'] },
+          'contemplative': { tags: ['thought-provoking', 'educational'], themes: ['philosophy', 'existential'] },
+          'hopeful': { tags: ['inspiring', 'beautiful'], themes: ['love', 'future'] }
+        };
+
+        const moodMapping = moodMappings[decisionRequest.mood];
+        if (moodMapping) {
+          moodMapping.tags.forEach(tag => {
+            if (entry.impactTags.some(t => t.toLowerCase().includes(tag.toLowerCase()))) score += 10;
+          });
+          moodMapping.themes.forEach(theme => {
+            if (entry.themes.some(t => t.toLowerCase().includes(theme.toLowerCase()))) score += 10;
+          });
+        }
+
+        // 3. Life Phase Weighting (+10 pts)
+        const phaseMappings: Record<string, string[]> = {
+          'College': ['coming-of-age', 'identity', 'discovery'],
+          'Career': ['ambition', 'struggle', 'success', 'ethics'],
+          'Midlife': ['family', 'reflection', 'legacy'],
+          'Rebuilding': ['resilience', 'healing', 'new beginnings']
+        };
         
-        const hasPreference = decisionRequest.preferences.some(pref => 
-          entry.impactTags.includes(pref) || entry.themes.includes(pref)
-        );
-        if (decisionRequest.preferences.length > 0 && !hasPreference) return false;
-        
-        return true;
+        const phaseMapping = phaseMappings[decisionRequest.lifePhase];
+        if (phaseMapping) {
+          phaseMapping.forEach(theme => {
+            if (entry.themes.some(t => t.toLowerCase().includes(theme.toLowerCase()))) score += 10;
+          });
+        }
+
+        // 4. Preference Stacking (+5 pts per match)
+        decisionRequest.preferences.forEach(pref => {
+          if (entry.impactTags.some(t => t.toLowerCase().includes(pref.toLowerCase()))) score += 5;
+          if (entry.themes.some(t => t.toLowerCase().includes(pref.toLowerCase()))) score += 5;
+        });
+
+        // 5. Difficulty Bonus (+5 pts)
+        if (decisionRequest.mood === 'unmotivated' && entry.difficulty === 'easy') score += 5;
+        if (decisionRequest.mood === 'contemplative' && entry.difficulty === 'heavy') score += 5;
+
+        return { entry, score };
       });
 
-      // Sort by relevance (fallback mathematical sorting)
-      recommendations = recommendations.slice(0, 3);
+      // Filter out disqualified and sort by score descending
+      const validEntries = scoredEntries.filter(e => e.score >= 0);
+      validEntries.sort((a, b) => b.score - a.score);
       
-      // If we couldn't find matches, fallback to general acclaimed ones
-      if (recommendations.length === 0) {
-        recommendations = allEntries.filter(e => e.difficulty === 'medium').slice(0, 3);
-      }
+      const recommendations = validEntries.slice(0, 3).map(e => e.entry);
+      
+      // Calculate real confidence
+      const topScore = validEntries[0]?.score ?? 0;
+      // Cap max theoretical score at roughly 45 for percentage calculation to ensure reasonable spread
+      const calculatedConfidence = recommendations.length > 0 ? Math.min(99, Math.max(65, Math.floor((topScore / 45) * 100) + 65)) : 0;
 
-      // Default offline heuristic reasoning
-      let reasoning = `Based on your ${decisionRequest.mood} mood and ${decisionRequest.timeAvailable} time availability, these stories align with your need for ${decisionRequest.preferences.join(', ')}.`;
+      // Human-readable time mapping for offline reasoning
+      const timeLabels: Record<string, string> = {
+        '30min': 'under 30 minutes',
+        '1hour': '1-2 hours',
+        '2hours': '2-3 hours',
+        'evening': 'a full evening'
+      };
+
+      const timeLabel = timeLabels[decisionRequest.timeAvailable] || decisionRequest.timeAvailable;
+      const prefLabel = decisionRequest.preferences.length > 0 
+        ? `your need for ${decisionRequest.preferences.join(', ')}`
+        : `your current situation`;
+
+      let reasoning = `Based on your ${decisionRequest.mood} mood and having ${timeLabel} available, these stories are mathematically selected to best align with ${prefLabel}.`;
       let alternatives = ['Journal after watching', 'Discuss with a friend', 'Take notes on key insights'];
 
-      // Attempt AI synthesis of the offline heuristic results
-      if (navigator.onLine) {
-        const { geminiService } = await import('@/services/GeminiService');
-        const aiResult = await geminiService.generateReasoning({
-          request: decisionRequest,
-          titles: recommendations.map(r => r.title)
-        });
-        
-        if (aiResult) {
-          reasoning = aiResult.reasoning;
-          alternatives = aiResult.alternatives;
+      // Phase 3: Fault-Tolerant AI
+      if (navigator.onLine && recommendations.length > 0) {
+        try {
+          const { geminiService } = await import('@/services/GeminiService');
+          const aiResult = await geminiService.generateReasoning({
+            request: decisionRequest,
+            titles: recommendations.map(r => r.title)
+          });
+          
+          if (aiResult) {
+            reasoning = aiResult.reasoning;
+            alternatives = aiResult.alternatives;
+          }
+        } catch (aiError) {
+          console.warn('AI Reasoning failed, falling back to offline heuristic reasoning:', aiError);
+          // Gracefully continue with offline reasoning instead of throwing
         }
       }
 
       setResult({
         recommendations,
         reasoning,
-        confidence: Math.floor(Math.random() * 20) + 75,
+        confidence: calculatedConfidence,
         alternatives
       });
 
@@ -165,6 +230,10 @@ export function DecisionEngine() {
       preferences: []
     });
     setResult(null);
+  };
+
+  const editDecision = () => {
+    setStep('context');
   };
 
   if (step === 'analysis') {
@@ -224,13 +293,21 @@ export function DecisionEngine() {
             animate={{ opacity: 1, y: 0 }}
             className="mb-8"
           >
-            <button
-              onClick={resetDecision}
-              className="flex items-center gap-2 text-text-primary/60 hover:text-text-primary mb-4 transition-colors"
-            >
-              <ArrowRight className="w-4 h-4 rotate-180" />
-              New Decision
-            </button>
+            <div className="flex items-center gap-4 mb-4">
+              <button
+                onClick={editDecision}
+                className="flex items-center gap-2 text-text-primary/60 hover:text-text-primary transition-colors"
+              >
+                <ArrowRight className="w-4 h-4 rotate-180" />
+                Refine Search
+              </button>
+              <button
+                onClick={resetDecision}
+                className="text-sm text-text-primary/40 hover:text-rose transition-colors"
+              >
+                Start Over
+              </button>
+            </div>
             
             <div className="surface-elevated rounded-2xl p-8 border-l-4 border-accent-primary">
               <div className="flex items-center gap-4 mb-6">
