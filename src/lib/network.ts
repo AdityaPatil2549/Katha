@@ -10,22 +10,46 @@
 
 export async function checkIsOnline(): Promise<boolean> {
   if (typeof navigator !== 'undefined' && !navigator.onLine) {
-    // If the browser knows it's offline, trust it.
     return false;
   }
 
+  // To achieve maximum accuracy (bypassing captive portals and 'Lie-Fi'),
+  // we ping redundant, highly available endpoints that support CORS.
+  // Using DNS-over-HTTPS APIs because they are incredibly fast and always support CORS.
+  const endpoints = [
+    'https://dns.google/resolve?name=google.com',
+    'https://cloudflare-dns.com/dns-query?name=cloudflare.com&type=A'
+  ];
+
   try {
-    // Fast ping to a lightweight, highly-available endpoint (Google's 204 No Content generator)
-    // Adding a timestamp prevents cache hits which could give false positives.
-    const response = await fetch(`https://generate_204?time=${new Date().getTime()}`, {
-      method: 'HEAD', // Lightweight request
-      mode: 'no-cors', // Avoids CORS blocking while still confirming network resolution
-      cache: 'no-store'
-    });
-    // With no-cors, response.type is 'opaque', but if it didn't throw an error, we have network access.
+    const checkEndpoint = async (url: string) => {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second strict timeout
+
+      try {
+        const response = await fetch(`${url}&_cb=${new Date().getTime()}`, {
+          method: 'GET',
+          mode: 'cors', // Enforce CORS to bypass captive portals (which redirect to non-CORS HTML pages)
+          headers: { 'Accept': 'application/dns-json' },
+          cache: 'no-store',
+          signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
+        if (!response.ok) throw new Error('Not ok');
+        return true;
+      } catch (error) {
+        clearTimeout(timeoutId);
+        throw error; // Let Promise.any handle it
+      }
+    };
+
+    // If ANY of the highly available endpoints resolve, we have internet.
+    await Promise.any(endpoints.map(checkEndpoint));
     return true;
+
   } catch (error) {
-    // A TypeError here indicates a DNS failure or no route to host (i.e., actually offline)
+    // If ALL endpoints fail or timeout, we are truly offline or behind a restrictive captive portal.
     return false;
   }
 }
