@@ -156,6 +156,23 @@ User Data: ${JSON.stringify(body.userData, null, 2)}`;
       });
     }
 
+    if (action === 'generate_reasoning') {
+      const prompt = `You are a personalized recommendation engine. I have recommended 3 stories to the user based on their context.
+Write a personalized explanation (max 2 sentences) for why these stories fit their mood and constraints.
+Also, provide 3 short, actionable "alternatives" or enhancement tips (e.g., "Dim the lights", "Make some tea").
+Return strictly formatted JSON:
+{
+  "reasoning": "string",
+  "alternatives": ["string", "string", "string"]
+}
+User Context: ${JSON.stringify(body.context, null, 2)}`;
+      const jsonModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash", generationConfig: { responseMimeType: "application/json" } });
+      const result = await jsonModel.generateContent(prompt);
+      const rawText = result.response.text();
+      const cleanJson = rawText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+      return new Response(JSON.stringify({ result: JSON.parse(cleanJson) }), { headers: { 'Content-Type': 'application/json' } });
+    }
+
     return new Response(JSON.stringify({ error: 'Invalid action' }), {
       status: 400,
       headers: { 'Content-Type': 'application/json' },
