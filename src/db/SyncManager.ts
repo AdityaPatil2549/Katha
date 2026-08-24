@@ -30,7 +30,12 @@ export class SyncManager {
     if (this.isSyncing) return;
     
     try {
-      const pendingSyncs = await db.syncQueue.orderBy('timestamp').toArray();
+      const allPending = await db.syncQueue.orderBy('timestamp').toArray();
+      const currentUserId = dbService.getUserId();
+      
+      // Prevent cross-account data leaks by only syncing items for the active user
+      const pendingSyncs = allPending.filter(item => !item.userId || item.userId === currentUserId);
+
       useSyncStore.getState().setPendingCount(pendingSyncs.length);
       useSyncStore.getState().setPendingIds(pendingSyncs.map(item => item.data?.id).filter(Boolean) as string[]);
       
@@ -72,7 +77,14 @@ export class SyncManager {
                   await cloudRepo.update(item.data.id, item.data.updates);
                 }
               }
-              if (item.action === 'DELETE') await cloudRepo.delete(item.data.id);
+              if (item.action === 'DELETE') {
+                const cloudDoc = await cloudRepo.findById(item.data.id);
+                if (cloudDoc && cloudDoc.updatedAt && new Date(cloudDoc.updatedAt).getTime() > item.timestamp) {
+                  console.warn(`[SyncManager] LWW: Skipping obsolete delete for story ${item.data.id}`);
+                } else {
+                  await cloudRepo.delete(item.data.id);
+                }
+              }
               success = true;
             }
           } else if (item.table === 'moments') {
@@ -87,7 +99,14 @@ export class SyncManager {
                   await cloudRepo.update(item.data.id, item.data.updates);
                 }
               }
-              if (item.action === 'DELETE') await cloudRepo.delete(item.data.id);
+              if (item.action === 'DELETE') {
+                const cloudDoc = await cloudRepo.findById(item.data.id);
+                if (cloudDoc && cloudDoc.updatedAt && new Date(cloudDoc.updatedAt).getTime() > item.timestamp) {
+                  console.warn(`[SyncManager] LWW: Skipping obsolete delete for moment ${item.data.id}`);
+                } else {
+                  await cloudRepo.delete(item.data.id);
+                }
+              }
               success = true;
             }
           } else if (item.table === 'sessions') {
@@ -102,7 +121,14 @@ export class SyncManager {
                   await cloudRepo.update(item.data.id, item.data.updates);
                 }
               }
-              if (item.action === 'DELETE') await cloudRepo.delete(item.data.id);
+              if (item.action === 'DELETE') {
+                const cloudDoc = await cloudRepo.findById(item.data.id);
+                if (cloudDoc && cloudDoc.updatedAt && new Date(cloudDoc.updatedAt).getTime() > item.timestamp) {
+                  console.warn(`[SyncManager] LWW: Skipping obsolete delete for session ${item.data.id}`);
+                } else {
+                  await cloudRepo.delete(item.data.id);
+                }
+              }
               success = true;
             }
           } else if (item.table === 'knowledge') {
@@ -117,7 +143,14 @@ export class SyncManager {
                   await cloudRepo.update(item.data.id, item.data.updates);
                 }
               }
-              if (item.action === 'DELETE') await cloudRepo.delete(item.data.id);
+              if (item.action === 'DELETE') {
+                const cloudDoc = await cloudRepo.findById(item.data.id);
+                if (cloudDoc && cloudDoc.updatedAt && new Date(cloudDoc.updatedAt).getTime() > item.timestamp) {
+                  console.warn(`[SyncManager] LWW: Skipping obsolete delete for knowledge ${item.data.id}`);
+                } else {
+                  await cloudRepo.delete(item.data.id);
+                }
+              }
               success = true;
             }
           } else if (item.table === 'timeline') {
@@ -133,7 +166,14 @@ export class SyncManager {
                   await cloudRepo.update(item.data.id, item.data.updates);
                 }
               }
-              if (item.action === 'DELETE') await cloudRepo.delete(item.data.id);
+              if (item.action === 'DELETE') {
+                const cloudDoc = await cloudRepo.findById(item.data.id);
+                if (cloudDoc && cloudDoc.updatedAt && new Date(cloudDoc.updatedAt).getTime() > item.timestamp) {
+                  console.warn(`[SyncManager] LWW: Skipping obsolete delete for timeline ${item.data.id}`);
+                } else {
+                  await cloudRepo.delete(item.data.id);
+                }
+              }
               success = true;
             }
           }
@@ -143,8 +183,20 @@ export class SyncManager {
             successCount++;
             console.log(`[SyncManager] Successfully flushed ${item.action} for ${item.table}`);
           }
-        } catch (err) {
+        } catch (err: any) {
           console.error(`[SyncManager] Failed to flush mutation ${item.id}:`, err);
+          
+          // Check for fatal Firestore errors (e.g., permission-denied, not-found)
+          // If fatal, we must remove the item to prevent an infinite Poison Pill loop
+          const isFatal = err?.code === 'permission-denied' || 
+                          err?.code === 'not-found' || 
+                          err?.code === 'invalid-argument' ||
+                          err?.code === 'unauthenticated';
+          
+          if (isFatal) {
+            console.error(`[SyncManager] Fatal error detected. Purging poison pill mutation ${item.id} from queue.`);
+            await db.syncQueue.delete(item.id!);
+          }
         }
       }
 

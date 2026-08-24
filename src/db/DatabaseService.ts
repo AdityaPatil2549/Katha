@@ -54,24 +54,28 @@ export class DatabaseService {
     );
   }
 
+  public getUserId(): string | null {
+    return this.userId;
+  }
+
   public setUserId(userId: string | null) {
     if (this.userId === userId) return;
     this.userId = userId;
 
     if (userId && db) {
       // Connect Cloud Repositories to the Syncing Repositories
-      this._stories.setCloudRepo(new FirestoreStoryRepository(userId));
-      this._moments.setCloudRepo(new FirestoreMomentRepository(userId));
-      this._sessions.setCloudRepo(new FirestoreSessionRepository(userId));
-      this._knowledge.setCloudRepo(new FirestoreKnowledgeRepository(userId));
-      this._timeline.setCloudRepo(new FirestoreTimelineRepository(userId));
+      this._stories.setCloudRepo(new FirestoreStoryRepository(userId), userId);
+      this._moments.setCloudRepo(new FirestoreMomentRepository(userId), userId);
+      this._sessions.setCloudRepo(new FirestoreSessionRepository(userId), userId);
+      this._knowledge.setCloudRepo(new FirestoreKnowledgeRepository(userId), userId);
+      this._timeline.setCloudRepo(new FirestoreTimelineRepository(userId), userId);
     } else {
       // Disconnect Cloud Repositories
-      this._stories.setCloudRepo(null);
-      this._moments.setCloudRepo(null);
-      this._sessions.setCloudRepo(null);
-      this._knowledge.setCloudRepo(null);
-      this._timeline.setCloudRepo(null);
+      (this._stories as any).setCloudRepo(null, null);
+      (this._moments as any).setCloudRepo(null, null);
+      (this._sessions as any).setCloudRepo(null, null);
+      (this._knowledge as any).setCloudRepo(null, null);
+      (this._timeline as any).setCloudRepo(null, null);
     }
   }
 

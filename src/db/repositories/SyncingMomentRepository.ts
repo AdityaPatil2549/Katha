@@ -1,14 +1,20 @@
 import { MomentRepository } from './index';
 import type { Moment, UUID } from '@/types/models';
+import { registerBackgroundSync } from '@/lib/network';
 
 export class SyncingMomentRepository implements MomentRepository {
+  private userId: string | null = null;
+
   constructor(
     private localRepo: MomentRepository,
     private cloudRepo: MomentRepository | null
   ) {}
 
-  public setCloudRepo(cloudRepo: MomentRepository | null) {
+  public setCloudRepo(cloudRepo: MomentRepository | null, userId?: string | null) {
     this.cloudRepo = cloudRepo;
+    if (userId !== undefined) {
+      this.userId = userId;
+    }
   }
 
   // --- READS (Always Local) ---
@@ -68,28 +74,30 @@ export class SyncingMomentRepository implements MomentRepository {
     if (this.cloudRepo) {
       if (navigator.onLine) {
         this.cloudRepo.create({ ...momentData, id: moment.id } as any).catch(async (err) => {
-          console.error('Background moment sync create failed:', err);
+          console.error('Background sync moment create failed:', err);
           const { db } = await import('@/db/KathaDb');
-          if (db.syncQueue) {
+          if (db.syncQueue && this.userId) {
             await db.syncQueue.add({
               id: crypto.randomUUID(),
+              userId: this.userId,
               table: 'moments',
               action: 'CREATE',
               data: { ...momentData, id: moment.id },
               timestamp: Date.now()
-            }).catch(e => console.error('Failed to queue offline sync', e));
+            }).then(() => registerBackgroundSync()).catch(e => console.error('Failed to queue offline sync', e));
           }
         });
       } else {
         const { db } = await import('@/db/KathaDb');
-        if (db.syncQueue) {
+        if (db.syncQueue && this.userId) {
           await db.syncQueue.add({
             id: crypto.randomUUID(),
+            userId: this.userId,
             table: 'moments',
             action: 'CREATE',
             data: { ...momentData, id: moment.id },
             timestamp: Date.now()
-          }).catch(e => console.error('Failed to queue offline sync', e));
+          }).then(() => registerBackgroundSync()).catch(e => console.error('Failed to queue offline sync', e));
         }
       }
     }
@@ -101,28 +109,30 @@ export class SyncingMomentRepository implements MomentRepository {
     if (this.cloudRepo) {
       if (navigator.onLine) {
         this.cloudRepo.update(id, updates).catch(async (err) => {
-          console.error('Background moment sync update failed:', err);
+          console.error('Background sync moment update failed:', err);
           const { db } = await import('@/db/KathaDb');
-          if (db.syncQueue) {
+          if (db.syncQueue && this.userId) {
             await db.syncQueue.add({
               id: crypto.randomUUID(),
+              userId: this.userId,
               table: 'moments',
               action: 'UPDATE',
               data: { id, updates },
               timestamp: Date.now()
-            }).catch(e => console.error('Failed to queue offline sync', e));
+            }).then(() => registerBackgroundSync()).catch(e => console.error('Failed to queue offline sync', e));
           }
         });
       } else {
         const { db } = await import('@/db/KathaDb');
-        if (db.syncQueue) {
+        if (db.syncQueue && this.userId) {
           await db.syncQueue.add({
             id: crypto.randomUUID(),
+            userId: this.userId,
             table: 'moments',
             action: 'UPDATE',
             data: { id, updates },
             timestamp: Date.now()
-          }).catch(e => console.error('Failed to queue offline sync', e));
+          }).then(() => registerBackgroundSync()).catch(e => console.error('Failed to queue offline sync', e));
         }
       }
     }
@@ -134,28 +144,30 @@ export class SyncingMomentRepository implements MomentRepository {
     if (this.cloudRepo) {
       if (navigator.onLine) {
         this.cloudRepo.delete(id).catch(async (err) => {
-          console.error('Background moment sync delete failed:', err);
+          console.error('Background sync moment delete failed:', err);
           const { db } = await import('@/db/KathaDb');
-          if (db.syncQueue) {
+          if (db.syncQueue && this.userId) {
             await db.syncQueue.add({
               id: crypto.randomUUID(),
+              userId: this.userId,
               table: 'moments',
               action: 'DELETE',
               data: { id },
               timestamp: Date.now()
-            }).catch(e => console.error('Failed to queue offline sync', e));
+            }).then(() => registerBackgroundSync()).catch(e => console.error('Failed to queue offline sync', e));
           }
         });
       } else {
         const { db } = await import('@/db/KathaDb');
-        if (db.syncQueue) {
+        if (db.syncQueue && this.userId) {
           await db.syncQueue.add({
             id: crypto.randomUUID(),
+            userId: this.userId,
             table: 'moments',
             action: 'DELETE',
             data: { id },
             timestamp: Date.now()
-          }).catch(e => console.error('Failed to queue offline sync', e));
+          }).then(() => registerBackgroundSync()).catch(e => console.error('Failed to queue offline sync', e));
         }
       }
     }

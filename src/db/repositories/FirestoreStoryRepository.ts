@@ -53,13 +53,13 @@ export class FirestoreStoryRepository implements StoryRepository {
   }
 
   async delete(id: UUID): Promise<void> {
-    const batch = writeBatch(db);
+    const refsToDelete: any[] = [];
     
-    // Helper to add query results to batch
+    // Helper to add query results to array
     const deleteFromCollection = async (collectionName: string, idField: string) => {
       const q = query(collection(db, 'users', this.userId, collectionName), where(idField, '==', id));
       const snapshot = await getDocs(q);
-      snapshot.forEach(docSnap => batch.delete(docSnap.ref));
+      snapshot.forEach(docSnap => refsToDelete.push(docSnap.ref));
     };
 
     // Queue deletes for related data
@@ -71,18 +71,26 @@ export class FirestoreStoryRepository implements StoryRepository {
     ]);
 
     // Queue delete for the story itself
-    batch.delete(this.getDocRef(id));
+    refsToDelete.push(this.getDocRef(id));
 
-    // Commit all deletions
-    await batch.commit();
+    // Commit all deletions in chunks of 500
+    for (let i = 0; i < refsToDelete.length; i += 500) {
+      const batch = writeBatch(db);
+      const chunk = refsToDelete.slice(i, i + 500);
+      chunk.forEach(ref => batch.delete(ref));
+      await batch.commit();
+    }
   }
 
   async bulkUpsert(stories: Story[]): Promise<void> {
-    const batch = writeBatch(db);
-    stories.forEach(story => {
-      batch.set(this.getDocRef(story.id), story);
-    });
-    await batch.commit();
+    for (let i = 0; i < stories.length; i += 500) {
+      const batch = writeBatch(db);
+      const chunk = stories.slice(i, i + 500);
+      chunk.forEach(story => {
+        batch.set(this.getDocRef(story.id), story);
+      });
+      await batch.commit();
+    }
   }
 
   async findById(id: UUID): Promise<Story | undefined> {

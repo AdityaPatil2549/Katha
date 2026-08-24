@@ -4,13 +4,18 @@ import { fetchAndCompressImageToBase64 } from '@/lib/imageUtils';
 import { registerBackgroundSync } from '@/lib/network';
 
 export class SyncingStoryRepository implements StoryRepository {
+  private userId: string | null = null;
+
   constructor(
     private localRepo: StoryRepository,
     private cloudRepo: StoryRepository | null
   ) {}
 
-  public setCloudRepo(cloudRepo: StoryRepository | null) {
+  public setCloudRepo(cloudRepo: StoryRepository | null, userId?: string | null) {
     this.cloudRepo = cloudRepo;
+    if (userId !== undefined) {
+      this.userId = userId;
+    }
   }
 
   // --- READS (Always Local) ---
@@ -96,9 +101,10 @@ export class SyncingStoryRepository implements StoryRepository {
         this.cloudRepo.create({ ...storyData, id: story.id } as any).catch(async (err) => {
           console.error('Background sync create failed:', err);
           const { db } = await import('@/db/KathaDb');
-          if (db.syncQueue) {
+          if (db.syncQueue && this.userId) {
             await db.syncQueue.add({
               id: crypto.randomUUID(),
+              userId: this.userId,
               table: 'stories',
               action: 'CREATE',
               data: { ...storyData, id: story.id },
@@ -108,9 +114,10 @@ export class SyncingStoryRepository implements StoryRepository {
         });
       } else {
         const { db } = await import('@/db/KathaDb');
-          if (db.syncQueue) {
+          if (db.syncQueue && this.userId) {
           await db.syncQueue.add({
             id: crypto.randomUUID(),
+            userId: this.userId,
             table: 'stories',
             action: 'CREATE',
             data: { ...storyData, id: story.id },
@@ -129,9 +136,10 @@ export class SyncingStoryRepository implements StoryRepository {
         this.cloudRepo.update(id, updates).catch(async (err) => {
           console.error('Background sync update failed:', err);
           const { db } = await import('@/db/KathaDb');
-          if (db.syncQueue) {
+          if (db.syncQueue && this.userId) {
             await db.syncQueue.add({
               id: crypto.randomUUID(),
+              userId: this.userId,
               table: 'stories',
               action: 'UPDATE',
               data: { id, updates },
@@ -141,9 +149,10 @@ export class SyncingStoryRepository implements StoryRepository {
         });
       } else {
         const { db } = await import('@/db/KathaDb');
-        if (db.syncQueue) {
+        if (db.syncQueue && this.userId) {
           await db.syncQueue.add({
             id: crypto.randomUUID(),
+            userId: this.userId,
             table: 'stories',
             action: 'UPDATE',
             data: { id, updates },
@@ -162,9 +171,10 @@ export class SyncingStoryRepository implements StoryRepository {
         this.cloudRepo.delete(id).catch(async (err) => {
           console.error('Background sync delete failed:', err);
           const { db } = await import('@/db/KathaDb');
-          if (db.syncQueue) {
+          if (db.syncQueue && this.userId) {
             await db.syncQueue.add({
               id: crypto.randomUUID(),
+              userId: this.userId,
               table: 'stories',
               action: 'DELETE',
               data: { id },
@@ -174,9 +184,10 @@ export class SyncingStoryRepository implements StoryRepository {
         });
       } else {
         const { db } = await import('@/db/KathaDb');
-        if (db.syncQueue) {
+        if (db.syncQueue && this.userId) {
           await db.syncQueue.add({
             id: crypto.randomUUID(),
+            userId: this.userId,
             table: 'stories',
             action: 'DELETE',
             data: { id },

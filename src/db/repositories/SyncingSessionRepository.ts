@@ -2,13 +2,18 @@ import type { Session, UUID } from '@/types/models';
 import type { SessionRepository } from './SessionRepository';
 
 export class SyncingSessionRepository implements SessionRepository {
+  private userId: string | null = null;
+
   constructor(
     private localRepo: SessionRepository,
     private cloudRepo: SessionRepository | null
   ) {}
 
-  setCloudRepo(repo: SessionRepository | null) {
+  setCloudRepo(repo: SessionRepository | null, userId?: string | null) {
     this.cloudRepo = repo;
+    if (userId !== undefined) {
+      this.userId = userId;
+    }
   }
 
   // ALL READS ARE LOCAL ONLY (0ms latency, true offline-first)
@@ -83,14 +88,16 @@ export class SyncingSessionRepository implements SessionRepository {
         console.error(`Background session sync failed [${action}]:`, err);
         // Phase 3: Add to Dexie syncQueue table for future retry if offline/failed
         const { db } = await import('@/db/KathaDb');
-        if (db.syncQueue) {
+        const { registerBackgroundSync } = await import('@/lib/network');
+        if (db.syncQueue && this.userId) {
           await db.syncQueue.add({
             id: crypto.randomUUID(),
+            userId: this.userId,
             table: 'sessions',
             action,
             data,
             timestamp: Date.now()
-          }).catch(e => console.error('Failed to queue offline sync', e));
+          }).then(() => registerBackgroundSync()).catch(e => console.error('Failed to queue offline sync', e));
         }
       }
     };
@@ -101,14 +108,16 @@ export class SyncingSessionRepository implements SessionRepository {
     } else {
       // Immediately queue to outbox
       const { db } = await import('@/db/KathaDb');
-      if (db.syncQueue) {
+      const { registerBackgroundSync } = await import('@/lib/network');
+      if (db.syncQueue && this.userId) {
         await db.syncQueue.add({
           id: crypto.randomUUID(),
+          userId: this.userId,
           table: 'sessions',
           action,
           data,
           timestamp: Date.now()
-        }).catch(e => console.error('Failed to queue offline sync', e));
+        }).then(() => registerBackgroundSync()).catch(e => console.error('Failed to queue offline sync', e));
       }
     }
   }

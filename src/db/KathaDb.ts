@@ -25,6 +25,7 @@ export class KathaDb extends Dexie {
   apiCache!: Table<ApiCacheEntry, string>;
   syncQueue!: Table<{
     id: string;
+    userId: string;
     table: string;
     action: 'CREATE' | 'UPDATE' | 'DELETE';
     data: any;

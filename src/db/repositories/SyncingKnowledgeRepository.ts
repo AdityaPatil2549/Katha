@@ -2,13 +2,18 @@ import type { Knowledge, UUID } from '@/types/models';
 import type { KnowledgeRepository } from './KnowledgeRepository';
 
 export class SyncingKnowledgeRepository implements KnowledgeRepository {
+  private userId: string | null = null;
+
   constructor(
     private localRepo: KnowledgeRepository,
     private cloudRepo: KnowledgeRepository | null
   ) {}
 
-  setCloudRepo(repo: KnowledgeRepository | null) {
+  setCloudRepo(repo: KnowledgeRepository | null, userId?: string | null) {
     this.cloudRepo = repo;
+    if (userId !== undefined) {
+      this.userId = userId;
+    }
   }
 
   async findById(id: UUID): Promise<Knowledge | undefined> {
@@ -62,14 +67,16 @@ export class SyncingKnowledgeRepository implements KnowledgeRepository {
       } catch (err) {
         console.error(`Background knowledge sync failed [${action}]:`, err);
         const { db } = await import('@/db/KathaDb');
-        if (db.syncQueue) {
+        const { registerBackgroundSync } = await import('@/lib/network');
+        if (db.syncQueue && this.userId) {
           await db.syncQueue.add({
             id: crypto.randomUUID(),
+            userId: this.userId,
             table: 'knowledge',
             action,
             data,
             timestamp: Date.now()
-          }).catch(e => console.error('Failed to queue offline sync', e));
+          }).then(() => registerBackgroundSync()).catch(e => console.error('Failed to queue offline sync', e));
         }
       }
     };
@@ -78,14 +85,16 @@ export class SyncingKnowledgeRepository implements KnowledgeRepository {
       executeSync();
     } else {
       const { db } = await import('@/db/KathaDb');
-      if (db.syncQueue) {
+      const { registerBackgroundSync } = await import('@/lib/network');
+      if (db.syncQueue && this.userId) {
         await db.syncQueue.add({
           id: crypto.randomUUID(),
+          userId: this.userId,
           table: 'knowledge',
           action,
           data,
           timestamp: Date.now()
-        }).catch(e => console.error('Failed to queue offline sync', e));
+        }).then(() => registerBackgroundSync()).catch(e => console.error('Failed to queue offline sync', e));
       }
     }
   }
