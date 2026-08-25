@@ -189,7 +189,7 @@ export default function SettingsVaultPage() {
         dbService.timeline.findAll()
       ]);
       const data = { exportDate: new Date().toISOString(), version: '1.0.0', stories, moments, sessions, knowledge, timeline };
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -215,7 +215,7 @@ export default function SettingsVaultPage() {
         version: '1.0.0',
         data: { stories, moments, sessions, knowledge, timeline }
       };
-      const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+      const blob = new Blob([JSON.stringify(backup)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -230,7 +230,11 @@ export default function SettingsVaultPage() {
   const handleClearCache = () => {
     if (confirm('Clear all cached data? This may slow down initial loading.')) {
       if ('caches' in window) {
-        caches.keys().then(names => names.forEach(name => caches.delete(name)));
+        caches.keys().then(names => 
+          names
+            .filter(name => !name.startsWith('workbox'))
+            .forEach(name => caches.delete(name))
+        );
       }
       alert('Cache cleared successfully');
     }
@@ -283,7 +287,7 @@ export default function SettingsVaultPage() {
         version: '1.0.0',
         data: { stories, moments, sessions, knowledge, timeline }
       };
-      const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+      const blob = new Blob([JSON.stringify(backup)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;

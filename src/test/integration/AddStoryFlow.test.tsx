@@ -1,8 +1,9 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { screen, fireEvent, waitFor } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { render } from '@/test/utils/testUtils';
-import { createMockStory, mockLocalStorage } from '@/test/utils/testUtils';
+import { mockLocalStorage } from '@/test/utils/testUtils';
+import AddStoryPage from '@/features/story/AddStoryPage';
 
 // Mock the router
 vi.mock('react-router-dom', async () => {
@@ -33,107 +34,54 @@ describe('Add Story Flow Integration', () => {
     vi.clearAllMocks();
   });
 
-  it('should navigate through the add story form successfully', async () => {
-    // Import dynamically to avoid issues with mocked modules
-    const { default: AddStoryPage } = await import('@/features/story/AddStoryPage');
-    
+  it('renders the first step of the wizard successfully', async () => {
     render(<AddStoryPage />);
 
-    // Check if the form renders
     expect(screen.getByText(/Add a New Story/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Story title/i)).toBeInTheDocument();
-
-    // Fill in the title
-    const titleInput = screen.getByLabelText(/Story title/i);
-    await user.type(titleInput, 'Test Story Title');
-
-    // Select category
-    const categorySelect = screen.getByLabelText(/Category/i);
-    await user.selectOptions(categorySelect, 'anime');
-
-    // Select platform
-    const platformSelect = screen.getByLabelText(/Select streaming platform/i);
-    await user.selectOptions(platformSelect, 'Netflix');
-
-    // Fill in rating
-    const ratingInput = screen.getByLabelText(/Rating/i);
-    await user.type(ratingInput, '8');
-
-    // Add genre
-    const genreSelect = screen.getByLabelText(/Select genre to add/i);
-    await user.selectOptions(genreSelect, 'Action');
-    
-    // Click add genre button
-    const addGenreBtn = screen.getByLabelText(/Add selected genre/i);
-    await user.click(addGenreBtn);
-
-    // Add mood
-    const moodBtn = screen.getByLabelText(/Toggle Inspired mood/i);
-    await user.click(moodBtn);
-
-    // Submit the form
-    const saveBtn = screen.getByRole('button', { name: /Save Story/i });
-    await user.click(saveBtn);
-
-    // Verify the story was added (mock should have been called)
-    // Note: Since we're mocking the store, we can't test actual navigation
-    // but we can verify the form submission doesn't crash
-    expect(screen.getByText(/Add a New Story/i)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /The Essentials/i })).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/Enter the exact title/i)).toBeInTheDocument();
   });
 
-  it('should validate required fields', async () => {
-    const { default: AddStoryPage } = await import('@/features/story/AddStoryPage');
-    
+  it('validates required fields on step 1 before continuing', async () => {
     render(<AddStoryPage />);
+    
+    // Mock window alert
+    const alertMock = vi.spyOn(window, 'alert').mockImplementation(() => {});
 
-    // Try to submit without filling required fields
-    const saveBtn = screen.getByRole('button', { name: /Save Story/i });
-    await user.click(saveBtn);
+    // Try to continue without filling fields
+    const continueBtn = screen.getByRole('button', { name: /Continue/i });
+    await user.click(continueBtn);
 
-    // Should show validation errors
-    expect(screen.getByText(/Add a New Story/i)).toBeInTheDocument();
+    // Should alert
+    expect(alertMock).toHaveBeenCalledWith('Title is required');
+    alertMock.mockRestore();
   });
 
-  it('should handle conditional logic for different statuses', async () => {
-    const { default: AddStoryPage } = await import('@/features/story/AddStoryPage');
-    
+  it('navigates to step 2 after filling step 1', async () => {
     render(<AddStoryPage />);
 
-    // Fill in basic info first
-    await user.type(screen.getByLabelText(/Story title/i), 'Test Story');
-    await user.selectOptions(screen.getByLabelText(/Category/i), 'anime');
-    await user.selectOptions(screen.getByLabelText(/Select streaming platform/i), 'Netflix');
+    const titleInput = screen.getByPlaceholderText(/Enter the exact title/i);
+    await user.type(titleInput, 'Test Story');
 
-    // Select "Watching" status
-    const watchingBtn = screen.getByRole('button', { name: /Watching/i });
-    await user.click(watchingBtn);
+    // Click Anime category button (span containing Anime)
+    const animeCat = screen.getByText('Anime', { selector: 'span.text-sm' });
+    await user.click(animeCat);
 
-    // Should show progress fields
-    expect(screen.getByLabelText(/Total episodes/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Current episode/i)).toBeInTheDocument();
-
-    // Select "Completed" status
-    const completedBtn = screen.getByRole('button', { name: /Completed/i });
-    await user.click(completedBtn);
-
-    // Should hide progress fields for completed
-    // Note: The UI might still show them but disabled
-  });
-
-  it('should handle poster upload', async () => {
-    const { default: AddStoryPage } = await import('@/features/story/AddStoryPage');
+    // Open dropdown and select platform
+    const platformTrigger = screen.getByText('Select platform...');
+    await user.click(platformTrigger);
     
-    render(<AddStoryPage />);
+    // Select Netflix
+    const netflixOpt = await screen.findByText('Netflix');
+    await user.click(netflixOpt);
 
-    // Find the poster upload area
-    const posterArea = screen.getByText(/Drag & drop or click to upload/i);
-    expect(posterArea).toBeInTheDocument();
+    // Continue
+    const continueBtn = screen.getByRole('button', { name: /Continue/i });
+    await user.click(continueBtn);
 
-    // Create a mock file
-    const file = new File(['test'], 'test.png', { type: 'image/png' });
-    
-    // Simulate file upload (this would need actual implementation)
-    // For now, just verify the upload area exists
-    expect(posterArea).toBeInTheDocument();
+    // Step 2 should render
+    await waitFor(() => {
+      expect(screen.getByText(/Progress & Details/i)).toBeInTheDocument();
+    });
   });
 });

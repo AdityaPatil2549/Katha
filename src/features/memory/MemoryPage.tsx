@@ -1,16 +1,17 @@
-import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Filter, Grid, List, Calendar, Tag, Heart, Clock, Sparkles } from 'lucide-react';
+import { Search, Filter, Grid, List, Calendar, Tag, Heart, Clock, Sparkles, PlayCircle } from 'lucide-react';
 import { useMomentsStore, useStoriesStore } from '@/store';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { StaggerContainer } from '@/components/ui/motion/StaggerContainer';
 import { FadeIn } from '@/components/ui/motion/FadeIn';
 import { Dropdown } from '@/components/ui/Dropdown';
+import { SpotifyWrapped } from './SpotifyWrapped';
 
 export function MemoryPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [filterMood, setFilterMood] = useState('all');
+  const [showWrapped, setShowWrapped] = useState(false);
 
   const { moments, loadMoments } = useMomentsStore();
   const { stories, loadStories } = useStoriesStore();
@@ -56,6 +57,16 @@ export function MemoryPage() {
         {/* Search and Filters */}
         <FadeIn delay={0.2} duration={0.8} className="mb-12">
           <div className="flex flex-col xl:flex-row gap-6 items-start xl:items-center p-6 bg-midnight-surface/10 border border-midnight-border/30 rounded-[2rem] backdrop-blur-md shadow-sm">
+            
+            {/* Synthesize Memory Button */}
+            <button
+              onClick={() => setShowWrapped(true)}
+              className="flex items-center gap-3 px-6 py-4 rounded-[1.5rem] bg-gradient-to-r from-accent-primary to-purple-600 text-white font-bold tracking-wide shadow-[0_0_20px_rgba(139,92,246,0.4)] hover:shadow-[0_0_30px_rgba(139,92,246,0.6)] hover:-translate-y-0.5 transition-all duration-300 w-full xl:w-auto justify-center xl:justify-start flex-shrink-0"
+            >
+              <PlayCircle className="w-5 h-5" />
+              Synthesize Memory
+            </button>
+
             <div className="flex-1 w-full max-w-2xl relative group">
               <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-text-muted group-focus-within:text-accent-rose transition-colors duration-500" />
               <input
@@ -197,6 +208,8 @@ export function MemoryPage() {
           </FadeIn>
         )}
       </div>
+
+      {showWrapped && <SpotifyWrapped onClose={() => setShowWrapped(false)} />}
     </div>
   );
 }

@@ -66,6 +66,6 @@ export const exportToPDF = async (elementId: string): Promise<Blob> => {
 };
 
 export const exportToJSON = (data: any): Blob => {
-  const jsonString = JSON.stringify(data, null, 2);
+  const jsonString = JSON.stringify(data);
   return new Blob([jsonString], { type: 'application/json' });
 };

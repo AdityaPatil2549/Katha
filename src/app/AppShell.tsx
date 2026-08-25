@@ -9,6 +9,7 @@ import { User, Settings, Download, Brain, Trophy, Calendar, ChevronDown, Book, C
 import { useSyncStore } from '@/store/syncStore';
 import { OutboxModal } from '@/components/system/OutboxModal';
 import { isOfflineMode } from '@/lib/firebase';
+import { AnimatedBackground } from '@/components/ui/motion/AnimatedBackground';
 
 const primaryNav = [
   { path: '/', label: 'Home' },
@@ -76,34 +77,31 @@ export function AppShell() {
             </div>
             
             <nav className="hidden md:flex items-center gap-2">
-              {primaryNav.map((item) => (
-                <NavLink 
-                  key={item.path} 
-                  to={item.path} 
-                  onMouseEnter={() => {
-                    // Subtle haptic feedback if supported by device
-                    if (navigator.vibrate) navigator.vibrate(10);
-                  }}
-                  className={({ isActive }) => `
-                    relative px-5 py-2 rounded-full text-sm font-bold tracking-widest uppercase transition-all duration-300
-                    ${isActive ? 'text-text-primary' : 'text-text-secondary hover:text-text-primary hover:bg-text-primary/5'}
-                  `}
-                  end={item.path === '/'}
-                >
-                  {({ isActive }) => (
-                    <>
-                      <span className="relative z-10">{item.label}</span>
-                      {isActive && (
-                        <motion.div 
-                          layoutId="activeTopNavIndicator"
-                          className="absolute inset-0 bg-text-primary/10 rounded-full z-0"
-                          transition={{ type: 'spring', stiffness: 200, damping: 20 }}
-                        />
-                      )}
-                    </>
-                  )}
-                </NavLink>
-              ))}
+              <AnimatedBackground 
+                enableHover 
+                defaultValue={location.pathname} 
+                className="bg-text-primary/10 rounded-full"
+                transition={{ type: 'spring', stiffness: 200, damping: 20 }}
+              >
+                {primaryNav.map((item) => (
+                  <NavLink 
+                    key={item.path} 
+                    to={item.path} 
+                    data-id={item.path}
+                    onMouseEnter={() => {
+                      // Subtle haptic feedback if supported by device
+                      if (navigator.vibrate) navigator.vibrate(10);
+                    }}
+                    className={({ isActive }) => `
+                      relative px-5 py-2 rounded-full text-sm font-bold tracking-widest uppercase transition-all duration-300
+                      ${isActive ? 'text-text-primary' : 'text-text-secondary hover:text-text-primary'}
+                    `}
+                    end={item.path === '/'}
+                  >
+                    <span className="relative z-10">{item.label}</span>
+                  </NavLink>
+                ))}
+              </AnimatedBackground>
             </nav>
           </div>
 

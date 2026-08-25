@@ -59,7 +59,6 @@ export class GoogleCloudService {
         timeline
       };
 
-      const fileContent = JSON.stringify(backupData);
       const fileMetadata = {
         name: 'katha_backup.json',
         parents: ['appDataFolder']
@@ -75,41 +74,31 @@ export class GoogleCloudService {
       const files = searchRes.result.files;
       const fileId = files && files.length > 0 ? files[0].id : null;
 
-      const boundary = '-------314159265358979323846';
-      const delimiter = "\r\n--" + boundary + "\r\n";
-      const close_delim = "\r\n--" + boundary + "--";
+      const form = new FormData();
+      form.append('metadata', new Blob([JSON.stringify(fileMetadata)], { type: 'application/json' }));
+      form.append('file', new Blob([JSON.stringify(backupData)], { type: 'application/json' }));
 
-      const multipartRequestBody =
-        delimiter +
-        'Content-Type: application/json\r\n\r\n' +
-        JSON.stringify(fileMetadata) +
-        delimiter +
-        'Content-Type: application/json\r\n\r\n' +
-        fileContent +
-        close_delim;
+      const token = gapi.client.getToken().access_token;
+      let url = 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
+      let method = 'POST';
 
-      let request;
       if (fileId) {
-        // Update existing file
-        request = gapi.client.request({
-          path: `/upload/drive/v3/files/${fileId}`,
-          method: 'PATCH',
-          params: { uploadType: 'multipart' },
-          headers: { 'Content-Type': `multipart/related; boundary=${boundary}` },
-          body: multipartRequestBody
-        });
-      } else {
-        // Create new file
-        request = gapi.client.request({
-          path: '/upload/drive/v3/files',
-          method: 'POST',
-          params: { uploadType: 'multipart' },
-          headers: { 'Content-Type': `multipart/related; boundary=${boundary}` },
-          body: multipartRequestBody
-        });
+        url = `https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=multipart`;
+        method = 'PATCH';
       }
 
-      await request;
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: form
+      });
+
+      if (!response.ok) {
+        throw new Error(`Cloud backup failed: ${response.statusText}`);
+      }
+
       console.log('Successfully backed up to Google Drive appDataFolder!');
     } catch (error) {
       console.error('Failed to backup to cloud', error);

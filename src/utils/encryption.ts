@@ -53,7 +53,7 @@ export const encryptData = async (data: string, password: string): Promise<strin
   buf.set(iv, salt.byteLength);
   buf.set(encryptedContentArr, salt.byteLength + iv.byteLength);
 
-  return btoa(String.fromCharCode.apply(null, Array.from(buf)));
+  return btoa(Array.from(buf).map(b => String.fromCharCode(b)).join(''));
 };
 
 export const decryptData = async (encryptedBase64: string, password: string): Promise<string> => {

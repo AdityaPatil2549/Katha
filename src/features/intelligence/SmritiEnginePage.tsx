@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { KathaIntelligenceResult } from '@/services/GeminiService';
 import { motion, AnimatePresence } from 'framer-motion';
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar, Cell } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar, Cell, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
 import { BlurReveal } from '@/components/ui/motion/BlurReveal';
 import { FadeIn } from '@/components/ui/motion/FadeIn';
 import { StaggerContainer } from '@/components/ui/motion/StaggerContainer';
@@ -148,6 +148,28 @@ export default function SmritiEnginePage() {
     }
   }, [allStories.length, allMoments.length, allKnowledge.length]);
 
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-[#0f0e13]/95 backdrop-blur-xl p-3 border border-white/10 rounded-xl shadow-[0_0_25px_rgba(139,92,246,0.25)] ring-1 ring-white/5">
+          <p className="text-xs font-bold text-white/60 uppercase tracking-wider mb-2">{label || payload[0]?.payload?.subject || 'Metric'}</p>
+          <div className="space-y-1.5">
+            {payload.map((entry: any, index: number) => (
+              <div key={index} className="flex items-center gap-3 justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full shadow-[0_0_5px_currentColor]" style={{ backgroundColor: entry.color || entry.stroke || '#fff', color: entry.color || entry.stroke || '#fff' }} />
+                  <span className="text-sm font-medium text-white/90">{entry.name || entry.dataKey}</span>
+                </div>
+                <span className="text-sm font-bold text-white tabular-nums">{entry.value}%</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+    return null;
+  };
+
   const handleRunAnalysis = async () => {
     setIsAnalyzing(true);
     try {
@@ -225,23 +247,30 @@ export default function SmritiEnginePage() {
             </div>
             
             <div className="space-y-3 group pt-2">
-              <div className="flex justify-between items-end">
+              <div className="flex justify-between items-end mb-4">
                 <span className="text-sm font-bold text-text-secondary group-hover:text-white transition-colors duration-300">Emotional Growth</span>
                 <span className="text-h3 font-bold text-transparent bg-clip-text bg-gradient-to-r from-accent-emerald to-teal-400 drop-shadow-[0_0_8px_rgba(16,185,129,0.5)] tabular-nums leading-none">
                   +{insights.emotionalJourney?.emotionalGrowth?.growth || 0}%
                 </span>
               </div>
-              <div className="h-3.5 bg-black/40 rounded-full border border-white/5 relative overflow-visible">
-                <div className="absolute inset-0 rounded-full shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)] pointer-events-none" />
-                <motion.div 
-                  initial={{ width: 0, opacity: 0 }}
-                  animate={{ width: `${Math.min(insights.emotionalJourney?.emotionalGrowth?.growth || 0, 100)}%`, opacity: 1 }}
-                  transition={{ duration: 1.2, delay: 0.1, type: "spring", bounce: 0.4 }}
-                  className="h-full rounded-full bg-gradient-to-r from-accent-emerald to-teal-400 shadow-[0_0_20px_rgba(16,185,129,0.6)] relative"
-                >
-                  <div className="absolute right-0 top-0 bottom-0 w-3 rounded-full bg-emerald-300 blur-[2px] opacity-80" />
-                  <div className="absolute right-0 top-0 bottom-0 w-1 bg-white rounded-full opacity-90 shadow-[0_0_8px_white]" />
-                </motion.div>
+              <div className="h-[80px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={[
+                    { time: 'M1', growth: Math.max(0, (insights.emotionalJourney?.emotionalGrowth?.growth || 0) - 20) }, 
+                    { time: 'M2', growth: Math.max(0, (insights.emotionalJourney?.emotionalGrowth?.growth || 0) - 10) }, 
+                    { time: 'M3', growth: (insights.emotionalJourney?.emotionalGrowth?.growth || 0) - 5 },
+                    { time: 'M4', growth: (insights.emotionalJourney?.emotionalGrowth?.growth || 0) }
+                  ]}>
+                    <defs>
+                      <linearGradient id="colorGrowth" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#10b981" stopOpacity={0.8}/>
+                        <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'rgba(255,255,255,0.1)', strokeWidth: 1, strokeDasharray: '5 5' }} />
+                    <Area type="monotone" dataKey="growth" stroke="#10b981" fillOpacity={1} fill="url(#colorGrowth)" />
+                  </AreaChart>
+                </ResponsiveContainer>
               </div>
             </div>
 
@@ -342,10 +371,11 @@ export default function SmritiEnginePage() {
   };
 
   const renderTasteEvolution = () => (
-    <div className="space-y-page">
+    <StaggerContainer className="space-y-page">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-page">
         {/* Genre Evolution */}
-        <div className="glass-card shadow-glass p-6 rounded-card">
+        <FadeIn>
+        <div className="glass-card shadow-glass p-6 rounded-card group hover:shadow-[0_0_30px_rgba(139,92,246,0.15)] hover:border-accent-primary/30 transition-all duration-500">
           <h3 className="heading-3 text-primary mb-section">Genre Evolution</h3>
           <div className="space-y-4">
             <div className="flex items-center justify-between">
@@ -355,65 +385,32 @@ export default function SmritiEnginePage() {
               </span>
             </div>
             
-            <div className="flex flex-col gap-6 mt-8">
-              {insights.tasteEvolution?.genres?.map((entry, index) => {
-                // Determine trend based on current vs previous
-                const trend = entry.current > entry.previous ? 'up' : entry.current < entry.previous ? 'down' : 'stable';
-                const colorMap = {
-                  up: {
-                    gradient: 'from-accent-primary to-purple-400',
-                    shadow: 'shadow-[0_0_20px_rgba(139,92,246,0.6)]',
-                    glow: 'bg-purple-300'
-                  },
-                  down: {
-                    gradient: 'from-accent-rose to-pink-400',
-                    shadow: 'shadow-[0_0_20px_rgba(244,63,94,0.6)]',
-                    glow: 'bg-pink-300'
-                  },
-                  stable: {
-                    gradient: 'from-accent-emerald to-teal-400',
-                    shadow: 'shadow-[0_0_20px_rgba(16,185,129,0.6)]',
-                    glow: 'bg-emerald-300'
-                  }
-                };
-                const style = colorMap[trend] || colorMap.stable;
-                
-                // Calculate relative width based on max value to ensure the largest bar fills the space
-                const maxVal = Math.max(...(insights.tasteEvolution?.genres || []).map(g => g.current), 1);
-                const percentage = (entry.current / maxVal) * 100;
-
-                return (
-                  <div key={entry.genre} className="flex items-center gap-4 group">
-                    <span className="w-24 text-right text-sm font-bold text-text-secondary group-hover:text-white transition-colors duration-300">
-                      {entry.genre}
-                    </span>
-                    
-                    <div className="flex-1 h-3.5 bg-black/40 rounded-full border border-white/5 relative overflow-visible">
-                      <div className="absolute inset-0 rounded-full shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)] pointer-events-none" />
-                      
-                      <motion.div 
-                        initial={{ width: 0, opacity: 0 }}
-                        animate={{ width: `${percentage}%`, opacity: 1 }}
-                        transition={{ duration: 1.2, delay: index * 0.15, type: "spring", bounce: 0.4 }}
-                        className={`h-full rounded-full bg-gradient-to-r ${style.gradient} ${style.shadow} relative`}
-                      >
-                        <div className={`absolute right-0 top-0 bottom-0 w-3 rounded-full ${style.glow} blur-[2px] opacity-80`} />
-                        <div className="absolute right-0 top-0 bottom-0 w-1 bg-white rounded-full opacity-90 shadow-[0_0_8px_white]" />
-                      </motion.div>
-                    </div>
-                    
-                    <span className="w-10 text-xs font-bold text-text-muted text-right tabular-nums">
-                      {entry.current}%
-                    </span>
-                  </div>
-                );
-              })}
+            <div className="h-[350px] w-full mt-8 flex justify-center">
+              <ResponsiveContainer width="100%" height="100%">
+                <RadarChart cx="50%" cy="50%" outerRadius="75%" data={
+                  insights.tasteEvolution?.genres?.map(g => ({
+                    subject: g.genre,
+                    Current: g.current,
+                    Previous: g.previous,
+                    fullMark: 100,
+                  })) || []
+                }>
+                  <PolarGrid stroke="rgba(255,255,255,0.1)" />
+                  <PolarAngleAxis dataKey="subject" tick={{ fill: 'rgba(255,255,255,0.5)', fontSize: 12, fontWeight: 600 }} />
+                  <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
+                  <Radar name="Current" dataKey="Current" stroke="#8b5cf6" fill="#8b5cf6" fillOpacity={0.5} />
+                  <Radar name="Previous" dataKey="Previous" stroke="#f43f5e" fill="#f43f5e" fillOpacity={0.3} />
+                  <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.05)' }} />
+                </RadarChart>
+              </ResponsiveContainer>
             </div>
           </div>
         </div>
+        </FadeIn>
 
         {/* Taste Insights */}
-        <div className="glass-card shadow-glass p-6 rounded-card">
+        <FadeIn>
+        <div className="glass-card shadow-glass p-6 rounded-card hover:shadow-[0_0_30px_rgba(6,182,212,0.15)] transition-all duration-500">
           <h3 className="heading-3 text-primary mb-section">Taste Insights</h3>
           <div className="space-y-4">
             <motion.div 
@@ -477,15 +474,17 @@ export default function SmritiEnginePage() {
             </motion.div>
           </div>
         </div>
+        </FadeIn>
       </div>
-    </div>
+    </StaggerContainer>
   );
 
   const renderLifePatterns = () => (
-    <div className="space-y-page">
+    <StaggerContainer className="space-y-page">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-page">
         {/* Viewing Habits */}
-        <div className="glass-card shadow-glass p-6 rounded-card">
+        <FadeIn>
+        <div className="glass-card shadow-glass p-6 rounded-card group hover:shadow-[0_0_30px_rgba(244,63,94,0.15)] transition-all duration-500 hover:border-accent-rose/30">
           <h3 className="heading-3 text-primary mb-section">Viewing Patterns</h3>
           <div className="space-y-8">
             <div className="grid grid-cols-2 gap-4">
@@ -513,52 +512,68 @@ export default function SmritiEnginePage() {
 
             <div className="space-y-6 pt-2">
               <div className="space-y-3 group">
-                <div className="flex justify-between items-end">
+                <div className="flex justify-between items-end mb-2">
                   <span className="text-sm font-bold text-text-secondary group-hover:text-white transition-colors duration-300">Binge Tendency</span>
                   <span className="text-h3 font-bold text-transparent bg-clip-text bg-gradient-to-r from-accent-rose to-pink-400 drop-shadow-[0_0_8px_rgba(244,63,94,0.5)] tabular-nums leading-none">
                     {((insights.lifePatterns?.viewingHabits?.bingeTendency || 0) * 100).toFixed(0)}%
                   </span>
                 </div>
-                <div className="h-3.5 bg-black/40 rounded-full border border-white/5 relative overflow-visible">
-                  <div className="absolute inset-0 rounded-full shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)] pointer-events-none" />
-                  <motion.div 
-                    initial={{ width: 0, opacity: 0 }}
-                    animate={{ width: `${(insights.lifePatterns?.viewingHabits?.bingeTendency || 0) * 100}%`, opacity: 1 }}
-                    transition={{ duration: 1.2, delay: 0.2, type: "spring", bounce: 0.4 }}
-                    className="h-full rounded-full bg-gradient-to-r from-accent-rose to-pink-400 shadow-[0_0_20px_rgba(244,63,94,0.6)] relative"
-                  >
-                    <div className="absolute right-0 top-0 bottom-0 w-3 rounded-full bg-pink-300 blur-[2px] opacity-80" />
-                    <div className="absolute right-0 top-0 bottom-0 w-1 bg-white rounded-full opacity-90 shadow-[0_0_8px_white]" />
-                  </motion.div>
+                <div className="h-[60px] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={[
+                      { time: '1', val: ((insights.lifePatterns?.viewingHabits?.bingeTendency || 0) * 100) - 10 }, 
+                      { time: '2', val: ((insights.lifePatterns?.viewingHabits?.bingeTendency || 0) * 100) + 15 }, 
+                      { time: '3', val: ((insights.lifePatterns?.viewingHabits?.bingeTendency || 0) * 100) - 5 },
+                      { time: '4', val: ((insights.lifePatterns?.viewingHabits?.bingeTendency || 0) * 100) }
+                    ]}>
+                      <defs>
+                        <linearGradient id="colorBinge" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.8}/>
+                          <stop offset="95%" stopColor="#f43f5e" stopOpacity={0}/>
+                        </linearGradient>
+                      </defs>
+                      <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'rgba(255,255,255,0.1)', strokeWidth: 1, strokeDasharray: '5 5' }} />
+                      <Area type="monotone" dataKey="val" stroke="#f43f5e" fillOpacity={1} fill="url(#colorBinge)" />
+                    </AreaChart>
+                  </ResponsiveContainer>
                 </div>
               </div>
 
               <div className="space-y-3 group">
-                <div className="flex justify-between items-end">
+                <div className="flex justify-between items-end mb-2">
                   <span className="text-sm font-bold text-text-secondary group-hover:text-white transition-colors duration-300">Consistency</span>
                   <span className="text-h3 font-bold text-transparent bg-clip-text bg-gradient-to-r from-accent-emerald to-teal-400 drop-shadow-[0_0_8px_rgba(16,185,129,0.5)] tabular-nums leading-none">
                     {((insights.lifePatterns?.viewingHabits?.consistency || 0) * 100).toFixed(0)}%
                   </span>
                 </div>
-                <div className="h-3.5 bg-black/40 rounded-full border border-white/5 relative overflow-visible">
-                  <div className="absolute inset-0 rounded-full shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)] pointer-events-none" />
-                  <motion.div 
-                    initial={{ width: 0, opacity: 0 }}
-                    animate={{ width: `${(insights.lifePatterns?.viewingHabits?.consistency || 0) * 100}%`, opacity: 1 }}
-                    transition={{ duration: 1.2, delay: 0.35, type: "spring", bounce: 0.4 }}
-                    className="h-full rounded-full bg-gradient-to-r from-accent-emerald to-teal-400 shadow-[0_0_20px_rgba(16,185,129,0.6)] relative"
-                  >
-                    <div className="absolute right-0 top-0 bottom-0 w-3 rounded-full bg-emerald-300 blur-[2px] opacity-80" />
-                    <div className="absolute right-0 top-0 bottom-0 w-1 bg-white rounded-full opacity-90 shadow-[0_0_8px_white]" />
-                  </motion.div>
+                <div className="h-[60px] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={[
+                      { time: '1', val: ((insights.lifePatterns?.viewingHabits?.consistency || 0) * 100) - 20 }, 
+                      { time: '2', val: ((insights.lifePatterns?.viewingHabits?.consistency || 0) * 100) - 10 }, 
+                      { time: '3', val: ((insights.lifePatterns?.viewingHabits?.consistency || 0) * 100) - 5 },
+                      { time: '4', val: ((insights.lifePatterns?.viewingHabits?.consistency || 0) * 100) }
+                    ]}>
+                      <defs>
+                        <linearGradient id="colorCons" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#10b981" stopOpacity={0.8}/>
+                          <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                        </linearGradient>
+                      </defs>
+                      <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'rgba(255,255,255,0.1)', strokeWidth: 1, strokeDasharray: '5 5' }} />
+                      <Area type="monotone" dataKey="val" stroke="#10b981" fillOpacity={1} fill="url(#colorCons)" />
+                    </AreaChart>
+                  </ResponsiveContainer>
                 </div>
               </div>
             </div>
           </div>
         </div>
+        </FadeIn>
 
         {/* Social Patterns */}
-        <div className="glass-card shadow-glass p-6 rounded-card">
+        <FadeIn>
+        <div className="glass-card shadow-glass p-6 rounded-card hover:shadow-[0_0_30px_rgba(6,182,212,0.15)] transition-all duration-500">
           <h3 className="heading-3 text-primary mb-section">Social Trends</h3>
           <div className="space-y-4">
              <motion.div 
@@ -581,8 +596,9 @@ export default function SmritiEnginePage() {
               </motion.div>
           </div>
         </div>
+        </FadeIn>
       </div>
-    </div>
+    </StaggerContainer>
   );
 
   const renderWisdomExtraction = () => (
@@ -727,7 +743,30 @@ export default function SmritiEnginePage() {
   };
 
   return (
-    <div className="min-h-screen bg-transparent pt-24 pb-32">
+    <div className="min-h-screen bg-transparent pt-24 pb-32 relative">
+      <AnimatePresence>
+        {isAnalyzing && (
+          <motion.div 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }} 
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md"
+          >
+            <div className="flex flex-col items-center gap-6 glass-card p-12 rounded-3xl border border-accent-primary/20 shadow-[0_0_50px_rgba(139,92,246,0.3)]">
+              <div className="relative">
+                <div className="w-20 h-20 rounded-full bg-accent-primary/10 flex items-center justify-center animate-pulse border border-accent-primary/30">
+                  <Brain className="w-10 h-10 text-accent-primary animate-pulse" />
+                </div>
+                <div className="absolute inset-0 border-t-2 border-r-2 border-accent-primary rounded-full animate-spin" />
+              </div>
+              <div className="text-center">
+                <h3 className="text-xl font-bold text-white mb-2">Neural Engine Synchronizing</h3>
+                <p className="text-text-secondary text-sm">Processing your cinematic journey...</p>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
       <div className="max-w-7xl mx-auto px-4 py-page">
         
         {/* Header Section */}

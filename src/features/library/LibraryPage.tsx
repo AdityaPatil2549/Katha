@@ -23,6 +23,7 @@ import { StaggerContainer, staggerItemVariants } from '@/components/ui/motion/St
 import { BlurReveal } from '@/components/ui/motion/BlurReveal';
 import { Dropdown } from '@/components/ui/Dropdown';
 import { Magnetic } from '@/components/ui/motion/Magnetic';
+import { Tilt } from '@/components/ui/motion/Tilt';
 
 export default function LibraryPage() {
   const navigate = useNavigate();
@@ -289,32 +290,34 @@ export default function LibraryPage() {
             >
               {viewMode === 'grid' ? (
                 <div className="space-y-5">
-                  <div className="aspect-[2/3] bg-midnight-surface/30 rounded-[2rem] relative overflow-hidden border border-midnight-border/30 shadow-card transition-shadow duration-500 group-hover:shadow-soft">
-                    {story.posterUrl ? (
-                      <img src={story.posterUrl} alt={story.title} className="w-full h-full object-cover transition-transform duration-1000 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] group-hover:scale-105" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-text-muted bg-midnight-surface/50">
-                        <BookOpen className="w-10 h-10 opacity-20" />
+                  <Tilt rotationFactor={8} isRevese>
+                    <div className="aspect-[2/3] bg-midnight-surface/30 rounded-[2rem] relative overflow-hidden border border-midnight-border/30 shadow-card transition-shadow duration-500 group-hover:shadow-soft">
+                      {story.posterUrl ? (
+                        <img src={story.posterUrl} alt={story.title} className="w-full h-full object-cover transition-transform duration-1000 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] group-hover:scale-105" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-text-muted bg-midnight-surface/50">
+                          <BookOpen className="w-10 h-10 opacity-20" />
+                        </div>
+                      )}
+                      
+                      {/* Dark gradient overlay for icons */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-midnight-bg/60 via-transparent to-midnight-bg/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                      
+                      <div className="absolute top-4 right-4 flex flex-col gap-3 z-10 [transform:translateZ(30px)]">
+                        {story.favorite && <Heart className="w-5 h-5 text-accent-rose fill-current drop-shadow-md" />}
+                        <div className={`flex items-center justify-center w-8 h-8 rounded-full bg-midnight-bg/80 backdrop-blur-md shadow-sm ${getStatusColor(story.status)}`}>
+                          {getStatusIcon(story.status)}
+                        </div>
                       </div>
-                    )}
-                    
-                    {/* Dark gradient overlay for icons */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-midnight-bg/60 via-transparent to-midnight-bg/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                    
-                    <div className="absolute top-4 right-4 flex flex-col gap-3 z-10">
-                      {story.favorite && <Heart className="w-5 h-5 text-accent-rose fill-current drop-shadow-md" />}
-                      <div className={`flex items-center justify-center w-8 h-8 rounded-full bg-midnight-bg/80 backdrop-blur-md shadow-sm ${getStatusColor(story.status)}`}>
-                        {getStatusIcon(story.status)}
-                      </div>
+                      {pendingIds.includes(story.id) && (
+                        <div className="absolute top-4 left-4 z-10 p-2 bg-midnight-bg/80 backdrop-blur-md rounded-full border border-midnight-border/50 shadow-sm [transform:translateZ(30px)]">
+                        <div title="Pending Sync">
+                          <Cloud className="w-4 h-4 text-accent-cyan animate-pulse" />
+                        </div>
+                        </div>
+                      )}
                     </div>
-                    {pendingIds.includes(story.id) && (
-                      <div className="absolute top-4 left-4 z-10 p-2 bg-midnight-bg/80 backdrop-blur-md rounded-full border border-midnight-border/50 shadow-sm">
-                      <div title="Pending Sync">
-                        <Cloud className="w-4 h-4 text-accent-cyan animate-pulse" />
-                      </div>
-                      </div>
-                    )}
-                  </div>
+                  </Tilt>
                   
                   {/* Story Info (Grid) */}
                   <div className="space-y-2">

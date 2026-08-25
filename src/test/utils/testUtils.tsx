@@ -1,5 +1,6 @@
 import { render, RenderOptions } from '@testing-library/react';
 import { ReactElement } from 'react';
+import { MemoryRouter } from 'react-router-dom';
 
 // Custom render function with providers
 const customRender = (
@@ -7,9 +8,14 @@ const customRender = (
   options?: Omit<RenderOptions, 'wrapper'>
 ) => {
   // Add any global providers here if needed
-  return render(ui, {
-    ...options,
-  });
+  return render(
+    <MemoryRouter>
+      {ui}
+    </MemoryRouter>,
+    {
+      ...options,
+    }
+  );
 };
 
 // Re-export everything from testing-library

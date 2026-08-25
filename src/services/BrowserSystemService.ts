@@ -55,7 +55,9 @@ export class BrowserSystemService implements SystemService {
       try {
         const cacheNames = await caches.keys();
         await Promise.all(
-          cacheNames.map(cacheName => caches.delete(cacheName))
+          cacheNames
+            .filter(name => !name.startsWith('workbox'))
+            .map(cacheName => caches.delete(cacheName))
         );
       } catch (error) {
         console.warn('Failed to clear cache:', error);

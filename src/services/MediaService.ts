@@ -183,16 +183,21 @@ class MediaService {
         ratings.tmdb = tmdbDetails.vote_average;
       } else if (type === 'tv') {
         // Fallback to TVMaze
-        const tvmazeRes = await tvmazeService.search(idOrTitle.toString());
-        if (!tvmazeRes.length) return null;
-        const show = tvmazeRes[0]!.show;
-        
-        title = show.name;
-        releaseYear = show.premiered ? parseInt(show.premiered.split('-')[0]!, 10) : null;
-        posterUrl = show.image?.original ?? show.image?.medium ?? null;
-        overview = show.summary?.replace(/<[^>]+>/g, '') ?? ''; // strip html
-        genres = show.genres ?? [];
-        ratings.tmdb = show.rating?.average ?? undefined; // store under tmdb for compatibility
+        try {
+          const tvmazeRes = await tvmazeService.search(idOrTitle.toString());
+          if (!tvmazeRes.length) return null;
+          const show = tvmazeRes[0]!.show;
+          
+          title = show.name;
+          releaseYear = show.premiered ? parseInt(show.premiered.split('-')[0]!, 10) : null;
+          posterUrl = show.image?.original ?? show.image?.medium ?? null;
+          overview = show.summary?.replace(/<[^>]+>/g, '') ?? ''; // strip html
+          genres = show.genres ?? [];
+          ratings.tmdb = show.rating?.average ?? undefined; // store under tmdb for compatibility
+        } catch (e) {
+          console.warn('TVMaze fallback failed:', e);
+          return null;
+        }
       } else {
         return null;
       }
@@ -238,16 +243,20 @@ class MediaService {
       }
 
       if (!animeFound) {
-        const res = await kitsuService.search(searchStr);
-        if (res.length > 0) {
-          const anime = res[0]!;
-          title = anime.attributes.titles.en ?? anime.attributes.canonicalTitle;
-          releaseYear = anime.attributes.startDate ? parseInt(anime.attributes.startDate.split('-')[0]!, 10) : null;
-          posterUrl = anime.attributes.posterImage?.original ?? anime.attributes.posterImage?.large ?? '';
-          overview = anime.attributes.synopsis ?? '';
-          genres = []; // Kitsu doesn't return genres in the edge search payload natively without includes
-          ratings.tmdb = anime.attributes.averageRating ? parseFloat(anime.attributes.averageRating) / 10 : undefined;
-          animeFound = true;
+        try {
+          const res = await kitsuService.search(searchStr);
+          if (res.length > 0) {
+            const anime = res[0]!;
+            title = anime.attributes.titles.en ?? anime.attributes.canonicalTitle;
+            releaseYear = anime.attributes.startDate ? parseInt(anime.attributes.startDate.split('-')[0]!, 10) : null;
+            posterUrl = anime.attributes.posterImage?.original ?? anime.attributes.posterImage?.large ?? '';
+            overview = anime.attributes.synopsis ?? '';
+            genres = []; // Kitsu doesn't return genres in the edge search payload natively without includes
+            ratings.tmdb = anime.attributes.averageRating ? parseFloat(anime.attributes.averageRating) / 10 : undefined;
+            animeFound = true;
+          }
+        } catch (e) {
+          console.warn('Kitsu fallback failed:', e);
         }
       }
 
@@ -255,16 +264,21 @@ class MediaService {
 
     } else if (type === 'game') {
       // Falls back to title search — best available without a dedicated ID endpoint.
-      const res = await rawgService.search(idOrTitle.toString());
-      if (!res.length) return null;
-      const game = res[0]!;
+      try {
+        const res = await rawgService.search(idOrTitle.toString());
+        if (!res.length) return null;
+        const game = res[0]!;
 
-      title = game.name;
-      releaseYear = game.released ? parseInt(game.released.split('-')[0]!, 10) : null;
-      posterUrl = game.background_image ?? '';
-      overview = 'Video Game';
-      genres = game.genres?.map(g => g.name) ?? [];
-      ratings.metacritic = game.metacritic?.toString();
+        title = game.name;
+        releaseYear = game.released ? parseInt(game.released.split('-')[0]!, 10) : null;
+        posterUrl = game.background_image ?? '';
+        overview = 'Video Game';
+        genres = game.genres?.map(g => g.name) ?? [];
+        ratings.metacritic = game.metacritic?.toString();
+      } catch (e) {
+        console.warn('RAWG fetch failed:', e);
+        return null;
+      }
     }
 
     // ── 2. Concurrently enrich with MDBList ratings, Fanart poster, + YouTube trailer ────────────

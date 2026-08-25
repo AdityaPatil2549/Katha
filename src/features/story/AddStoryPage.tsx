@@ -4,6 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { BlurReveal } from '@/components/ui/motion/BlurReveal';
 import { FadeIn } from '@/components/ui/motion/FadeIn';
 import { StaggerContainer } from '@/components/ui/motion/StaggerContainer';
+import { GlowEffect } from '@/components/ui/motion/GlowEffect';
+import { Magnetic } from '@/components/ui/motion/Magnetic';
 import { Dropdown } from '@/components/ui/Dropdown';
 import { 
   Save, 
@@ -1115,15 +1117,26 @@ export default function AddStoryPage() {
                 >
                   <Clock className="w-4 h-4" /> Save + Session
                 </button>
-                <button
-                  type="button"
-                  onClick={() => handleSubmit('save')}
-                  disabled={isSubmitting}
-                  className="btn btn-primary px-8 py-3 rounded-xl flex items-center gap-2 shadow-[0_4px_20px_rgba(99,102,241,0.3)] hover:scale-105 transition-transform"
-                >
-                  <Save className="w-5 h-5" />
-                  {isSubmitting ? 'Saving...' : 'Save Story'}
-                </button>
+                <Magnetic>
+                  <div className="relative">
+                    <GlowEffect
+                      colors={['#0894FF', '#C959DD', '#FF2E54', '#FF9004']}
+                      mode="colorShift"
+                      blur="soft"
+                      duration={3}
+                      scale={1.1}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleSubmit('save')}
+                      disabled={isSubmitting}
+                      className="btn btn-primary px-8 py-3 rounded-xl flex items-center gap-2 shadow-[0_4px_20px_rgba(99,102,241,0.3)] hover:scale-105 transition-transform relative z-10"
+                    >
+                      <Save className="w-5 h-5" />
+                      {isSubmitting ? 'Saving...' : 'Save Story'}
+                    </button>
+                  </div>
+                </Magnetic>
               </div>
             )}
           </div>

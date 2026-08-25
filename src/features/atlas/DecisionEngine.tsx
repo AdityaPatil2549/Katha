@@ -238,43 +238,46 @@ export function DecisionEngine() {
 
   if (step === 'analysis') {
     return (
-      <div className="min-h-screen bg-gradient-midnight flex items-center justify-center p-page">
+      <div className="min-h-screen bg-transparent flex items-center justify-center p-page">
         <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
+          initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="surface-elevated rounded-2xl p-8 max-w-md w-full text-center"
+          transition={{ duration: 0.25, ease: 'easeOut' }}
+          className="glass-card shadow-glass rounded-3xl p-10 max-w-lg w-full text-center border border-accent-primary/20 relative overflow-hidden"
         >
-          <div className="mb-6">
-            <Brain className="w-16 h-16 text-accent-primary mx-auto mb-4 animate-pulse" />
-            <h2 className="text-2xl font-bold text-text-primary mb-2">Analyzing Your Request</h2>
-            <p className="text-text-primary/70">Finding the perfect story for your needs...</p>
+          <div className="absolute inset-0 bg-gradient-to-br from-accent-primary/5 to-purple-600/5" />
+          <div className="relative z-10 mb-8">
+            <div className="relative w-20 h-20 mx-auto mb-6">
+              <div className="absolute inset-0 rounded-full bg-accent-primary/20 flex items-center justify-center animate-pulse shadow-[0_0_30px_rgba(139,92,246,0.3)]">
+                <Brain className="w-10 h-10 text-accent-primary" />
+              </div>
+              <div className="absolute inset-0 border-t-2 border-r-2 border-accent-primary rounded-full animate-spin" style={{ animationDuration: '2s' }} />
+            </div>
+            <h2 className="text-2xl font-bold text-white mb-2">Neural Engine Synthesizing</h2>
+            <p className="text-text-secondary">Extracting intelligence from the Atlas...</p>
           </div>
 
-          <div className="space-y-4 mb-6">
-            <div className="flex items-center gap-3">
-              <Lightbulb className="w-5 h-5 text-amber" />
-              <span className="text-text-primary/60">Processing your question</span>
+          <div className="relative z-10 space-y-4 mb-8">
+            <div className="flex items-center gap-4">
+              <Lightbulb className="w-5 h-5 text-amber animate-pulse" />
+              <div className="h-4 bg-white/10 rounded-full animate-pulse w-3/4"></div>
             </div>
-            <div className="flex items-center gap-3">
-              <Heart className="w-5 h-5 text-rose" />
-              <span className="text-text-primary/60">Analyzing emotional context</span>
+            <div className="flex items-center gap-4">
+              <Heart className="w-5 h-5 text-rose animate-pulse" style={{ animationDelay: '200ms' }} />
+              <div className="h-4 bg-white/10 rounded-full animate-pulse w-2/3" style={{ animationDelay: '200ms' }}></div>
             </div>
-            <div className="flex items-center gap-3">
-              <Target className="w-5 h-5 text-emerald" />
-              <span className="text-text-primary/60">Matching with Atlas database</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <Sparkles className="w-5 h-5 text-cyan" />
-              <span className="text-text-primary/60">Generating recommendations</span>
+            <div className="flex items-center gap-4">
+              <Target className="w-5 h-5 text-emerald animate-pulse" style={{ animationDelay: '400ms' }} />
+              <div className="h-4 bg-white/10 rounded-full animate-pulse w-5/6" style={{ animationDelay: '400ms' }}></div>
             </div>
           </div>
 
-          <div className="w-full bg-midnight-border rounded-full h-2">
+          <div className="relative z-10 w-full bg-black/40 rounded-full h-1.5 overflow-hidden">
             <motion.div
-              className="h-full bg-gradient-cyan rounded-full"
+              className="h-full bg-gradient-to-r from-accent-primary to-purple-400 rounded-full"
               initial={{ width: '0%' }}
               animate={{ width: '100%' }}
-              transition={{ duration: 3 }}
+              transition={{ duration: 3, ease: "linear" }}
             />
           </div>
         </motion.div>
@@ -350,7 +353,7 @@ export function DecisionEngine() {
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
+                transition={{ duration: 0.25, ease: 'easeOut', delay: 0.2 }}
               >
                 <h2 className="text-2xl font-bold text-text-primary mb-6">Recommended Stories</h2>
             
@@ -360,12 +363,18 @@ export function DecisionEngine() {
                   key={entry.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1 * index }}
+                  transition={{ duration: 0.25, ease: 'easeOut', delay: 0.1 * index }}
                   whileHover={{ scale: 1.02 }}
-                  className="surface-elevated rounded-xl p-6 hover:surface-hover transition-all cursor-pointer"
+                  whileTap={{ scale: 0.98 }}
+                  className={`surface-elevated rounded-xl p-6 hover:surface-hover transition-all cursor-pointer relative overflow-hidden group ${
+                    index === 0 ? 'ring-2 ring-accent-primary shadow-[0_0_20px_rgba(139,92,246,0.3)]' : ''
+                  }`}
                   onClick={() => window.open(`/atlas?entry=${entry.id}`, '_blank')}
                 >
-                  <div className="flex items-start justify-between mb-4">
+                  {index === 0 && (
+                    <div className="absolute inset-0 bg-gradient-to-br from-accent-primary/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  )}
+                  <div className="flex items-start justify-between mb-4 relative z-10">
                     <div className="flex items-center gap-2">
                       {getCategoryIcon(entry.category)}
                       <span className="text-sm text-text-primary/60 capitalize">{entry.category}</span>
@@ -418,16 +427,19 @@ export function DecisionEngine() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
+            transition={{ duration: 0.25, ease: 'easeOut', delay: 0.4 }}
             className="mt-8"
           >
-            <div className="surface-elevated rounded-xl p-6">
-              <h3 className="text-lg font-semibold text-text-primary mb-4">Enhancement Tips</h3>
-              <div className="grid gap-3 md:grid-cols-3">
+            <div className="surface-elevated rounded-xl p-8 border border-white/5 relative overflow-hidden">
+              <div className="absolute right-0 top-0 w-32 h-32 bg-amber/5 rounded-full blur-[40px] pointer-events-none" />
+              <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                <Lightbulb className="w-5 h-5 text-amber" />
+                Enhancement Tips
+              </h3>
+              <div className="grid gap-4 md:grid-cols-3">
                 {result.alternatives.map((alternative, index) => (
-                  <div key={index} className="flex items-start gap-2">
-                    <Lightbulb className="w-4 h-4 text-amber mt-0.5 flex-shrink-0" />
-                    <span className="text-sm text-text-primary/70">{alternative}</span>
+                  <div key={index} className="flex items-start gap-3 p-4 bg-black/20 rounded-lg border border-white/5 hover:border-amber/20 transition-colors">
+                    <span className="text-sm font-medium text-text-primary/90 leading-relaxed">{alternative}</span>
                   </div>
                 ))}
               </div>
@@ -520,10 +532,10 @@ export function DecisionEngine() {
                       <button
                         key={mood.value}
                         onClick={() => setDecisionRequest({...decisionRequest, mood: mood.value})}
-                        className={`p-3 rounded-xl border transition-all ${
+                        className={`p-3 rounded-xl border transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] ${
                           decisionRequest.mood === mood.value
-                            ? 'border-accent-primary bg-accent-primary/20 text-text-primary'
-                            : 'border-midnight-border text-text-primary/60 hover:border-text-primary/40'
+                            ? 'border-accent-primary bg-accent-primary/20 text-white shadow-[0_0_15px_rgba(139,92,246,0.3)]'
+                            : 'border-midnight-border text-text-primary/60 hover:border-text-primary/40 hover:bg-white/5'
                         }`}
                       >
                         <div className="text-2xl mb-1">{mood.icon}</div>
@@ -540,10 +552,10 @@ export function DecisionEngine() {
                       <button
                         key={option.value}
                         onClick={() => setDecisionRequest({...decisionRequest, timeAvailable: option.value})}
-                        className={`p-3 rounded-xl border transition-all ${
+                        className={`p-3 rounded-xl border transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] ${
                           decisionRequest.timeAvailable === option.value
-                            ? 'border-accent-primary bg-accent-primary/20 text-text-primary'
-                            : 'border-midnight-border text-text-primary/60 hover:border-text-primary/40'
+                            ? 'border-accent-primary bg-accent-primary/20 text-white shadow-[0_0_15px_rgba(139,92,246,0.3)]'
+                            : 'border-midnight-border text-text-primary/60 hover:border-text-primary/40 hover:bg-white/5'
                         }`}
                       >
                         <div className="text-sm">{option.label}</div>
@@ -559,10 +571,10 @@ export function DecisionEngine() {
                       <button
                         key={phase.value}
                         onClick={() => setDecisionRequest({...decisionRequest, lifePhase: phase.value})}
-                        className={`p-3 rounded-xl border transition-all ${
+                        className={`p-3 rounded-xl border transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] ${
                           decisionRequest.lifePhase === phase.value
-                            ? 'border-accent-primary bg-accent-primary/20 text-text-primary'
-                            : 'border-midnight-border text-text-primary/60 hover:border-text-primary/40'
+                            ? 'border-accent-primary bg-accent-primary/20 text-white shadow-[0_0_15px_rgba(139,92,246,0.3)]'
+                            : 'border-midnight-border text-text-primary/60 hover:border-text-primary/40 hover:bg-white/5'
                         }`}
                       >
                         <div className="text-sm">{phase.label}</div>
@@ -583,10 +595,10 @@ export function DecisionEngine() {
                             : [...decisionRequest.preferences, pref.value];
                           setDecisionRequest({...decisionRequest, preferences: newPrefs});
                         }}
-                        className={`p-3 rounded-xl border transition-all ${
+                        className={`p-3 rounded-xl border transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] ${
                           decisionRequest.preferences.includes(pref.value)
-                            ? 'border-accent-primary bg-accent-primary/20 text-text-primary'
-                            : 'border-midnight-border text-text-primary/60 hover:border-text-primary/40'
+                            ? 'border-accent-primary bg-accent-primary/20 text-white shadow-[0_0_15px_rgba(139,92,246,0.3)]'
+                            : 'border-midnight-border text-text-primary/60 hover:border-text-primary/40 hover:bg-white/5'
                         }`}
                       >
                         <div className="text-sm">{pref.label}</div>

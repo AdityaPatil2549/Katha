@@ -13,19 +13,19 @@ import {
 describe('Formatters', () => {
   describe('formatDate', () => {
     it('formats date string correctly', () => {
-      const date = '2024-01-15T10:30:00Z';
+      const date = '2024-01-15T10:30:00';
       expect(formatDate(date)).toBe('Jan 15, 2024');
     });
 
     it('formats Date object correctly', () => {
-      const date = new Date('2024-01-15T10:30:00Z');
+      const date = new Date('2024-01-15T10:30:00');
       expect(formatDate(date)).toBe('Jan 15, 2024');
     });
   });
 
   describe('formatDateTime', () => {
     it('formats date with time correctly', () => {
-      const date = '2024-01-15T10:30:00Z';
+      const date = '2024-01-15T10:30:00';
       expect(formatDateTime(date)).toBe('Jan 15, 2024 10:30');
     });
   });
@@ -62,7 +62,7 @@ describe('Formatters', () => {
     });
 
     it('formats days and hours correctly', () => {
-      expect(formatWatchTime(25 * 60 + 8)).toBe('1d 8h');
+      expect(formatWatchTime(25 * 60 + 8)).toBe('1d 1h');
     });
   });
 

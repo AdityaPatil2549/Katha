@@ -6,12 +6,15 @@ import { TextEffect } from '@/components/ui/motion/TextEffect';
 import { FadeIn } from '@/components/ui/motion/FadeIn';
 import { StaggerContainer } from '@/components/ui/motion/StaggerContainer';
 import { Magnetic } from '@/components/ui/motion/Magnetic';
+import { Tilt } from '@/components/ui/motion/Tilt';
+import { GlowEffect } from '@/components/ui/motion/GlowEffect';
+import { TextShimmer } from '@/components/ui/motion/TextShimmer';
 import { AtlasNavigation } from '@/components/atlas/AtlasNavigation';
 import { useStoriesStore, useMomentsStore } from '@/store';
 
 export function HomePage() {
   const navigate = useNavigate();
-  const { stories, loadStories } = useStoriesStore();
+  const { stories, loadStories, loading } = useStoriesStore();
   const { moments, loadMoments } = useMomentsStore();
   const [userName, setUserName] = useState('Explorer');
 
@@ -77,13 +80,22 @@ export function HomePage() {
               
               <FadeIn delay={0.9} className="flex items-center gap-6">
                 <Magnetic>
-                  <button 
-                    className="bg-high-contrast text-text-high-contrast hover:bg-text-secondary px-8 py-4 rounded-xl font-bold tracking-wide transition-transform hover:scale-105 active:scale-95 flex items-center gap-3 text-lg"
-                    onClick={() => navigate(`/story/${featuredStory.id}`)}
-                  >
-                    <Play className="w-6 h-6 fill-current" />
-                    Play Now
-                  </button>
+                  <div className="relative">
+                    <GlowEffect
+                      colors={['#0894FF', '#C959DD', '#FF2E54', '#FF9004']}
+                      mode="colorShift"
+                      blur="soft"
+                      duration={3}
+                      scale={1.1}
+                    />
+                    <button 
+                      className="bg-high-contrast text-text-high-contrast hover:bg-text-secondary px-8 py-4 rounded-xl font-bold tracking-wide transition-transform hover:scale-105 active:scale-95 flex items-center gap-3 text-lg relative z-10"
+                      onClick={() => navigate(`/story/${featuredStory.id}`)}
+                    >
+                      <Play className="w-6 h-6 fill-current" />
+                      Play Now
+                    </button>
+                  </div>
                 </Magnetic>
                 <Magnetic>
                   <button 
@@ -125,14 +137,23 @@ export function HomePage() {
               
               <FadeIn delay={0.9} className="flex flex-col sm:flex-row items-center gap-6">
                 <Magnetic>
-                  <button 
-                    className="bg-gradient-cyan text-midnight-bg px-10 py-5 rounded-[2rem] font-bold tracking-wide transition-all hover:scale-105 hover:shadow-glow-cyan active:scale-95 flex items-center gap-3 text-lg relative overflow-hidden group"
-                    onClick={() => navigate(`/add-story`)}
-                  >
-                    <div className="absolute inset-0 bg-white/20 translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300 ease-out" />
-                    <Plus className="w-6 h-6 relative z-10" />
-                    <span className="relative z-10">Add Your First Story</span>
-                  </button>
+                  <div className="relative">
+                    <GlowEffect
+                      colors={['#0894FF', '#C959DD', '#FF2E54', '#FF9004']}
+                      mode="colorShift"
+                      blur="soft"
+                      duration={3}
+                      scale={1.1}
+                    />
+                    <button 
+                      className="bg-gradient-cyan text-midnight-bg px-10 py-5 rounded-[2rem] font-bold tracking-wide transition-all hover:scale-105 hover:shadow-glow-cyan active:scale-95 flex items-center gap-3 text-lg relative overflow-hidden group z-10"
+                      onClick={() => navigate(`/add-story`)}
+                    >
+                      <div className="absolute inset-0 bg-white/20 translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300 ease-out" />
+                      <Plus className="w-6 h-6 relative z-10" />
+                      <span className="relative z-10">Add Your First Story</span>
+                    </button>
+                  </div>
                 </Magnetic>
               </FadeIn>
             </div>
@@ -157,7 +178,13 @@ export function HomePage() {
           </div>
           
           <div className="flex gap-4 overflow-x-auto pb-8 scrollbar-hide snap-x snap-mandatory">
-            {stories.length > 0 ? (
+            {loading ? (
+              <div className="w-full h-[157px] flex items-center justify-center border border-dashed border-midnight-border/50 rounded-xl">
+                <TextShimmer className="text-text-muted font-sans font-medium tracking-wide" duration={1.5}>
+                  Loading your stories...
+                </TextShimmer>
+              </div>
+            ) : stories.length > 0 ? (
               stories.slice(0, 10).map((item, index) => (
                 <motion.div 
                   key={item.id} 
@@ -170,22 +197,24 @@ export function HomePage() {
                   className="flex-none w-[280px] aspect-[16/9] bg-midnight-surface rounded-xl overflow-hidden cursor-pointer group snap-start relative shadow-card transition-all duration-300 hover:shadow-glow-cyan z-10 [transform-style:preserve-3d]"
                   onClick={() => navigate(`/story/${item.id}`)}
                 >
-                  <div className="absolute inset-0 bg-gradient-to-t from-midnight-bg via-midnight-bg/40 to-transparent z-10 opacity-90 group-hover:opacity-100 transition-opacity duration-700 [transform:translateZ(10px)]" />
-                  
-                  <div className="absolute bottom-0 left-0 right-0 p-5 z-20 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500 [transform:translateZ(30px)]">
-                    <motion.div layoutId={`story-title-${item.id}`} className="font-serif text-2xl font-bold text-text-primary leading-tight mb-2 truncate">{item.title}</motion.div>
-                    <div className="flex items-center gap-3 text-xs font-bold text-text-secondary uppercase tracking-wider">
-                      <span className="text-accent-cyan">{item.category}</span>
-                      <span>•</span>
-                      <span className="text-accent-amber">{item.rating ? `${item.rating}/10` : 'No Rating'}</span>
+                  <Tilt rotationFactor={8} isRevese>
+                    <div className="absolute inset-0 bg-gradient-to-t from-midnight-bg via-midnight-bg/40 to-transparent z-10 opacity-90 group-hover:opacity-100 transition-opacity duration-700 [transform:translateZ(10px)]" />
+                    
+                    <div className="absolute bottom-0 left-0 right-0 p-5 z-20 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500 [transform:translateZ(30px)]">
+                      <motion.div layoutId={`story-title-${item.id}`} className="font-serif text-2xl font-bold text-text-primary leading-tight mb-2 truncate">{item.title}</motion.div>
+                      <div className="flex items-center gap-3 text-xs font-bold text-text-secondary uppercase tracking-wider">
+                        <span className="text-accent-cyan">{item.category}</span>
+                        <span>•</span>
+                        <span className="text-accent-amber">{item.rating ? `${item.rating}/10` : 'No Rating'}</span>
+                      </div>
                     </div>
-                  </div>
-                  
-                  <div className="absolute inset-0 z-30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 bg-midnight-bg/20 backdrop-blur-sm [transform:translateZ(50px)]">
-                    <div className="bg-high-contrast text-text-high-contrast rounded-full p-4 transform scale-75 group-hover:scale-100 transition-transform duration-500 shadow-glow">
-                      <Play className="w-6 h-6 fill-current ml-1" />
+                    
+                    <div className="absolute inset-0 z-30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 bg-midnight-bg/20 backdrop-blur-sm [transform:translateZ(50px)]">
+                      <div className="bg-high-contrast text-text-high-contrast rounded-full p-4 transform scale-75 group-hover:scale-100 transition-transform duration-500 shadow-glow">
+                        <Play className="w-6 h-6 fill-current ml-1" />
+                      </div>
                     </div>
-                  </div>
+                  </Tilt>
                 </motion.div>
               ))
             ) : (

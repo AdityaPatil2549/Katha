@@ -122,6 +122,7 @@ class GeminiService {
         'analyze_intelligence_taste',
         'analyze_intelligence_life',
         'analyze_intelligence_wisdom',
+        'analyze_intelligence_predictions'
       ] as const;
 
       const settled = await Promise.allSettled(
@@ -130,7 +131,7 @@ class GeminiService {
         )
       );
 
-      const [emotion, taste, life, wisdom] = settled.map(r =>
+      const [emotion, taste, life, wisdom, predictions] = settled.map(r =>
         r.status === 'fulfilled' ? r.value : null
       );
 
@@ -139,7 +140,7 @@ class GeminiService {
         tasteEvolution: taste,
         lifePatterns: life,
         wisdomExtraction: wisdom,
-        predictions: {
+        predictions: predictions || {
           nextFavoriteGenre: 'Unknown',
           emotionalReadiness: 'High',
           optimalWatchTime: 'Evening',

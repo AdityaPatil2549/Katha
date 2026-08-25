@@ -27,7 +27,7 @@ class WatchmodeService {
       const typeStr = type === 'movie' ? 'movie' : 'tv';
       // Watchmode requires the ID to be prefixed with 'tmdb_' or similar, or they have a title search endpoint.
       // The Title Details endpoint: /title/tmdb_{type}_{id}/details/
-      const endpoint = `${BASE_URL}?path=/title/${typeStr}-${tmdbId}/sources/&regions=US`;
+      const endpoint = `${BASE_URL}?path=/title/tmdb_${typeStr}-${tmdbId}/sources/&regions=US`;
       
       const response = await fetch(endpoint);
       if (!response.ok) {
