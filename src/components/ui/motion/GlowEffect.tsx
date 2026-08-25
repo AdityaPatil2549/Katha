@@ -45,19 +45,12 @@ export function GlowEffect({
 
   const animations = {
     rotate: {
-      background: [
-        `conic-gradient(from 0deg at 50% 50%, ${colors.join(', ')})`,
-        `conic-gradient(from 360deg at 50% 50%, ${colors.join(', ')})`,
-      ],
+      rotate: [0, 360],
       transition: {
         ...(transition ?? BASE_TRANSITION),
       },
     },
     pulse: {
-      background: colors.map(
-        (color) =>
-          `radial-gradient(circle at 50% 50%, ${color} 0%, transparent 100%)`
-      ),
       scale: [1 * scale, 1.1 * scale, 1 * scale],
       opacity: [0.5, 0.8, 0.5],
       transition: {
@@ -68,13 +61,8 @@ export function GlowEffect({
       },
     },
     breathe: {
-      background: [
-        ...colors.map(
-          (color) =>
-            `radial-gradient(circle at 50% 50%, ${color} 0%, transparent 100%)`
-        ),
-      ],
       scale: [1 * scale, 1.05 * scale, 1 * scale],
+      opacity: [0.7, 1, 0.7],
       transition: {
         ...(transition ?? {
           ...BASE_TRANSITION,
@@ -83,10 +71,7 @@ export function GlowEffect({
       },
     },
     colorShift: {
-      background: colors.map((color, index) => {
-        const nextColor = colors[(index + 1) % colors.length];
-        return `conic-gradient(from 0deg at 50% 50%, ${color} 0%, ${nextColor} 50%, ${color} 100%)`;
-      }),
+      backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
       transition: {
         ...(transition ?? {
           ...BASE_TRANSITION,
@@ -95,10 +80,7 @@ export function GlowEffect({
       },
     },
     flowHorizontal: {
-      background: colors.map((color) => {
-        const nextColor = colors[(colors.indexOf(color) + 1) % colors.length];
-        return `linear-gradient(to right, ${color}, ${nextColor})`;
-      }),
+      backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
       transition: {
         ...(transition ?? {
           ...BASE_TRANSITION,
@@ -106,9 +88,23 @@ export function GlowEffect({
         }),
       },
     },
-    static: {
-      background: `linear-gradient(to right, ${colors.join(', ')})`,
-    },
+    static: {},
+  };
+
+  const getStaticBackground = () => {
+    switch (mode) {
+      case 'rotate':
+        return `conic-gradient(from 0deg at 50% 50%, ${colors.join(', ')})`;
+      case 'pulse':
+      case 'breathe':
+        return `radial-gradient(circle at 50% 50%, ${colors[0]} 0%, transparent 100%)`;
+      case 'colorShift':
+      case 'flowHorizontal':
+      case 'static':
+        return `linear-gradient(to right, ${colors.join(', ')})`;
+      default:
+        return undefined;
+    }
   };
 
   const getBlurClass = (blur: GlowEffectProps['blur']) => {
@@ -137,6 +133,8 @@ export function GlowEffect({
           '--scale': scale,
           willChange: 'transform',
           backfaceVisibility: 'hidden',
+          background: getStaticBackground(),
+          backgroundSize: (mode === 'colorShift' || mode === 'flowHorizontal') ? '200% 200%' : undefined,
         } as React.CSSProperties
       }
       animate={animations[mode]}
