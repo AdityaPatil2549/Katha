@@ -3,7 +3,7 @@
 ## 🚀 Live Application
 
 Experience Katha right now, fully deployed and optimized:
-👉 **[Launch Katha on Firebase](https://katha-9eda9.web.app)**
+👉 **[Launch Katha on Vercel](https://katha.vercel.app)**
 
 *Note: Katha is an offline-first PWA. Once you visit the site, it caches the core assets, meaning it will load instantly even if you lose your internet connection.*
 
@@ -21,7 +21,7 @@ We believe that the stories you consume shape who you become. Katha helps you tr
 
 ### 🧠 Smriti Intelligence Engine
 
-At the core of Katha is **Smriti** — a local intelligence engine that analyzes your consumption patterns.
+At the core of Katha is **Smriti** — an advanced intelligence engine powered by Google Gemini that analyzes your consumption patterns.
 
 * 🎭 **Emotional Tracking:** Map how specific genres or media affect your mood over time.
 * ⚡ **Impact Index:** A proprietary scoring system (1-100) that calculates how deeply a story resonated with your life.
@@ -57,22 +57,22 @@ Katha features a custom, ultra-premium design system built on top of Tailwind CS
 
 * **Canvas:** Deep midnight black (`#04050C` / `#0B0C14`).
 * **Surfaces:** Translucent glassmorphism with dynamic ambient glows and deep drop shadows.
+* **Motion Primitives:** Hardware-accelerated cinematic animations including *Magnetic* buttons, *Tilt* physics on story cards, *GlowEffects*, and a custom *Cinematic Cursor*.
 * **Neon Accents:**
   * 🟣 **Violet** (Wisdom & Intelligence)
   * 🔵 **Cyan** (Memory & Discovery)
   * 🔴 **Rose** (Emotion & Heart)
   * 🟢 **Emerald** (Growth & Action)
-* **Motion:** Magnetic cursors, staggered blur reveals, fluid spring animations, and text-reveal effects. No harsh cuts; everything flows.
 
 <br/>
 
-## 🔒 100% Privacy. Zero Cloud.
+## 🔒 Security & Privacy
 
-We believe your personal stories and emotional data are intimately yours. Katha is built as a **Local-First PWA (Progressive Web App)**.
+We believe your personal stories and emotional data are intimately yours. Katha is built with strict privacy and security standards.
 
-* 🛡️ **No Servers:** Your data never leaves your device. Everything is stored locally in your browser using IndexedDB.
-* ✈️ **Offline First:** Works flawlessly on an airplane or in a cabin in the woods. Once loaded, you don't need the internet to browse your library.
-* 📦 **Your Data:** Complete data portability. Export everything instantly to JSON, PDF, or Word documents. You own your memories.
+* 🛡️ **Zero Cloud Storage:** Your media data never leaves your device. Everything is stored locally in your browser using IndexedDB.
+* 🔐 **Secure Edge APIs:** All external integrations (TMDB, Gemini) are routed through Vercel Edge Functions with strict `Zod` payload validation and active rate limiting to prevent abuse and prompt injection.
+* 📦 **Data Portability:** Complete data portability. Export everything instantly to JSON, PDF, or Word documents. You own your memories.
 
 <br/>
 
@@ -87,8 +87,8 @@ Katha uses a modern, lightning-fast frontend stack.
 | **Motion/Animation** | Framer Motion              | High-performance spring physics and layout animations.     |
 | **State Management** | Zustand                    | Lightweight, un-opinionated global state.                  |
 |  **Local Database**  | Dexie.js (IndexedDB)       | Robust, typed wrapper for local browser storage.           |
-|  **Data Fetching**  | Custom API Services        | Integrations with TMDB, OMDB, Jikan, Trakt, and Watchmode. |
-| **Hosting & Deploy** | Firebase Hosting           | High-speed global CDN with HTTP/2 and asset compression.   |
+| **AI Integration** | Google Gemini API | Powers the Smriti intelligence and reasoning engines. |
+|  **Hosting & Deploy**  | Vercel & Edge Functions | High-speed global CDN, secure API routing, and SSR proxying.   |
 
 <br/>
 
@@ -116,7 +116,7 @@ npm install
 
 ### 3. Set up Environment Variables
 
-Katha connects to various external APIs to fetch movie, TV, and anime metadata.
+Katha connects to various external APIs and AI services.
 
 Copy the example environment file:
 
@@ -124,10 +124,11 @@ Copy the example environment file:
 cp .env.example .env.local
 ```
 
-Open `.env.local` and add your API keys. *Note: You can run the app without some of these, but specific discovery features may be limited.*
+Open `.env.local` and add your API keys.
 
-* `VITE_TMDB_API_KEY`: For Movies and TV Shows.
-* `VITE_OMDB_API_KEY`: For backup movie data.
+* `GEMINI_API_KEY`: Required for Smriti Intelligence and Discovery features.
+* `TMDB_API_KEY`: For Movies and TV Shows metadata.
+* `OMDB_API_KEY`: For backup movie data.
 
 ### 4. Start the development server
 
@@ -141,7 +142,7 @@ Visit `http://localhost:5173` to enter the Katha universe.
 
 ## 📱 Installing as an App (PWA)
 
-Katha is designed to feel like a native application. You can install it on your devices directly from the [Live URL](https://katha-9eda9.web.app):
+Katha is designed to feel like a native application. You can install it on your devices directly from the Live URL:
 
 * **iOS / iPadOS:** Open Katha in Safari, tap the "Share" icon, and select "Add to Home Screen".
 * **Android:** Open Katha in Chrome, tap the three-dot menu, and select "Install app" or "Add to Home screen".
