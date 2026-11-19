@@ -1,57 +1,59 @@
 /**
  * network.ts
- * 
- * Provides robust network connectivity detection.
- * navigator.onLine is notoriously inaccurate (it only verifies a local network connection,
- * e.g., you are connected to a router, but the router might have no internet access - "Lie-Fi").
- * 
- * This module performs a lightweight HTTP ping to verify true connectivity.
+ *
+ * CSP-safe, low-overhead network connectivity detection.
+ * Uses navigator.onLine plus a same-origin HEAD probe against /manifest.webmanifest
+ * (short-cached for 10s to avoid redundant probes during batch sync flushes).
  */
 
-export async function checkIsOnline(): Promise<boolean> {
+let lastCheckedAt = 0;
+let lastOnlineResult = true;
+const CACHE_TTL_MS = 10_000;
+
+export function resetNetworkCacheForTests() {
+  lastCheckedAt = 0;
+  lastOnlineResult = true;
+}
+
+export async function checkIsOnline(force = false): Promise<boolean> {
   if (typeof navigator !== 'undefined' && !navigator.onLine) {
+    lastOnlineResult = false;
+    lastCheckedAt = Date.now();
     return false;
   }
 
-  // To achieve maximum accuracy (bypassing captive portals and 'Lie-Fi'),
-  // we ping redundant, highly available endpoints that support CORS.
-  // Using DNS-over-HTTPS APIs because they are incredibly fast and always support CORS.
-  const endpoints = [
-    'https://dns.google/resolve?name=google.com',
-    'https://cloudflare-dns.com/dns-query?name=cloudflare.com&type=A'
-  ];
+  const now = Date.now();
+  if (!force && lastCheckedAt > 0 && now - lastCheckedAt < CACHE_TTL_MS) {
+    return lastOnlineResult;
+  }
+
+  if (typeof window === 'undefined' || typeof fetch !== 'function') {
+    return true;
+  }
+
+  // Only perform same-origin HTTP fetch when served over http(s)
+  if (!window.location.origin.startsWith('http')) {
+    return typeof navigator !== 'undefined' ? navigator.onLine : true;
+  }
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 3000);
 
   try {
-    const checkEndpoint = async (url: string) => {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second strict timeout
-
-      try {
-        const response = await fetch(`${url}&_cb=${new Date().getTime()}`, {
-          method: 'GET',
-          mode: 'cors', // Enforce CORS to bypass captive portals (which redirect to non-CORS HTML pages)
-          headers: { 'Accept': 'application/dns-json' },
-          cache: 'no-store',
-          signal: controller.signal
-        });
-        
-        clearTimeout(timeoutId);
-        if (!response.ok) throw new Error('Not ok');
-        return true;
-      } catch (error) {
-        clearTimeout(timeoutId);
-        throw error; // Let Promise.any handle it
-      }
-    };
-
-    // If ANY of the highly available endpoints resolve, we have internet.
-    await Promise.any(endpoints.map(checkEndpoint));
-    return true;
-
-  } catch (error) {
-    // If ALL endpoints fail or timeout, we are truly offline or behind a restrictive captive portal.
-    return false;
+    const response = await fetch(`/manifest.webmanifest?_cb=${now}`, {
+      method: 'HEAD',
+      cache: 'no-store',
+      signal: controller.signal,
+    });
+    lastOnlineResult = response.ok || response.status < 500;
+  } catch {
+    lastOnlineResult = false;
+  } finally {
+    clearTimeout(timeoutId);
+    lastCheckedAt = Date.now();
   }
+
+  return lastOnlineResult;
 }
 
 export async function registerBackgroundSync() {
@@ -59,8 +61,7 @@ export async function registerBackgroundSync() {
     try {
       const registration = await navigator.serviceWorker.ready;
       if ('sync' in registration) {
-        await (registration as any).sync.register('katha-sync');
-        console.log('[Background Sync] Registered successfully.');
+        await (registration as unknown as { sync: { register: (tag: string) => Promise<void> } }).sync.register('katha-sync');
       }
     } catch (err) {
       console.warn('[Background Sync] Failed to register:', err);

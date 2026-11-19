@@ -51,9 +51,9 @@ export function EditorialCollections() {
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
-      case 'easy': return 'text-emerald';
-      case 'medium': return 'text-amber';
-      case 'heavy': return 'text-rose';
+      case 'easy': return 'text-accent-emerald';
+      case 'medium': return 'text-accent-amber';
+      case 'heavy': return 'text-accent-rose';
       default: return 'text-text-primary/60';
     }
   };
@@ -62,21 +62,21 @@ export function EditorialCollections() {
     const themes = {
       'collection-001': {
         gradient: 'from-amber-500/20 to-orange-500/20',
-        borderColor: 'border-amber',
-        iconColor: 'text-amber',
+        borderColor: 'border-accent-amber',
+        iconColor: 'text-accent-amber',
         title: 'Life-Changing Cinema'
       },
       'collection-002': {
         gradient: 'from-purple-500/20 to-pink-500/20',
-        borderColor: 'border-purple',
-        iconColor: 'text-purple',
+        borderColor: 'border-accent-primary',
+        iconColor: 'text-accent-primary',
         title: 'Philosophical Depth'
       }
     };
     return themes[collectionId as keyof typeof themes] || {
       gradient: 'from-cyan-500/20 to-blue-500/20',
-      borderColor: 'border-cyan',
-      iconColor: 'text-cyan',
+      borderColor: 'border-accent-cyan',
+      iconColor: 'text-accent-cyan',
       title: 'Curated Wisdom'
     };
   };
@@ -171,7 +171,7 @@ export function EditorialCollections() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1 * index }}
                   whileHover={{ scale: 1.02 }}
-                  className="surface-elevated rounded-xl p-6 hover:surface-hover transition-all cursor-pointer"
+                  className="surface-elevated rounded-xl p-6 hover:bg-midnight-surface-hover transition-all cursor-pointer"
                   onClick={() => window.open(`/atlas?entry=${entry.id}`, '_blank')}
                 >
                   <div className="flex items-start justify-between mb-4">
@@ -200,7 +200,7 @@ export function EditorialCollections() {
 
                   <div className="flex flex-wrap gap-2 mb-4">
                     {entry.themes.slice(0, 2).map((theme, idx) => (
-                      <span key={idx} className="text-xs bg-gradient-cyan/20 text-cyan px-2 py-1 rounded-full">
+                      <span key={idx} className="text-xs bg-accent-cyan/15 text-accent-cyan px-2 py-1 rounded-full">
                         {theme}
                       </span>
                     ))}
@@ -259,7 +259,7 @@ export function EditorialCollections() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 * index }}
                 whileHover={{ scale: 1.02 }}
-                className={`surface-elevated rounded-2xl overflow-hidden hover:surface-hover transition-all cursor-pointer border-l-4 ${theme.borderColor}`}
+                className={`surface-elevated rounded-2xl overflow-hidden hover:bg-midnight-surface-hover transition-all cursor-pointer border-l-4 ${theme.borderColor}`}
                 onClick={() => loadCollectionEntries(collection)}
               >
                 <div className={`p-8 bg-gradient-to-br ${theme.gradient}`}>
@@ -309,11 +309,12 @@ export function EditorialCollections() {
                       ))}
                     </div>
                     <button 
-                      onClick={() => {
-                        window.location.href = '/atlas';
-                        alert('Filters applied to Atlas view');
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        loadCollectionEntries(collection);
                       }}
-                      className="text-accent-primary hover:text-accent-primary/80 transition-colors"
+                      className="text-accent-primary hover:text-accent-primary/80 transition-colors font-medium"
                     >
                       Explore Collection →
                     </button>
@@ -338,8 +339,8 @@ export function EditorialCollections() {
             
             <div className="grid gap-6 md:grid-cols-3">
               <div className="text-center">
-                <div className="p-4 bg-gradient-cyan/20 rounded-xl mb-4 inline-block">
-                  <Compass className="w-8 h-8 text-cyan" />
+                <div className="p-4 bg-accent-cyan/15 rounded-xl mb-4 inline-block">
+                  <Compass className="w-8 h-8 text-accent-cyan" />
                 </div>
                 <h3 className="text-lg font-semibold text-text-primary mb-2">Curated Wisdom</h3>
                 <p className="text-text-primary/70 text-sm">
@@ -348,7 +349,7 @@ export function EditorialCollections() {
               </div>
               
               <div className="text-center">
-                <div className="p-4 bg-gradient-violet/20 rounded-xl mb-4 inline-block">
+                <div className="p-4 bg-accent-primary/15 rounded-xl mb-4 inline-block">
                   <Brain className="w-8 h-8 text-accent-primary" />
                 </div>
                 <h3 className="text-lg font-semibold text-text-primary mb-2">Philosophical Depth</h3>
@@ -358,8 +359,8 @@ export function EditorialCollections() {
               </div>
               
               <div className="text-center">
-                <div className="p-4 bg-gradient-amber/20 rounded-xl mb-4 inline-block">
-                  <Heart className="w-8 h-8 text-amber" />
+                <div className="p-4 bg-accent-amber/15 rounded-xl mb-4 inline-block">
+                  <Heart className="w-8 h-8 text-accent-amber" />
                 </div>
                 <h3 className="text-lg font-semibold text-text-primary mb-2">Life Stage Relevance</h3>
                 <p className="text-text-primary/70 text-sm">

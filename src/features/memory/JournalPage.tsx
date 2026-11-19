@@ -2,9 +2,11 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, PenTool, Book, Tag, Loader2, Calendar, Hash, Trash2 } from 'lucide-react';
 import { personalRepository } from '@/db/repositories/PersonalRepository';
+import { useToastStore } from '@/store/toastStore';
 import type { JournalEntry } from '@/types/personal';
 
 export default function JournalPage() {
+  const addToast = useToastStore((s) => s.addToast);
   const [activeTab, setActiveTab] = useState<'write' | 'search'>('write');
 
   // Write tab state
@@ -44,9 +46,9 @@ export default function JournalPage() {
       setContent('');
       setTags('');
       await loadEntries(); // Refresh list
-    } catch (error) {
-      console.error('Failed to save journal entry:', error);
-      alert('Failed to save. Please try again.');
+      addToast({ type: 'success', message: 'Journal reflection saved.' });
+    } catch {
+      addToast({ type: 'error', message: 'Failed to save journal entry. Please try again.' });
     } finally {
       setIsSaving(false);
     }
@@ -176,7 +178,7 @@ export default function JournalPage() {
                         key={entry.id}
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        className="bg-midnight-surface/60 border border-white/5 rounded-2xl p-5 hover:border-white/10 transition-colors"
+                        className="bg-midnight-surface/60 border border-midnight-border rounded-2xl p-5 hover:border-accent-cyan/40 transition-colors"
                       >
                         <div className="flex items-start justify-between gap-4 mb-3">
                           <div className="flex items-center gap-2 text-xs text-text-muted">
@@ -186,7 +188,7 @@ export default function JournalPage() {
                             })}
                             {entry.embedding && (
                               <span
-                                className="ml-2 text-[10px] bg-accent-cyan/10 text-accent-cyan border border-accent-cyan/20 px-1.5 py-0.5 rounded"
+                                className="ml-2 text-xs bg-accent-cyan/10 text-accent-cyan border border-accent-cyan/20 px-1.5 py-0.5 rounded"
                                 title="AI embedding generated — this entry is semantically searchable"
                               >
                                 ⚡ Indexed
@@ -200,7 +202,7 @@ export default function JournalPage() {
                         {entry.tags.length > 0 && (
                           <div className="flex flex-wrap gap-1.5 mt-3">
                             {entry.tags.map(tag => (
-                              <span key={tag} className="flex items-center gap-1 text-[11px] bg-white/5 text-text-secondary px-2 py-0.5 rounded-full">
+                              <span key={tag} className="flex items-center gap-1 text-xs bg-midnight-bg/60 border border-midnight-border text-text-secondary px-2 py-0.5 rounded-full">
                                 <Hash className="w-2.5 h-2.5" />
                                 {tag}
                               </span>

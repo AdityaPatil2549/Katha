@@ -16,10 +16,10 @@ export function AtlasNavigation() {
       <div className="grid gap-4 md:grid-cols-2 mb-6">
         <Link
           to="/atlas-installer"
-          className="flex items-center gap-3 p-4 surface-elevated rounded-lg hover:surface-hover transition-all group"
+          className="flex items-center gap-3 p-4 surface-elevated rounded-lg hover:bg-midnight-surface-hover transition-all group"
         >
-          <div className="p-2 bg-gradient-cyan/20 rounded-lg group-hover:bg-gradient-cyan/30 transition-colors">
-            <Database className="w-5 h-5 text-cyan" />
+          <div className="p-2 bg-accent-cyan/15 rounded-lg group-hover:bg-accent-cyan/25 transition-colors">
+            <Database className="w-5 h-5 text-accent-cyan" />
           </div>
           <div className="flex-1">
             <h3 className="text-text-primary font-medium mb-1">Install Atlas</h3>
@@ -29,9 +29,9 @@ export function AtlasNavigation() {
 
         <Link
           to="/atlas"
-          className="flex items-center gap-3 p-4 surface-elevated rounded-lg hover:surface-hover transition-all group"
+          className="flex items-center gap-3 p-4 surface-elevated rounded-lg hover:bg-midnight-surface-hover transition-all group"
         >
-          <div className="p-2 bg-accent-primary/20 rounded-lg group-hover:bg-accent-primary/30 transition-colors">
+          <div className="p-2 bg-accent-primary/15 rounded-lg group-hover:bg-accent-primary/25 transition-colors">
             <BookOpen className="w-5 h-5 text-accent-primary" />
           </div>
           <div className="flex-1">
@@ -42,10 +42,10 @@ export function AtlasNavigation() {
 
         <Link
           to="/atlas/collections"
-          className="flex items-center gap-3 p-4 surface-elevated rounded-lg hover:surface-hover transition-all group"
+          className="flex items-center gap-3 p-4 surface-elevated rounded-lg hover:bg-midnight-surface-hover transition-all group"
         >
-          <div className="p-2 bg-gradient-amber/20 rounded-lg group-hover:bg-gradient-amber/30 transition-colors">
-            <Sparkles className="w-5 h-5 text-amber" />
+          <div className="p-2 bg-accent-amber/15 rounded-lg group-hover:bg-accent-amber/25 transition-colors">
+            <Sparkles className="w-5 h-5 text-accent-amber" />
           </div>
           <div className="flex-1">
             <h3 className="text-text-primary font-medium mb-1">Editorial Collections</h3>
@@ -55,10 +55,10 @@ export function AtlasNavigation() {
 
         <Link
           to="/atlas/life-phases"
-          className="flex items-center gap-3 p-4 surface-elevated rounded-lg hover:surface-hover transition-all group"
+          className="flex items-center gap-3 p-4 surface-elevated rounded-lg hover:bg-midnight-surface-hover transition-all group"
         >
-          <div className="p-2 bg-gradient-emerald/20 rounded-lg group-hover:bg-gradient-emerald/30 transition-colors">
-            <Users className="w-5 h-5 text-emerald" />
+          <div className="p-2 bg-accent-emerald/15 rounded-lg group-hover:bg-accent-emerald/25 transition-colors">
+            <Users className="w-5 h-5 text-accent-emerald" />
           </div>
           <div className="flex-1">
             <h3 className="text-text-primary font-medium mb-1">Life Phases</h3>
@@ -68,10 +68,10 @@ export function AtlasNavigation() {
 
         <Link
           to="/atlas/moods"
-          className="flex items-center gap-3 p-4 surface-elevated rounded-lg hover:surface-hover transition-all group"
+          className="flex items-center gap-3 p-4 surface-elevated rounded-lg hover:bg-midnight-surface-hover transition-all group"
         >
-          <div className="p-2 bg-gradient-rose/20 rounded-lg group-hover:bg-gradient-rose/30 transition-colors">
-            <Heart className="w-5 h-5 text-rose" />
+          <div className="p-2 bg-accent-rose/15 rounded-lg group-hover:bg-accent-rose/25 transition-colors">
+            <Heart className="w-5 h-5 text-accent-rose" />
           </div>
           <div className="flex-1">
             <h3 className="text-text-primary font-medium mb-1">Mood Discovery</h3>
@@ -81,10 +81,10 @@ export function AtlasNavigation() {
 
         <Link
           to="/atlas/decision-engine"
-          className="flex items-center gap-3 p-4 surface-elevated rounded-lg hover:surface-hover transition-all group"
+          className="flex items-center gap-3 p-4 surface-elevated rounded-lg hover:bg-midnight-surface-hover transition-all group"
         >
-          <div className="p-2 bg-gradient-purple/20 rounded-lg group-hover:bg-gradient-purple/30 transition-colors">
-            <Brain className="w-5 h-5 text-purple" />
+          <div className="p-2 bg-accent-primary/15 rounded-lg group-hover:bg-accent-primary/25 transition-colors">
+            <Brain className="w-5 h-5 text-accent-primary" />
           </div>
           <div className="flex-1">
             <h3 className="text-text-primary font-medium mb-1">Decision Engine</h3>
@@ -94,10 +94,10 @@ export function AtlasNavigation() {
 
         <Link
           to="/atlas/profile"
-          className="flex items-center gap-3 p-4 surface-elevated rounded-lg hover:surface-hover transition-all group"
+          className="flex items-center gap-3 p-4 surface-elevated rounded-lg hover:bg-midnight-surface-hover transition-all group"
         >
-          <div className="p-2 bg-gradient-indigo/20 rounded-lg group-hover:bg-gradient-indigo/30 transition-colors">
-            <User className="w-5 h-5 text-indigo" />
+          <div className="p-2 bg-accent-cyan/15 rounded-lg group-hover:bg-accent-cyan/25 transition-colors">
+            <User className="w-5 h-5 text-accent-cyan" />
           </div>
           <div className="flex-1">
             <h3 className="text-text-primary font-medium mb-1">Personal Profile</h3>
@@ -107,10 +107,10 @@ export function AtlasNavigation() {
 
         <Link
           to="/atlas/wisdom"
-          className="flex items-center gap-3 p-4 surface-elevated rounded-lg hover:surface-hover transition-all group"
+          className="flex items-center gap-3 p-4 surface-elevated rounded-lg hover:bg-midnight-surface-hover transition-all group"
         >
-          <div className="p-2 bg-gradient-amber/20 rounded-lg group-hover:bg-gradient-amber/30 transition-colors">
-            <Lightbulb className="w-5 h-5 text-amber" />
+          <div className="p-2 bg-accent-amber/15 rounded-lg group-hover:bg-accent-amber/25 transition-colors">
+            <Lightbulb className="w-5 h-5 text-accent-amber" />
           </div>
           <div className="flex-1">
             <h3 className="text-text-primary font-medium mb-1">Wisdom Dashboard</h3>
@@ -135,7 +135,7 @@ export function AtlasNavigation() {
 
         <div className="p-4 bg-midnight-surface rounded-lg">
           <div className="flex items-center gap-2 mb-2">
-            <Sparkles className="w-4 h-4 text-amber" />
+            <Sparkles className="w-4 h-4 text-accent-amber" />
             <span className="text-sm font-medium text-text-primary">Atlas Features</span>
           </div>
           <ul className="space-y-1 text-xs text-text-primary/60">

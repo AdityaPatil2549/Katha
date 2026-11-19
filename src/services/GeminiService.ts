@@ -1,3 +1,5 @@
+import { auth } from '@/lib/firebase';
+
 const BASE_URL = '/api/gemini';
 
 // ─── Typed return for the intelligence analysis pipeline ──────────────────────
@@ -34,19 +36,26 @@ export interface KathaIntelligenceResult {
 
 class GeminiService {
   // ─── Private fetch helper — eliminates boilerplate ──────────────────────────
-  private async post<T = any>(action: string, payload: Record<string, unknown>): Promise<T | null> {
+  private async post<T = unknown>(action: string, payload: Record<string, unknown>): Promise<T | null> {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 15000);
 
     try {
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      const currentUser = auth?.currentUser;
+      if (currentUser) {
+        const token = await currentUser.getIdToken();
+        headers.Authorization = `Bearer ${token}`;
+      }
+
       const response = await fetch(BASE_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({ action, ...payload }),
         signal: controller.signal
       });
       if (!response.ok) throw new Error(`Gemini action '${action}' failed: ${response.status}`);
-      const data = await response.json();
+      const data = (await response.json()) as { result?: T };
       return data.result ?? null;
     } finally {
       clearTimeout(timeoutId);
@@ -90,7 +99,7 @@ class GeminiService {
   }
 
   // ─── Private retry helper for critical endpoints ────────────────────────────
-  private async retryPost<T = any>(action: string, payload: Record<string, unknown>, maxRetries = 3): Promise<T | null> {
+  private async retryPost<T = unknown>(action: string, payload: Record<string, unknown>, maxRetries = 3): Promise<T | null> {
     let attempt = 0;
     while (attempt < maxRetries) {
       try {
@@ -117,35 +126,30 @@ class GeminiService {
    */
   async analyzeIntelligence(userData: unknown): Promise<KathaIntelligenceResult | null> {
     try {
-      const actions = [
-        'analyze_intelligence_emotion',
-        'analyze_intelligence_taste',
-        'analyze_intelligence_life',
-        'analyze_intelligence_wisdom',
-        'analyze_intelligence_predictions'
-      ] as const;
+      const [emotionRes, tasteRes, lifeRes, wisdomRes, predictionsRes] = await Promise.allSettled([
+        this.retryPost<KathaIntelligenceResult['emotionalJourney']>('analyze_intelligence_emotion', { userData }),
+        this.retryPost<KathaIntelligenceResult['tasteEvolution']>('analyze_intelligence_taste', { userData }),
+        this.retryPost<KathaIntelligenceResult['lifePatterns']>('analyze_intelligence_life', { userData }),
+        this.retryPost<KathaIntelligenceResult['wisdomExtraction']>('analyze_intelligence_wisdom', { userData }),
+        this.retryPost<KathaIntelligenceResult['predictions']>('analyze_intelligence_predictions', { userData }),
+      ]);
 
-      const settled = await Promise.allSettled(
-        actions.map(action =>
-          this.retryPost(action, { userData })
-        )
-      );
-
-      const [emotion, taste, life, wisdom, predictions] = settled.map(r =>
-        r.status === 'fulfilled' ? r.value : null
-      );
+      const predictionsFallback: KathaIntelligenceResult['predictions'] = {
+        nextFavoriteGenre: 'Unknown',
+        emotionalReadiness: 'High',
+        optimalWatchTime: 'Evening',
+        lifePhaseTransition: 'Approaching',
+      };
 
       return {
-        emotionalJourney: emotion,
-        tasteEvolution: taste,
-        lifePatterns: life,
-        wisdomExtraction: wisdom,
-        predictions: predictions || {
-          nextFavoriteGenre: 'Unknown',
-          emotionalReadiness: 'High',
-          optimalWatchTime: 'Evening',
-          lifePhaseTransition: 'Approaching',
-        },
+        emotionalJourney: emotionRes.status === 'fulfilled' ? emotionRes.value : null,
+        tasteEvolution: tasteRes.status === 'fulfilled' ? tasteRes.value : null,
+        lifePatterns: lifeRes.status === 'fulfilled' ? lifeRes.value : null,
+        wisdomExtraction: wisdomRes.status === 'fulfilled' ? wisdomRes.value : null,
+        predictions:
+          predictionsRes.status === 'fulfilled' && predictionsRes.value
+            ? predictionsRes.value
+            : predictionsFallback,
       };
     } catch (error) {
       console.error('Gemini Intelligence Analysis Error:', error);

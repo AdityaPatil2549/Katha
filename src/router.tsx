@@ -11,14 +11,10 @@ const LibraryPage = React.lazy(() => import('@/features/library/LibraryPage'));
 const StoryPage = React.lazy(() => import('@/features/story/StoryPage'));
 const StoryPageEnhanced = React.lazy(() => import('@/features/story/StoryPageEnhanced'));
 const AddStoryPage = React.lazy(() => import('@/features/story/AddStoryPage'));
-const MemoryPage = React.lazy(() => import('@/features/memory/MemoryPage').then(module => ({ default: module.MemoryPage })));
 const MemoryWorldPage = React.lazy(() => import('@/features/memory/MemoryWorldPage'));
 const JournalPage = React.lazy(() => import('@/features/memory/JournalPage'));
-const DiscoverPage = React.lazy(() => import('@/features/discover/DiscoverPage'));
 const DiscoverWorldPage = React.lazy(() => import('@/features/discover/DiscoverWorldPage'));
-const ExportPage = React.lazy(() => import('@/features/export/ExportPage'));
 const ExportSystemPage = React.lazy(() => import('@/features/export/ExportSystemPage').then(module => ({ default: module.ExportSystemPage })));
-const SettingsPage = React.lazy(() => import('@/features/settings/SettingsPage'));
 const SettingsVaultPage = React.lazy(() => import('@/features/settings/SettingsVaultPage'));
 const SmritiEnginePage = React.lazy(() => import('@/features/intelligence/SmritiEnginePage'));
 const AtlasInstaller = React.lazy(() => import('@/features/atlas/AtlasInstaller').then(module => ({ default: module.AtlasInstaller })));
@@ -62,14 +58,15 @@ export const router = createBrowserRouter([
       { path: 'story/:storyId', element: suspense(<StoryPage />, 'Opening Story Details') },
       { path: 'story/:storyId/enhanced', element: suspense(<StoryPageEnhanced />, 'Opening Enhanced Story Details') },
       { path: 'add-story', element: suspense(<AddStoryPage />, 'Adding New Story') },
-      { path: 'memory', element: suspense(<MemoryPage />, 'Opening Your Memories') },
+      { path: 'memory', element: <Navigate to="/memory-world" replace /> },
       { path: 'memory-world', element: suspense(<MemoryWorldPage />, 'Opening Memory World') },
       { path: 'journal', element: suspense(<JournalPage />, 'Opening Journal') },
-      { path: 'discover', element: suspense(<DiscoverPage />, 'Opening Discover') },
-      { path: 'discover-world', element: suspense(<DiscoverWorldPage />, 'Opening Smriti Atlas') },
-      { path: 'export', element: suspense(<ExportPage />, 'Creating Storybook') },
+      { path: 'explore', element: suspense(<DiscoverWorldPage />, 'Opening Smriti Atlas Hub') },
+      { path: 'discover', element: <Navigate to="/explore" replace /> },
+      { path: 'discover-world', element: <Navigate to="/explore" replace /> },
+      { path: 'export', element: <Navigate to="/export-system" replace /> },
       { path: 'export-system', element: suspense(<ExportSystemPage />, 'Opening Export System') },
-      { path: 'settings', element: suspense(<SettingsPage />, 'Opening Katha Settings') },
+      { path: 'settings', element: <Navigate to="/settings-vault" replace /> },
       { path: 'settings-vault', element: suspense(<SettingsVaultPage />, 'Opening Settings Vault') },
       { path: 'intelligence', element: suspense(<SmritiEnginePage />, 'Opening Smriti Intelligence') },
       { path: 'atlas-installer', element: suspense(<AtlasInstaller />, 'Installing Smriti Atlas') },

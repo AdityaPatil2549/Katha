@@ -17,7 +17,7 @@ import {
   Flame,
   Award
 } from 'lucide-react';
-import { useMomentsStore, useStoriesStore } from '@/store';
+import { useSessionsStore, useStoriesStore } from '@/store';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, getDay, isSameDay, isToday } from 'date-fns';
 
 interface DayData {
@@ -31,9 +31,13 @@ interface DayData {
 export default function WatchCalendar() {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
-  const momentsStore: any = useMomentsStore();
-  const { moments, sessions = [] } = momentsStore;
-  const { stories } = useStoriesStore();
+  const { sessions, loadSessions } = useSessionsStore();
+  const { stories, loadStories } = useStoriesStore();
+
+  useEffect(() => {
+    void loadSessions();
+    void loadStories();
+  }, [loadSessions, loadStories]);
 
   // Calculate calendar data
   const calendarData = useMemo(() => {
@@ -55,8 +59,10 @@ export default function WatchCalendar() {
     });
     
     // Process sessions
-    sessions.forEach((session: any) => {
-      const dateKey = format(session.date, 'yyyy-MM-dd');
+    sessions.forEach((session) => {
+      const parsedDate = new Date(session.date);
+      if (Number.isNaN(parsedDate.getTime())) return;
+      const dateKey = format(parsedDate, 'yyyy-MM-dd');
       const existing = dayDataMap.get(dateKey);
       
       if (existing) {

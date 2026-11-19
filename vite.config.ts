@@ -16,8 +16,8 @@ export default defineConfig({
         name: 'Katha — Powered by Smriti',
         short_name: 'Katha',
         description: 'Local-first, offline-first Personal Story Operating System.',
-        theme_color: '#0B1020',
-        background_color: '#0B1020',
+        theme_color: '#121316',
+        background_color: '#121316',
         display: 'standalone',
         start_url: '/',
         icons: [
@@ -107,6 +107,19 @@ export default defineConfig({
     host: 'localhost'
   },
   build: {
-    target: 'es2022'
+    target: 'es2022',
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('three') || id.includes('@react-three')) return 'vendor-three';
+            if (id.includes('recharts') || id.includes('d3-')) return 'vendor-charts';
+            if (id.includes('framer-motion')) return 'vendor-motion';
+            if (id.includes('firebase')) return 'vendor-firebase';
+            if (id.includes('docx') || id.includes('jspdf') || id.includes('file-saver')) return 'vendor-docs';
+          }
+        }
+      }
+    }
   }
 });

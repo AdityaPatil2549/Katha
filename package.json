@@ -7,7 +7,7 @@
         "dev": "vite",
         "build": "tsc -p tsconfig.json --noEmit && vite build",
         "preview": "vite preview",
-        "test": "vitest run",
+        "test": "vitest run --pool=threads --no-file-parallelism",
         "test:watch": "vitest",
         "test:ui": "vitest --ui",
         "test:coverage": "vitest run --coverage",

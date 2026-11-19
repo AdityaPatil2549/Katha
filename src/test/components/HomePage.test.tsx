@@ -9,12 +9,18 @@ vi.mock('@/components/atlas/AtlasNavigation', () => ({
   AtlasNavigation: () => <div data-testid="atlas-navigation">Atlas</div>
 }));
 
+vi.mock('@/components/ui/motion/TextEffect', () => ({
+  TextEffect: ({ children, className }: { children: React.ReactNode; className?: string }) => (
+    <div className={className}>{children}</div>
+  )
+}));
+
 // Mock the stores
 vi.mock('@/store/storiesStore', () => ({
   useStoriesStore: () => ({
     stories: [
-      createMockStory({ title: 'Vinland Saga', status: 'watching', category: 'anime' }),
-      createMockStory({ title: 'Interstellar', status: 'completed' }),
+      createMockStory({ id: 'test-story-1', title: 'Vinland Saga', status: 'watching', category: 'anime' }),
+      createMockStory({ id: 'test-story-2', title: 'Interstellar', status: 'completed' }),
     ],
     loading: false,
     loadStories: vi.fn(),
@@ -49,7 +55,7 @@ describe('HomePage', () => {
     
     // Use getByRole or test other elements since TextEffect splits the text
     expect(screen.getByText('Continue Watching')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Play Now/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Open Story/i })).toBeInTheDocument();
   });
 
   it('displays My List section', () => {

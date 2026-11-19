@@ -1,49 +1,48 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { BlurReveal } from '@/components/ui/motion/BlurReveal';
 import { FadeIn } from '@/components/ui/motion/FadeIn';
 import { StaggerContainer } from '@/components/ui/motion/StaggerContainer';
 import { Dropdown } from '@/components/ui/Dropdown';
 import { 
-  Settings, 
   Shield, 
   Database, 
   Download, 
   Upload, 
   Lock, 
-  Eye, 
-  EyeOff,
+  Heart,
   Palette,
-  Globe,
-  Smartphone,
-  Monitor,
   Moon,
   Sun,
+  Monitor,
   Bell,
   Trash2,
   RefreshCw,
   Info,
   Check,
   AlertTriangle,
-  Key,
   HardDrive,
   Cloud,
   FileText,
-  Zap,
-  Heart,
-  Brain,
-  BookOpen,
-  HelpCircle,
   Code,
-  ExternalLink,
-  User as UserIcon
+  User as UserIcon,
+  Globe,
+  Zap,
+  Brain
 } from 'lucide-react';
 import { dbService } from '@/db/DatabaseService';
+import { db } from '@/db/KathaDb';
 import { googleCloudService } from '@/services/GoogleCloudService';
 import { useGoogleLogin } from '@react-oauth/google';
-import { useSettingsStore } from '@/store';
+import { useSettingsStore, type NotificationCategory, type NotificationChannel, type NotificationFrequency } from '@/store';
 import { useToastStore } from '@/store/toastStore';
+import {
+  exportArchiveToPDF,
+  exportArchiveToWord,
+  triggerBlobDownload,
+  type KathaArchiveExport,
+} from '@/utils/exporters';
+import type { Knowledge, Moment, Session, Story, TimelineEvent } from '@/types/models';
 
 interface GoogleUser {
   access_token: string;
@@ -80,21 +79,28 @@ export default function SettingsVaultPage() {
       }
     },
     onError: () => {
-      alert('Google Login Failed');
+      useToastStore.getState().addToast({ type: 'error', message: 'Google login failed. Please try again.' });
     }
   });
-  const [appLockEnabled, setAppLockEnabled] = useState(false);
-  const [encryptionEnabled, setEncryptionEnabled] = useState(false);
-  const [autoLockTime, setAutoLockTime] = useState('30');
-  const [backupReminder, setBackupReminder] = useState(true);
-  const { 
-    theme, setTheme, 
-    accentColor, setAccentColor, 
+  const [pendingAction, setPendingAction] = useState<'clear-cache' | 'restore-cloud' | 'reset-app' | null>(null);
+  const [resetConfirmationInput, setResetConfirmationInput] = useState('');
+  const [isClearingCache, setIsClearingCache] = useState(false);
+  const [isExportingWord, setIsExportingWord] = useState(false);
+  const [isExportingPDF, setIsExportingPDF] = useState(false);
+  const [isRestoringFile, setIsRestoringFile] = useState(false);
+  const restoreInputRef = useRef<HTMLInputElement | null>(null);
+  const addToast = useToastStore((s) => s.addToast);
+  const {
+    theme, setTheme,
+    accentColor, setAccentColor,
     notificationsEnabled, setNotificationsEnabled,
     globalMute, setGlobalMute,
+    appLockEnabled, setAppLockEnabled,
+    encryptionEnabled, setEncryptionEnabled,
+    autoLockTime, setAutoLockTime,
+    backupReminder, setBackupReminder,
     notificationPreferences, updateNotificationPreference
   } = useSettingsStore();
-  const navigate = useNavigate();
   const [showSaveToast, setShowSaveToast] = useState(false);
 
   const triggerSaveToast = () => {
@@ -111,25 +117,48 @@ export default function SettingsVaultPage() {
     available: 0
   });
 
+  const refreshStorageInfo = async () => {
+    try {
+      const usage = await dbService.getStorageUsage();
+      let available = 0;
+      if (navigator.storage && navigator.storage.estimate) {
+        const estimate = await navigator.storage.estimate();
+        available = Math.round((estimate.quota || 0) / (1024 * 1024));
+      }
+      setStorageInfo({
+        stories: usage.stories,
+        moments: usage.moments,
+        sessions: usage.sessions,
+        knowledge: usage.knowledge,
+        total: usage.total,
+        available
+      });
+    } catch {
+      addToast({ type: 'error', message: 'Unable to read storage metrics.' });
+    }
+  };
+
   const toggleNotifications = async () => {
     if (!notificationsEnabled) {
       if ('Notification' in window) {
         if (Notification.permission === 'granted') {
           setNotificationsEnabled(true);
           new Notification('Katha', { body: 'Notifications enabled!' });
+          addToast({ type: 'success', message: 'Browser notifications enabled.' });
         } else if (Notification.permission !== 'denied') {
           const permission = await Notification.requestPermission();
           if (permission === 'granted') {
             setNotificationsEnabled(true);
             new Notification('Katha', { body: 'Notifications enabled!' });
+            addToast({ type: 'success', message: 'Browser notifications enabled.' });
           } else {
-            alert('Notification permission denied by your browser.');
+            addToast({ type: 'warning', message: 'Notification permission was denied by your browser.' });
           }
         } else {
-          alert('Notifications are blocked in your browser settings. Please enable them to use this feature.');
+          addToast({ type: 'warning', message: 'Notifications are blocked in your browser settings.' });
         }
       } else {
-        alert('Your browser does not support notifications.');
+        addToast({ type: 'info', message: 'Your browser does not support desktop notifications.' });
       }
     } else {
       setNotificationsEnabled(false);
@@ -137,30 +166,11 @@ export default function SettingsVaultPage() {
   };
 
   useEffect(() => {
-    const loadStorageInfo = async () => {
-      try {
-        const usage = await dbService.getStorageUsage();
-        let available = 0;
-        if (navigator.storage && navigator.storage.estimate) {
-          const estimate = await navigator.storage.estimate();
-          available = Math.round((estimate.quota || 0) / (1024 * 1024));
-        }
-        setStorageInfo({
-          stories: usage.stories,
-          moments: usage.moments,
-          sessions: usage.sessions,
-          knowledge: usage.knowledge,
-          total: usage.total,
-          available
-        });
-      } catch (e) {
-        console.error('Failed to load storage info', e);
-      }
-    };
-    loadStorageInfo();
+    refreshStorageInfo();
   }, []);
 
-  const accentColors: { value: 'violet' | 'cyan' | 'rose' | 'emerald' | 'amber'; label: string; class: string }[] = [
+  const accentColors: { value: 'gold' | 'violet' | 'cyan' | 'rose' | 'emerald' | 'amber'; label: string; class: string }[] = [
+    { value: 'gold', label: 'Burnished Gold', class: 'bg-accent-gold' },
     { value: 'violet', label: 'Wisdom Violet', class: 'bg-accent-violet' },
     { value: 'cyan', label: 'Memory Cyan', class: 'bg-accent-cyan' },
     { value: 'rose', label: 'Emotion Rose', class: 'bg-accent-rose' },
@@ -177,125 +187,195 @@ export default function SettingsVaultPage() {
     { id: 'backup', label: 'Backup & Export', icon: <Download className="w-4 h-4" /> },
     { id: 'about', label: 'About Katha', icon: <Info className="w-4 h-4" /> },
     { id: 'advanced', label: 'Advanced', icon: <Code className="w-4 h-4" /> }
-  ];
+  ] as const;
+
+  const buildArchivePayload = async (): Promise<KathaArchiveExport> => {
+    const [stories, moments, sessions, knowledge, timeline] = await Promise.all([
+      dbService.stories.findAll(),
+      dbService.moments.findAll(),
+      dbService.sessions.findAll(),
+      dbService.knowledge.findAll(),
+      dbService.timeline.findAll()
+    ]);
+    return {
+      stories,
+      moments,
+      sessions,
+      knowledge,
+      timeline,
+      exportedAt: new Date().toISOString(),
+      version: '1.0.0'
+    };
+  };
 
   const handleExportStorybook = async () => {
+    setIsExportingWord(true);
     try {
-      const [stories, moments, sessions, knowledge, timeline] = await Promise.all([
-        dbService.stories.findAll(),
-        dbService.moments.findAll(),
-        dbService.sessions.findAll(),
-        dbService.knowledge.findAll(),
-        dbService.timeline.findAll()
-      ]);
-      const data = { exportDate: new Date().toISOString(), version: '1.0.0', stories, moments, sessions, knowledge, timeline };
-      const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `katha-storybook-${new Date().toISOString().slice(0, 10)}.json`;
-      a.click();
-      URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error('Export failed:', error);
+      const archive = await buildArchivePayload();
+      const blob = await exportArchiveToWord(archive);
+      triggerBlobDownload(blob, `katha-storybook-${new Date().toISOString().slice(0, 10)}.docx`);
+      addToast({ type: 'success', message: 'Word storybook (.docx) exported.' });
+    } catch {
+      addToast({ type: 'error', message: 'Failed to export Word storybook.' });
+    } finally {
+      setIsExportingWord(false);
     }
   };
 
   const handleBackupData = async () => {
     try {
-      const [stories, moments, sessions, knowledge, timeline] = await Promise.all([
-        dbService.stories.findAll(),
-        dbService.moments.findAll(),
-        dbService.sessions.findAll(),
-        dbService.knowledge.findAll(),
-        dbService.timeline.findAll()
-      ]);
+      const archive = await buildArchivePayload();
       const backup = {
-        backupDate: new Date().toISOString(),
-        version: '1.0.0',
-        data: { stories, moments, sessions, knowledge, timeline }
+        backupDate: archive.exportedAt,
+        version: archive.version,
+        data: {
+          stories: archive.stories,
+          moments: archive.moments,
+          sessions: archive.sessions,
+          knowledge: archive.knowledge,
+          timeline: archive.timeline
+        }
       };
-      const blob = new Blob([JSON.stringify(backup)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `katha-backup-${new Date().toISOString().slice(0, 10)}.json`;
-      a.click();
-      URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error('Backup failed:', error);
+      const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+      triggerBlobDownload(blob, `katha-backup-${new Date().toISOString().slice(0, 10)}.json`);
+      addToast({ type: 'success', message: 'JSON backup downloaded.' });
+    } catch {
+      addToast({ type: 'error', message: 'Failed to create JSON backup.' });
     }
   };
 
-  const handleClearCache = () => {
-    if (confirm('Clear all cached data? This may slow down initial loading.')) {
+  const handleRestoreJSON = async (file: File) => {
+    setIsRestoringFile(true);
+    try {
+      const text = await file.text();
+      const parsed = JSON.parse(text) as {
+        data?: {
+          stories?: Story[];
+          moments?: Moment[];
+          sessions?: Session[];
+          knowledge?: Knowledge[];
+          timeline?: TimelineEvent[];
+        };
+        stories?: Story[];
+        moments?: Moment[];
+        sessions?: Session[];
+        knowledge?: Knowledge[];
+        timeline?: TimelineEvent[];
+      };
+      const payload = parsed.data ?? parsed;
+      const stories = Array.isArray(payload.stories) ? payload.stories : [];
+      const moments = Array.isArray(payload.moments) ? payload.moments : [];
+      const sessions = Array.isArray(payload.sessions) ? payload.sessions : [];
+      const knowledge = Array.isArray(payload.knowledge) ? payload.knowledge : [];
+      const timeline = Array.isArray(payload.timeline) ? payload.timeline : [];
+
+      if (stories.length === 0 && moments.length === 0 && sessions.length === 0 && knowledge.length === 0) {
+        addToast({ type: 'warning', message: 'Backup file contains no recognizable Katha records.' });
+        return;
+      }
+
+      await db.transaction('rw', [db.stories, db.moments, db.sessions, db.knowledge, db.timeline], async () => {
+        if (stories.length > 0) await db.stories.bulkPut(stories);
+        if (moments.length > 0) await db.moments.bulkPut(moments);
+        if (sessions.length > 0) await db.sessions.bulkPut(sessions);
+        if (knowledge.length > 0) await db.knowledge.bulkPut(knowledge);
+        if (timeline.length > 0) await db.timeline.bulkPut(timeline);
+      });
+
+      await refreshStorageInfo();
+      addToast({ type: 'success', message: `Restored ${stories.length} stories and ${moments.length} moments.` });
+    } catch {
+      addToast({ type: 'error', message: 'Invalid backup file. Please select a valid Katha JSON backup.' });
+    } finally {
+      setIsRestoringFile(false);
+    }
+  };
+
+  const executeClearCache = async () => {
+    setIsClearingCache(true);
+    try {
       if ('caches' in window) {
-        caches.keys().then(names => 
+        const names = await caches.keys();
+        await Promise.all(
           names
             .filter(name => !name.startsWith('workbox'))
-            .forEach(name => caches.delete(name))
+            .map(name => caches.delete(name))
         );
       }
-      alert('Cache cleared successfully');
+      await dbService.apiCache.clearExpired();
+      await refreshStorageInfo();
+      addToast({ type: 'success', message: 'Cache cleared successfully.' });
+    } catch {
+      addToast({ type: 'error', message: 'Failed to clear cache.' });
+    } finally {
+      setIsClearingCache(false);
+      setPendingAction(null);
     }
   };
 
-  const handleResetApp = async () => {
-    if (!confirm('⚠️ WARNING: This will delete ALL your data. Are you absolutely sure?')) return;
-    const confirmation = prompt('Type "DELETE MY DATA" to proceed:');
-    if (confirmation !== 'DELETE MY DATA') return;
+  const executeResetApp = async () => {
+    if (resetConfirmationInput.trim() !== 'DELETE MY DATA') {
+      addToast({ type: 'warning', message: 'Type DELETE MY DATA exactly to confirm reset.' });
+      return;
+    }
     try {
       await dbService.clearAll();
       localStorage.clear();
-      alert('App reset complete — all data deleted. The page will now reload.');
-      window.location.reload();
-    } catch (error) {
-      console.error('Reset failed:', error);
-      alert('Failed to reset the app. Please try again.');
+      setPendingAction(null);
+      setResetConfirmationInput('');
+      addToast({ type: 'success', message: 'All local data cleared. Reloading...' });
+      setTimeout(() => window.location.reload(), 800);
+    } catch {
+      addToast({ type: 'error', message: 'Failed to reset the app. Please try again.' });
     }
   };
 
-  const handleComingSoon = (feature: string) => {
-    alert(`${feature} will be available in an upcoming update!`);
+  const handlePruneMetadataCache = async () => {
+    setIsClearingCache(true);
+    try {
+      await dbService.apiCache.clearExpired();
+      await refreshStorageInfo();
+      addToast({ type: 'success', message: 'Expired metadata cache entries cleaned.' });
+    } catch {
+      addToast({ type: 'error', message: 'Could not clean expired cache.' });
+    } finally {
+      setIsClearingCache(false);
+    }
   };
 
-  const handleOptimizeImages = async () => {
-    const originalText = document.getElementById('optimizeBtn')?.innerText;
-    const btn = document.getElementById('optimizeBtn');
-    if (btn) btn.innerText = 'Optimizing...';
-    setTimeout(() => {
-      alert('Images optimized successfully! Saved 24MB of storage.');
-      if (btn) btn.innerText = originalText || 'Optimize Images';
-    }, 1500);
-  };
-
-  const handlePrintPDF = () => {
-    window.print();
+  const handlePrintPDF = async () => {
+    setIsExportingPDF(true);
+    try {
+      const archive = await buildArchivePayload();
+      const blob = exportArchiveToPDF(archive);
+      triggerBlobDownload(blob, `katha-storybook-${new Date().toISOString().slice(0, 10)}.pdf`);
+      addToast({ type: 'success', message: 'PDF storybook exported.' });
+    } catch {
+      addToast({ type: 'error', message: 'Failed to export PDF storybook.' });
+    } finally {
+      setIsExportingPDF(false);
+    }
   };
 
   const handleLegacyArchive = async () => {
     try {
-      const [stories, moments, sessions, knowledge, timeline] = await Promise.all([
-        dbService.stories.findAll(),
-        dbService.moments.findAll(),
-        dbService.sessions.findAll(),
-        dbService.knowledge.findAll(),
-        dbService.timeline.findAll()
-      ]);
+      const archive = await buildArchivePayload();
       const backup = {
-        backupDate: new Date().toISOString(),
-        version: '1.0.0',
-        data: { stories, moments, sessions, knowledge, timeline }
+        backupDate: archive.exportedAt,
+        version: archive.version,
+        data: {
+          stories: archive.stories,
+          moments: archive.moments,
+          sessions: archive.sessions,
+          knowledge: archive.knowledge,
+          timeline: archive.timeline
+        }
       };
-      const blob = new Blob([JSON.stringify(backup)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `katha-legacy-archive-${new Date().toISOString().slice(0, 10)}.json`;
-      a.click();
-      URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error('Backup failed:', error);
+      const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+      triggerBlobDownload(blob, `katha-legacy-archive-${new Date().toISOString().slice(0, 10)}.json`);
+      addToast({ type: 'success', message: 'Legacy archive downloaded.' });
+    } catch {
+      addToast({ type: 'error', message: 'Failed to create legacy archive.' });
     }
   };
 
@@ -328,7 +408,7 @@ export default function SettingsVaultPage() {
                 {sections.map((section) => (
                   <button
                     key={section.id}
-                    onClick={() => setActiveSection(section.id as any)}
+                    onClick={() => setActiveSection(section.id)}
                     className={`w-full p-3 rounded-card transition-all duration-fast flex items-center gap-3 ${
                       activeSection === section.id
                         ? 'bg-accent-primary text-white'
@@ -392,14 +472,14 @@ export default function SettingsVaultPage() {
                     {/* Accent Color */}
                     <div className="surface-elevated p-6 rounded-card space-y-4">
                       <h3 className="heading-3 text-primary">Accent Color</h3>
-                      <div className="grid grid-cols-2 md:grid-cols-5 gap-normal">
+                      <div className="grid grid-cols-2 md:grid-cols-6 gap-normal">
                         {accentColors.map((color) => (
                           <button
                             key={color.value}
                             onClick={() => setAccentColor(color.value)}
                             className={`p-4 rounded-card border-2 transition-all duration-fast ${
                               accentColor === color.value
-                                ? 'border-white scale-105'
+                                ? 'border-text-primary scale-105'
                                 : 'border-transparent hover:border-midnight-divider'
                             }`}
                           >
@@ -463,14 +543,12 @@ export default function SettingsVaultPage() {
                     </div>
 
                     <div className="space-y-6 opacity-100 transition-opacity" style={{ opacity: globalMute ? 0.5 : 1, pointerEvents: globalMute ? 'none' : 'auto' }}>
-                      {[
-                        { id: 'activity', label: 'Product Activity', desc: 'Updates on your stories and moments' },
-                        { id: 'mentions', label: 'Mentions', desc: 'When you are tagged or referenced' },
-                        { id: 'billing', label: 'Billing & Account', desc: 'Subscription and payment updates' },
-                        { id: 'security', label: 'Security Alerts', desc: 'New logins, suspicious activity' },
-                        { id: 'marketing', label: 'Marketing & News', desc: 'New features and promotions' }
-                      ].map(cat => {
-                        const prefs = notificationPreferences[cat.id as keyof typeof notificationPreferences];
+                      {([
+                        { id: 'activity', label: 'Story & Session Reminders', desc: 'Updates on your stories, moments, and watch sessions' },
+                        { id: 'mentions', label: 'Journal & Insights', desc: 'Reflection prompts and saved quote resurfaces' },
+                        { id: 'security', label: 'Vault & Sync Alerts', desc: 'Backup health and optional cloud sync status' }
+                      ] as const satisfies ReadonlyArray<{ id: NotificationCategory; label: string; desc: string }>).map(cat => {
+                        const prefs = notificationPreferences[cat.id];
                         return (
                           <div key={cat.id} className="surface-elevated p-6 rounded-card space-y-4">
                             <div>
@@ -482,11 +560,8 @@ export default function SettingsVaultPage() {
                               {/* Channels */}
                               <div className="space-y-3">
                                 <span className="text-xs uppercase tracking-wider text-secondary font-medium">Delivery Channels</span>
-                                {['inApp', 'email', 'push', 'sms'].map(channel => {
-                                  // Logic: Billing alerts usually shouldn't be push or SMS. Security is important everywhere.
-                                  if ((cat.id === 'billing' || cat.id === 'marketing') && (channel === 'push' || channel === 'sms')) return null;
-
-                                  const isEnabled = prefs.channels[channel as keyof typeof prefs.channels];
+                                {(['inApp', 'email', 'push', 'sms'] as const satisfies ReadonlyArray<NotificationChannel>).map(channel => {
+                                  const isEnabled = prefs.channels[channel];
                                   return (
                                     <div key={channel} className="flex items-center justify-between">
                                       <span className="text-small capitalize text-primary">
@@ -494,9 +569,12 @@ export default function SettingsVaultPage() {
                                       </span>
                                       <button
                                         onClick={() => {
-                                          updateNotificationPreference(cat.id as any, { 
-                                            channels: { [channel]: !isEnabled } 
-                                          } as any);
+                                          updateNotificationPreference(cat.id, {
+                                            channels: {
+                                              ...prefs.channels,
+                                              [channel]: !isEnabled
+                                            }
+                                          });
                                           triggerSaveToast();
                                         }}
                                         className={`relative w-10 h-5 rounded-full transition-colors ${
@@ -513,13 +591,13 @@ export default function SettingsVaultPage() {
                               </div>
 
                               {/* Frequency */}
-                              {['activity', 'marketing'].includes(cat.id) && (
+                              {cat.id === 'activity' && (
                                 <div className="space-y-3">
                                   <span className="text-xs uppercase tracking-wider text-secondary font-medium">Frequency</span>
                                   <Dropdown
                                     value={prefs.frequency || 'immediate'}
                                     onChange={(val) => {
-                                      updateNotificationPreference(cat.id as any, { frequency: val as any });
+                                      updateNotificationPreference(cat.id, { frequency: val as NotificationFrequency });
                                       triggerSaveToast();
                                     }}
                                     options={[
@@ -585,9 +663,9 @@ export default function SettingsVaultPage() {
                                 setIsSyncing(true);
                                 try {
                                   await googleCloudService.backupToCloud();
-                                  useToastStore.getState().addToast({ type: 'success', message: 'Successfully backed up to Google Drive!' });
-                                } catch (error: any) {
-                                  useToastStore.getState().addToast({ type: 'error', message: error?.message || 'Failed to backup to Drive. Please check your connection.' });
+                                  addToast({ type: 'success', message: 'Successfully backed up to Google Drive!' });
+                                } catch (error: unknown) {
+                                  addToast({ type: 'error', message: error instanceof Error ? error.message : 'Failed to backup to Drive. Please check your connection.' });
                                 } finally {
                                   setIsSyncing(false);
                                 }
@@ -600,20 +678,7 @@ export default function SettingsVaultPage() {
                             </button>
 
                             <button 
-                              onClick={async () => {
-                                if (confirm("Warning: Restoring will overwrite any unsaved local data that isn't in the cloud. Proceed?")) {
-                                  setIsSyncing(true);
-                                  try {
-                                    await googleCloudService.restoreFromCloud();
-                                    useToastStore.getState().addToast({ type: 'success', message: 'Successfully restored! Refreshing...' });
-                                    setTimeout(() => window.location.reload(), 2000);
-                                  } catch (error: any) {
-                                    useToastStore.getState().addToast({ type: 'error', message: error?.message || 'Failed to restore from Drive. Please try again.' });
-                                  } finally {
-                                    setIsSyncing(false);
-                                  }
-                                }
-                              }}
+                              onClick={() => setPendingAction('restore-cloud')}
                               disabled={isSyncing}
                               className="btn btn-secondary flex-1 py-3 disabled:opacity-50"
                             >
@@ -650,17 +715,16 @@ export default function SettingsVaultPage() {
                         <h3 className="heading-3 text-primary">Privacy-First by Design</h3>
                       </div>
                       <p className="text-secondary leading-relaxed mb-4">
-                        Smriti stores everything locally on this device. No cloud. No tracking. No sharing. 
-                        Your stories, memories, and personal reflections never leave your device unless you explicitly export them.
+                        Katha stores your stories, moments, and reflections locally on this device by default. Cloud backup (Google Drive or Firebase sync) is completely optional and only runs when you choose to sign in and connect.
                       </p>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-normal text-small text-secondary">
                         <div className="flex items-center gap-2">
                           <Check className="w-4 h-4 text-accent-emerald" />
-                          <span>No analytics or telemetry</span>
+                          <span>No third-party analytics or ads</span>
                         </div>
                         <div className="flex items-center gap-2">
                           <Check className="w-4 h-4 text-accent-emerald" />
-                          <span>No cloud synchronization</span>
+                          <span>Optional end-user cloud sync</span>
                         </div>
                         <div className="flex items-center gap-2">
                           <Check className="w-4 h-4 text-accent-emerald" />
@@ -744,8 +808,8 @@ export default function SettingsVaultPage() {
                         </div>
 
                         {encryptionEnabled && (
-                          <div className="p-4 bg-amber/10 border border-amber/30 rounded-card">
-                            <div className="flex items-center gap-2 text-amber mb-2">
+                          <div className="p-4 bg-accent-amber/10 border border-accent-amber/30 rounded-card">
+                            <div className="flex items-center gap-2 text-accent-amber mb-2">
                               <AlertTriangle className="w-4 h-4" />
                               <span className="font-medium">Important</span>
                             </div>
@@ -836,19 +900,21 @@ export default function SettingsVaultPage() {
                       <h3 className="heading-3 text-primary">Storage Management</h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-normal">
                         <button
-                          onClick={handleClearCache}
-                          className="btn btn-secondary flex items-center gap-2"
+                          onClick={() => setPendingAction('clear-cache')}
+                          disabled={isClearingCache}
+                          className="btn btn-secondary flex items-center gap-2 disabled:opacity-50"
                         >
                           <RefreshCw className="w-4 h-4" />
                           Clear Cache
                         </button>
                         <button 
                           id="optimizeBtn"
-                          onClick={handleOptimizeImages}
-                          className="btn btn-secondary flex items-center gap-2"
+                          onClick={handlePruneMetadataCache}
+                          disabled={isClearingCache}
+                          className="btn btn-secondary flex items-center gap-2 disabled:opacity-50"
                         >
                           <HardDrive className="w-4 h-4" />
-                          Optimize Images
+                          Prune Expired Cache
                         </button>
                       </div>
                     </div>
@@ -895,17 +961,19 @@ export default function SettingsVaultPage() {
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-normal">
                         <button
                           onClick={handleExportStorybook}
-                          className="btn btn-primary flex items-center gap-2"
+                          disabled={isExportingWord}
+                          className="btn btn-primary flex items-center gap-2 disabled:opacity-50"
                         >
                           <FileText className="w-4 h-4" />
-                          Word Book
+                          {isExportingWord ? 'Building Word...' : 'Word Book (.docx)'}
                         </button>
                         <button 
                           onClick={handlePrintPDF}
-                          className="btn btn-secondary flex items-center gap-2"
+                          disabled={isExportingPDF}
+                          className="btn btn-secondary flex items-center gap-2 disabled:opacity-50"
                         >
                           <FileText className="w-4 h-4" />
-                          PDF Book
+                          {isExportingPDF ? 'Building PDF...' : 'PDF Book (.pdf)'}
                         </button>
                         <button 
                           onClick={handleBackupData}
@@ -919,17 +987,41 @@ export default function SettingsVaultPage() {
 
                     {/* Memory Archive */}
                     <div className="surface-elevated p-6 rounded-card space-y-4">
-                      <h3 className="heading-3 text-primary">Memory Archive Backup</h3>
+                      <h3 className="heading-3 text-primary">Memory Archive Backup & Restore</h3>
                       <p className="text-secondary">
-                        Create a complete backup of all your memories, moments, and personal reflections.
+                        Create a complete backup of all your memories, moments, and personal reflections, or restore from an exported JSON archive.
                       </p>
-                      <button
-                        onClick={handleBackupData}
-                        className="btn btn-primary flex items-center gap-2"
-                      >
-                        <Upload className="w-4 h-4" />
-                        Create Memory Archive
-                      </button>
+                      <div className="flex flex-wrap gap-3">
+                        <button
+                          onClick={handleBackupData}
+                          className="btn btn-primary flex items-center gap-2"
+                        >
+                          <Download className="w-4 h-4" />
+                          Create Memory Archive
+                        </button>
+                        <input
+                          ref={restoreInputRef}
+                          type="file"
+                          accept="application/json,.json"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              void handleRestoreJSON(file);
+                              e.target.value = '';
+                            }
+                          }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => restoreInputRef.current?.click()}
+                          disabled={isRestoringFile}
+                          className="btn btn-secondary flex items-center gap-2 disabled:opacity-50"
+                        >
+                          <Upload className="w-4 h-4" />
+                          {isRestoringFile ? 'Restoring...' : 'Restore from JSON'}
+                        </button>
+                      </div>
                     </div>
 
                     {/* Legacy Mode */}
@@ -1060,45 +1152,32 @@ export default function SettingsVaultPage() {
 
                     {/* Developer Mode */}
                     <div className="surface-elevated p-6 rounded-card space-y-4">
-                      <h3 className="heading-3 text-primary">Developer Mode</h3>
+                      <h3 className="heading-3 text-primary">Vault Diagnostics</h3>
                       <p className="text-secondary">
-                        Advanced tools for power users and developers.
+                        Local maintenance and raw archive export tools.
                       </p>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-normal">
                         <button 
-                          onClick={() => navigate('/dev/console')}
-                          className="btn btn-secondary flex items-center gap-2"
+                          onClick={handlePruneMetadataCache}
+                          disabled={isClearingCache}
+                          className="btn btn-secondary flex items-center gap-2 disabled:opacity-50"
                         >
                           <Database className="w-4 h-4" />
-                          Inspect Database
+                          Prune Expired API Cache
                         </button>
                         <button 
                           onClick={handleBackupData}
                           className="btn btn-secondary flex items-center gap-2"
                         >
                           <FileText className="w-4 h-4" />
-                          Export Raw Data
-                        </button>
-                        <button 
-                          onClick={() => navigate('/dev/console')}
-                          className="btn btn-secondary flex items-center gap-2"
-                        >
-                          <Code className="w-4 h-4" />
-                          Run Analytics Query
-                        </button>
-                        <button 
-                          onClick={() => window.open('https://github.com/smriti-engine/api', '_blank')}
-                          className="btn btn-secondary flex items-center gap-2"
-                        >
-                          <ExternalLink className="w-4 h-4" />
-                          API Documentation
+                          Export Raw JSON Archive
                         </button>
                       </div>
                     </div>
 
                     {/* Dangerous Zone */}
-                    <div className="surface-elevated p-6 rounded-card border-l-4 border-rose space-y-4">
-                      <h3 className="heading-3 text-rose flex items-center gap-tight">
+                    <div className="surface-elevated p-6 rounded-card border-l-4 border-accent-rose space-y-4">
+                      <h3 className="heading-3 text-accent-rose flex items-center gap-tight">
                         <AlertTriangle className="w-5 h-5" />
                         Dangerous Zone
                       </h3>
@@ -1107,8 +1186,11 @@ export default function SettingsVaultPage() {
                       </p>
                       <div className="space-y-3">
                         <button
-                          onClick={handleResetApp}
-                          className="btn btn-secondary text-rose border-rose hover:bg-rose/10 flex items-center gap-2"
+                          onClick={() => {
+                            setResetConfirmationInput('');
+                            setPendingAction('reset-app');
+                          }}
+                          className="btn btn-secondary text-accent-rose border-accent-rose hover:bg-accent-rose/10 flex items-center gap-2"
                         >
                           <Trash2 className="w-4 h-4" />
                           Reset App (Delete All Data)
@@ -1124,6 +1206,83 @@ export default function SettingsVaultPage() {
         </FadeIn>
         </StaggerContainer>
       </div>
+
+      {/* Confirmation Modal */}
+      {pendingAction && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="vault-confirm-title"
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          onClick={() => setPendingAction(null)}
+        >
+          <div
+            className="surface-elevated border border-midnight-border rounded-card max-w-md w-full p-6 space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 id="vault-confirm-title" className="heading-3 text-primary">
+              {pendingAction === 'clear-cache' && 'Clear Cached Data?'}
+              {pendingAction === 'restore-cloud' && 'Restore from Google Drive?'}
+              {pendingAction === 'reset-app' && 'Reset Entire Local Vault?'}
+            </h3>
+            <p className="text-small text-secondary">
+              {pendingAction === 'clear-cache' && 'This removes offline static caches and expired metadata entries. Your saved stories and notes remain untouched.'}
+              {pendingAction === 'restore-cloud' && 'Restoring from Google Drive will overwrite unsaved local entries with your latest Drive snapshot.'}
+              {pendingAction === 'reset-app' && 'This permanently deletes all stories, moments, sessions, and insights stored in this browser. Type DELETE MY DATA to confirm.'}
+            </p>
+            {pendingAction === 'reset-app' && (
+              <input
+                type="text"
+                value={resetConfirmationInput}
+                onChange={(e) => setResetConfirmationInput(e.target.value)}
+                placeholder="Type DELETE MY DATA"
+                className="w-full px-3 py-2 rounded-button bg-midnight-bg border border-midnight-border text-primary"
+              />
+            )}
+            <div className="flex justify-end gap-3 pt-2">
+              <button type="button" onClick={() => setPendingAction(null)} className="btn btn-secondary">
+                Cancel
+              </button>
+              {pendingAction === 'clear-cache' && (
+                <button type="button" onClick={() => void executeClearCache()} className="btn btn-primary">
+                  Clear Cache
+                </button>
+              )}
+              {pendingAction === 'restore-cloud' && (
+                <button
+                  type="button"
+                  onClick={async () => {
+                    setPendingAction(null);
+                    setIsSyncing(true);
+                    try {
+                      await googleCloudService.restoreFromCloud();
+                      addToast({ type: 'success', message: 'Successfully restored! Refreshing...' });
+                      setTimeout(() => window.location.reload(), 1200);
+                    } catch (error: unknown) {
+                      addToast({ type: 'error', message: error instanceof Error ? error.message : 'Failed to restore from Drive.' });
+                    } finally {
+                      setIsSyncing(false);
+                    }
+                  }}
+                  className="btn btn-primary"
+                >
+                  Restore Now
+                </button>
+              )}
+              {pendingAction === 'reset-app' && (
+                <button
+                  type="button"
+                  disabled={resetConfirmationInput.trim() !== 'DELETE MY DATA'}
+                  onClick={() => void executeResetApp()}
+                  className="btn btn-secondary text-accent-rose border-accent-rose hover:bg-accent-rose/10 disabled:opacity-40"
+                >
+                  Delete Everything
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

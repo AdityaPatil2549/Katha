@@ -36,11 +36,11 @@ export function OfflineIndicator({ className = '' }: OfflineIndicatorProps) {
   return (
     <div
       className={`
-        fixed top-4 right-4 z-50 flex items-center gap-2 px-4 py-2 rounded-lg
+        fixed top-4 right-4 z-50 flex items-center gap-2 px-4 py-2 rounded-lg backdrop-blur-md
         transition-all duration-300 animate-slide-up
         ${isOnline 
-          ? 'bg-surface-emerald border border-emerald-500/20 text-emerald' 
-          : 'bg-surface-rose border border-rose-500/20 text-rose'
+          ? 'bg-accent-emerald/15 border border-accent-emerald/30 text-accent-emerald' 
+          : 'bg-accent-rose/15 border border-accent-rose/30 text-accent-rose'
         }
         ${className}
       `}

@@ -1,34 +1,24 @@
-# Katha Security & Compliance Information
+# Katha Security & Privacy Architecture
 
-At Katha, we take the privacy and security of your personal media tracking and journaling seriously. Below is an overview of how we protect your data.
+At Katha, we treat your personal media history, quotes, and reflections as private personal records. Below is an accurate overview of how your data is stored, protected, and optionally synced.
 
-## 🔒 Certifications and Compliance
-Katha is built entirely on **Google Cloud Firebase**, which means our underlying infrastructure inherits world-class security certifications.
-* **SOC 1, SOC 2, and SOC 3**: The underlying Firebase infrastructure is audited regularly for security, availability, and confidentiality.
-* **ISO/IEC 27001, 27017, 27018**: Certified for information security management and cloud security.
-*(Note: While Google Cloud holds these certifications, Katha as an independent application has not undergone formal individual audits yet).*
+## 🏠 Local-First Storage by Default
+* **IndexedDB Vault**: Without signing in, all stories, moments, sessions, and knowledge records remain on your device inside browser IndexedDB (managed via Dexie.js).
+* **No Mandatory Cloud Account**: You can use the full local vault without creating or linking a cloud account.
 
-## 🛡️ Data Encryption
-* **In Transit**: All data sent between the Katha web application and our servers is encrypted using industry-standard **HTTPS/TLS 1.2+**. We enforce HTTP Strict Transport Security (HSTS) on our domain.
-* **At Rest**: Your stories, moments, and profile data are stored in Firestore, which automatically encrypts all data at rest using the Advanced Encryption Standard (AES-256).
+## ☁️ Optional Cloud Infrastructure & Compliance
+When you explicitly choose to sign in with Google, Katha uses **Google Cloud Firebase** (Authentication & Cloud Firestore) and optional **Google Drive AppData**:
+* **Inherited Infrastructure Standards**: Google Cloud / Firebase maintains SOC 1/2/3 and ISO/IEC 27001/27017/27018 compliance for underlying cloud storage. *(Note: Katha itself is an independent open-source application and has not undergone third-party security audits.)*
+* **In Transit**: All client-server and API traffic uses **HTTPS/TLS**.
+* **Cloud Sync Partitioning**: Firestore records and local offline outbox queue items are scoped by authenticated user UID (`userId`).
 
-## 🌍 Data Residency
-Our primary database (Firestore) is hosted in the **US-Central1** region. All customer data, user accounts, and backups are processed and stored within this Google Cloud region. 
-
-## 🔐 Access Controls
-We follow the principle of least privilege:
-* **User Isolation**: Firestore Security Rules ensure that you (and only you) can read, write, or modify your personal data. User data is partitioned by your unique Authentication ID (`uid`).
-* **Developer Access**: Internal access to the production Firebase console is restricted. We do not access user data unless explicitly requested by the user for support/debugging purposes.
+## 🛡️ Edge API & Client Hardening
+* **Authenticated AI Proxy**: `/api/gemini` requires a valid Firebase ID Bearer token (`verifyFirebaseBearerToken`) and validates request payloads with strict Zod bounds.
+* **SSRF Prevention**: Metadata proxy routes (`/api/tmdb`, `/api/jikan`, `/api/omdb`, etc.) reject absolute URLs, `//` protocol-relative paths, and `..` traversal segments via `validateRelativePath`.
+* **Content Security Policy**: `index.html` enforces a strict CSP without `'unsafe-eval'`, restricts `connect-src` to explicit trusted origins, and limits form actions/frame ancestors.
 
 ## 🐛 Vulnerability Disclosure
-We believe in responsible disclosure. If you are a security researcher and have found a vulnerability in Katha, please report it to us immediately. 
-* Do not publicly disclose the vulnerability until we have had time to patch it.
-* We currently do not have a paid bug bounty program, but we deeply appreciate reports that keep our users safe.
+If you discover a security issue in Katha, please report it responsibly before public disclosure so it can be patched promptly.
 
-## 📜 Incident History
-Transparency is key. We maintain a public log of any security incidents that result in the unauthorized access or loss of user data.
-* **August 2026**: Initial launch of Katha's hardened Firebase rules.
-* *No security incidents or breaches have occurred to date.*
-
-## 🕵️‍♂️ Penetration Testing
-As an indie open-source project, Katha relies on automated Static Application Security Testing (SAST) via **Semgrep**, secret scanning via **Gitleaks**, and dependency auditing. We have not yet commissioned a formal third-party penetration test. 
+## 📜 Security Changelog
+* **Current Baseline**: Local-first IndexedDB storage, UID-scoped offline sync outbox, hardened Edge API proxies (`api/_lib/proxy.ts` & `api/_lib/rate-limit.ts`), and verified `.docx` / `.pdf` / `.md` / `.json` client-side exports. 

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { BlurReveal } from '@/components/ui/motion/BlurReveal';
@@ -18,6 +18,7 @@ import {
   Tv, 
   Youtube, 
   Video,
+  Gamepad2,
   X,
   ChevronDown,
   Upload,
@@ -29,6 +30,7 @@ import {
 } from 'lucide-react';
 import { useStoriesStore } from '@/store';
 import { useSyncStore } from '@/store/syncStore';
+import { useToastStore } from '@/store/toastStore';
 import type { Story, StoryCategory, StoryStatus } from '@/types/models';
 import { mediaService } from '@/services/MediaService';
 import { youtubeService } from '@/services/YouTubeService';
@@ -38,6 +40,8 @@ const CATEGORIES: { value: StoryCategory; label: string; icon: React.ReactNode }
   { value: 'movie', label: 'Movie', icon: <Film className="w-4 h-4" /> },
   { value: 'documentary', label: 'Documentary', icon: <Video className="w-4 h-4" /> },
   { value: 'youtube', label: 'YouTube', icon: <Youtube className="w-4 h-4" /> },
+  { value: 'game', label: 'Game', icon: <Gamepad2 className="w-4 h-4" /> },
+  { value: 'book', label: 'Book', icon: <BookOpen className="w-4 h-4" /> },
 ];
 
 const PLATFORMS = [
@@ -61,6 +65,7 @@ export default function AddStoryPage() {
   const navigate = useNavigate();
   const { addStory } = useStoriesStore();
   const { isOnline } = useSyncStore();
+  const addToast = useToastStore((s) => s.addToast);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -121,7 +126,7 @@ export default function AddStoryPage() {
   const handleNext = () => {
     const error = validateStep(currentStep);
     if (error) {
-      alert(error);
+      addToast({ type: 'error', message: error });
       return;
     }
     setSlideDirection('left');
@@ -187,7 +192,7 @@ export default function AddStoryPage() {
     return () => clearTimeout(debounce);
   }, [apiSearchQuery, searchPlatform, isOnline]);
 
-  const handleResultSelect = async (result: any) => {
+  const handleResultSelect = async (result: { id: string; source?: string; mediaType?: string }) => {
     setShowApiDropdown(false);
     setIsSearchingApi(true);
     
@@ -247,17 +252,20 @@ export default function AddStoryPage() {
     }
   };
 
-  // Auto-save draft every 30 seconds
+  // Keep ref in sync so periodic auto-save runs on a clean 30s interval without resetting on keystrokes
+  const formDataRef = useRef(formData);
+  formDataRef.current = formData;
+
   useEffect(() => {
     const interval = setInterval(() => {
-      const draft = { ...formData };
-      localStorage.setItem('katha_story_draft', JSON.stringify(draft));
+      if (!formDataRef.current.title.trim()) return;
+      localStorage.setItem('katha_story_draft', JSON.stringify(formDataRef.current));
       setDraftSaved(true);
       setTimeout(() => setDraftSaved(false), 2000);
     }, 30000);
 
     return () => clearInterval(interval);
-  }, [formData]);
+  }, []);
 
   // Load draft on mount
   useEffect(() => {
@@ -266,13 +274,13 @@ export default function AddStoryPage() {
       try {
         const parsedDraft = JSON.parse(draft);
         setFormData(parsedDraft);
-      } catch (e) {
+      } catch {
         // Ignore invalid draft
       }
     }
   }, []);
 
-  const handleInputChange = (field: string, value: any) => {
+  const handleInputChange = (field: string, value: string | number | boolean | string[] | undefined) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -367,7 +375,7 @@ export default function AddStoryPage() {
   const handleSubmit = async (action: 'save' | 'saveAndSession' | 'saveAndMoment') => {
     const error = validateForm();
     if (error) {
-      alert(error);
+      addToast({ type: 'error', message: error });
       return;
     }
 
@@ -377,10 +385,10 @@ export default function AddStoryPage() {
       const storyData = {
         ...formData,
         platform: showPlatformOther ? customPlatform : formData.platform,
-        watchTimeMinutes: formData.category === 'movie' ? formData.watchTimeMinutes : 0,
+        watchTimeMinutes: formData.watchTimeMinutes || 0,
       };
 
-      await addStory(storyData);
+      const savedStory = await addStory(storyData);
       
       // Clear draft
       localStorage.removeItem('katha_story_draft');
@@ -390,20 +398,18 @@ export default function AddStoryPage() {
         setShowSuccess(false);
         
         if (action === 'saveAndSession') {
-          // Navigate to add session
-          navigate('/library');
+          navigate(`/story/${savedStory.id}?action=add-session`);
         } else if (action === 'saveAndMoment') {
-          // Navigate to add moment
-          navigate('/memory');
+          navigate(`/story/${savedStory.id}?action=add-moment`);
         } else {
-          navigate('/library');
+          navigate(`/story/${savedStory.id}`);
         }
-      }, 1500);
+      }, 900);
     } catch (error) {
       if (error instanceof Error) {
-        alert(error.message); // Will display the specific duplicate error
+        addToast({ type: 'error', message: error.message });
       } else {
-        alert('Failed to save story. Please try again.');
+        addToast({ type: 'error', message: 'Failed to save story. Please try again.' });
       }
     } finally {
       setIsSubmitting(false);
@@ -513,21 +519,21 @@ export default function AddStoryPage() {
                         <button
                           type="button"
                           onClick={() => { setSearchPlatform('anime'); setApiSearchQuery(''); }}
-                          className={`px-3 py-1.5 text-xs rounded-md transition-colors whitespace-nowrap ${searchPlatform === 'anime' ? 'bg-purple/20 text-purple font-medium' : 'text-muted hover:text-secondary'}`}
+                          className={`px-3 py-1.5 text-xs rounded-md transition-colors whitespace-nowrap ${searchPlatform === 'anime' ? 'bg-accent-primary/20 text-accent-primary font-medium' : 'text-text-muted hover:text-text-secondary'}`}
                         >
                           Anime
                         </button>
                         <button
                           type="button"
                           onClick={() => { setSearchPlatform('game'); setApiSearchQuery(''); }}
-                          className={`px-3 py-1.5 text-xs rounded-md transition-colors whitespace-nowrap ${searchPlatform === 'game' ? 'bg-emerald/20 text-emerald font-medium' : 'text-muted hover:text-secondary'}`}
+                          className={`px-3 py-1.5 text-xs rounded-md transition-colors whitespace-nowrap ${searchPlatform === 'game' ? 'bg-accent-emerald/20 text-accent-emerald font-medium' : 'text-text-muted hover:text-text-secondary'}`}
                         >
                           Games
                         </button>
                         <button
                           type="button"
                           onClick={() => { setSearchPlatform('youtube'); setApiSearchQuery(''); }}
-                          className={`px-3 py-1.5 text-xs rounded-md transition-colors whitespace-nowrap ${searchPlatform === 'youtube' ? 'bg-rose/20 text-rose font-medium' : 'text-muted hover:text-secondary'}`}
+                          className={`px-3 py-1.5 text-xs rounded-md transition-colors whitespace-nowrap ${searchPlatform === 'youtube' ? 'bg-accent-rose/20 text-accent-rose font-medium' : 'text-text-muted hover:text-text-secondary'}`}
                         >
                           YouTube
                         </button>
@@ -586,7 +592,7 @@ export default function AddStoryPage() {
                               <div className="flex-1 min-w-0">
                                 <h4 className="text-primary font-semibold truncate text-base mb-1">{result.title}</h4>
                                 <p className="text-xs text-secondary flex items-center gap-2">
-                                  <span className="uppercase font-semibold tracking-wider text-[10px] bg-white/10 px-2 py-0.5 rounded text-text-primary">{result.mediaType}</span>
+                                  <span className="uppercase font-semibold tracking-wider text-xs bg-midnight-bg/60 border border-midnight-border px-2 py-0.5 rounded text-text-primary">{result.mediaType}</span>
                                   <span>{result.releaseYear}</span>
                                 </p>
                               </div>
@@ -649,8 +655,7 @@ export default function AddStoryPage() {
                         onChange={handlePlatformChange}
                         options={[
                           { value: '', label: 'Select platform...' },
-                          ...PLATFORMS.map(platform => ({ value: platform, label: platform })),
-                          { value: 'Other', label: 'Other' }
+                          ...PLATFORMS.map(platform => ({ value: platform, label: platform }))
                         ]}
                         className="w-full py-4 text-base bg-midnight-surface/50"
                       />
@@ -864,7 +869,7 @@ export default function AddStoryPage() {
                           <button
                             type="button"
                             onClick={() => handleInputChange('posterUrl', '')}
-                            className="absolute -top-3 -right-3 p-2 bg-midnight-bg rounded-full text-rose border border-rose/20 shadow-lg hover:bg-rose hover:text-white transition-colors"
+                            className="absolute -top-3 -right-3 p-2 bg-midnight-bg rounded-full text-accent-rose border border-accent-rose/30 shadow-lg hover:bg-accent-rose hover:text-white transition-colors"
                             aria-label="Remove poster"
                           >
                             <X className="w-4 h-4" />

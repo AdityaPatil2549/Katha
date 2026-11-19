@@ -5,6 +5,14 @@ const CLIENT_ID = '528829308172-g5tt6v14japuti0t6gpep6q5rpipvea7.apps.googleuser
 const DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"];
 const SCOPES = 'https://www.googleapis.com/auth/drive.appdata';
 
+interface CloudBackupPayload {
+  stories?: Parameters<typeof dbService.stories.bulkUpsert>[0];
+  moments?: Parameters<typeof dbService.moments.bulkUpsert>[0];
+  sessions?: Parameters<typeof dbService.sessions.bulkUpsert>[0];
+  knowledge?: Parameters<typeof dbService.knowledge.bulkUpsert>[0];
+  timeline?: Parameters<typeof dbService.timeline.bulkUpsert>[0];
+}
+
 export class GoogleCloudService {
   private isInitialized = false;
 
@@ -98,8 +106,6 @@ export class GoogleCloudService {
       if (!response.ok) {
         throw new Error(`Cloud backup failed: ${response.statusText}`);
       }
-
-      console.log('Successfully backed up to Google Drive appDataFolder!');
     } catch (error) {
       console.error('Failed to backup to cloud', error);
       throw error;
@@ -130,7 +136,7 @@ export class GoogleCloudService {
         alt: 'media'
       });
 
-      const backupData = downloadRes.result as any;
+      const backupData = downloadRes.result as unknown as CloudBackupPayload;
 
       if (backupData.stories) {
         await dbService.stories.bulkUpsert(backupData.stories);
@@ -148,7 +154,6 @@ export class GoogleCloudService {
         await dbService.timeline.bulkUpsert(backupData.timeline);
       }
 
-      console.log('Successfully restored from Google Drive!');
       return true;
     } catch (error) {
       console.error('Failed to restore from cloud', error);

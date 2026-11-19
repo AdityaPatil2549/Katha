@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import { Dropdown } from '@/components/ui/Dropdown';
 import { 
@@ -24,6 +24,7 @@ import {
   Cloud
 } from 'lucide-react';
 import { useStoriesStore, useMomentsStore, useSessionsStore, useKnowledgeStore } from '@/store';
+import { useToastStore } from '@/store/toastStore';
 import { useSyncStore } from '@/store/syncStore';
 import type { Story, Moment, Session, Knowledge } from '@/types/models';
 import { FadeIn } from '@/components/ui/motion/FadeIn';
@@ -31,7 +32,8 @@ import { StaggerContainer, staggerItemVariants } from '@/components/ui/motion/St
 import { BlurReveal } from '@/components/ui/motion/BlurReveal';
 
 export default function StoryPage() {
-  const { id } = useParams<{ id: string }>();
+  const { storyId } = useParams<{ storyId: string }>();
+  const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   
   const { 
@@ -74,6 +76,12 @@ export default function StoryPage() {
   const [editingMoment, setEditingMoment] = useState<Moment | null>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'moments' | 'sessions' | 'knowledge'>('overview');
   const [copied, setCopied] = useState(false);
+  const [pendingConfirm, setPendingConfirm] = useState<{
+    title: string;
+    message: string;
+    onConfirm: () => Promise<void>;
+  } | null>(null);
+  const addToast = useToastStore((s) => s.addToast);
   const { scrollY } = useScroll();
   const posterY = useTransform(scrollY, [0, 500], [0, 100]);
   const posterOpacity = useTransform(scrollY, [0, 300], [1, 0.4]);
@@ -104,12 +112,20 @@ export default function StoryPage() {
   }, [loadSessions, loadKnowledge]);
 
   useEffect(() => {
-    const foundStory = stories.find(s => s.id === id);
-    if (foundStory) {
-      setStory(foundStory);
-      if (id) getMomentsByStory(id);
+    const foundStory = stories.find(s => s.id === storyId);
+    setStory(foundStory ?? null);
+    if (foundStory && storyId) {
+      getMomentsByStory(storyId);
+      const action = searchParams.get('action');
+      if (action === 'add-session') {
+        setShowAddSession(true);
+        setSearchParams({}, { replace: true });
+      } else if (action === 'add-moment') {
+        setShowAddMoment(true);
+        setSearchParams({}, { replace: true });
+      }
     }
-  }, [id, stories, getMomentsByStory]);
+  }, [storyId, stories, getMomentsByStory, searchParams, setSearchParams]);
 
   const handleToggleFavorite = async () => {
     if (!story) return;
@@ -147,16 +163,28 @@ export default function StoryPage() {
     setEditingMoment(null);
   };
 
-  const handleDeleteMoment = async (momentId: string) => {
-    if (!confirm('Are you sure you want to delete this moment?')) return;
-    await deleteMoment(momentId);
+  const handleDeleteMoment = (momentId: string) => {
+    setPendingConfirm({
+      title: 'Delete Moment',
+      message: 'Are you sure you want to delete this moment? This action cannot be undone.',
+      onConfirm: async () => {
+        await deleteMoment(momentId);
+        addToast({ type: 'success', message: 'Moment deleted.' });
+      },
+    });
   };
 
-  const handleDeleteStory = async () => {
+  const handleDeleteStory = () => {
     if (!story) return;
-    if (!confirm('Are you sure you want to delete this story and all related data?')) return;
-    await deleteStory(story.id);
-    navigate('/library');
+    setPendingConfirm({
+      title: 'Delete Story',
+      message: `Are you sure you want to delete "${story.title}" and all related sessions, moments, and insights?`,
+      onConfirm: async () => {
+        await deleteStory(story.id);
+        addToast({ type: 'success', message: 'Story removed from your library.' });
+        navigate('/library');
+      },
+    });
   };
 
   const handleAddSession = async (e?: React.FormEvent) => {
@@ -262,12 +290,32 @@ export default function StoryPage() {
     });
   };
 
-  if (storiesLoading || !story) {
+  if (storiesLoading) {
     return (
       <div className="max-w-4xl mx-auto p-6">
         <div className="flex justify-center py-24">
           <div className="w-10 h-10 border-2 border-text-primary/20 border-t-text-primary rounded-full animate-spin" />
         </div>
+      </div>
+    );
+  }
+
+  if (!story) {
+    return (
+      <div className="max-w-2xl mx-auto px-6 py-24 text-center space-y-6">
+        <div className="w-16 h-16 mx-auto rounded-full bg-midnight-surface border border-midnight-border flex items-center justify-center">
+          <BookOpen className="w-8 h-8 text-text-muted" />
+        </div>
+        <h1 className="font-serif text-3xl text-text-primary">Story not found</h1>
+        <p className="text-text-secondary font-sans">
+          This story entry could not be found in your library or may have been removed.
+        </p>
+        <button
+          onClick={() => navigate('/library')}
+          className="px-6 py-3 rounded-button bg-text-primary text-midnight-bg font-sans text-sm font-medium hover:opacity-90 transition-opacity"
+        >
+          Back to Library
+        </button>
       </div>
     );
   }
@@ -397,6 +445,14 @@ export default function StoryPage() {
             >
               <Plus className="w-4 h-4 mr-2" />
               Add Moment
+            </button>
+            <button
+              onClick={() => navigate(`/story/${story.id}/enhanced`)}
+              className="px-6 py-3 rounded-button border border-accent-gold/40 bg-accent-gold/10 text-accent-gold hover:bg-accent-gold/20 text-sm font-sans tracking-wide transition-all duration-300 flex items-center gap-2 shadow-sm"
+              title="Open deep intelligence: ratings, streaming providers, and trailers"
+            >
+              <Lightbulb className="w-4 h-4" />
+              Deep Intelligence View
             </button>
             <button 
               className="px-6 py-3 rounded-button border border-midnight-border/50 text-text-primary text-sm font-sans tracking-wide transition-colors hover:bg-midnight-surface/50 flex items-center gap-2"
@@ -680,7 +736,7 @@ export default function StoryPage() {
                                     <span>{session.duration} min</span>
                                   </div>
                                   {session.mood && (
-                                    <span className="px-3 py-1 rounded-chip text-[10px] tracking-wider uppercase border border-midnight-border/50 text-text-secondary bg-midnight-bg/50">
+                                    <span className="px-3 py-1 rounded-chip text-xs tracking-wider uppercase border border-midnight-border/50 text-text-secondary bg-midnight-bg/50">
                                       {session.mood}
                                     </span>
                                   )}
@@ -689,8 +745,16 @@ export default function StoryPage() {
                                 {session.notes && <div className="text-sm text-text-muted font-light italic mt-2">{session.notes}</div>}
                               </div>
                               <button
-                                onClick={() => { if (confirm('Delete this session?')) deleteSession(session.id); }}
-                                className="p-2 text-text-muted hover:text-accent-rose transition-colors opacity-0 group-hover:opacity-100"
+                                type="button"
+                                onClick={() => setPendingConfirm({
+                                  title: 'Delete Session',
+                                  message: 'Are you sure you want to delete this watch session?',
+                                  onConfirm: async () => {
+                                    await deleteSession(session.id);
+                                    addToast({ type: 'success', message: 'Watch session removed.' });
+                                  },
+                                })}
+                                className="p-2 text-text-muted hover:text-accent-rose transition-colors opacity-60 group-hover:opacity-100"
                                 aria-label="Delete session"
                               >
                                 <Trash2 className="w-4 h-4" />
@@ -742,8 +806,16 @@ export default function StoryPage() {
                                 <h4 className="font-serif text-2xl text-text-primary leading-tight">{item.lesson}</h4>
                               </div>
                               <button
-                                onClick={() => { if (confirm('Delete this insight?')) deleteKnowledge(item.id); }}
-                                className="p-2 text-text-muted hover:text-accent-rose transition-colors opacity-0 group-hover:opacity-100"
+                                type="button"
+                                onClick={() => setPendingConfirm({
+                                  title: 'Delete Insight',
+                                  message: 'Are you sure you want to delete this captured insight?',
+                                  onConfirm: async () => {
+                                    await deleteKnowledge(item.id);
+                                    addToast({ type: 'success', message: 'Insight removed.' });
+                                  },
+                                })}
+                                className="p-2 text-text-muted hover:text-accent-rose transition-colors opacity-60 group-hover:opacity-100"
                                 aria-label="Delete insight"
                               >
                                 <Trash2 className="w-4 h-4" />
@@ -753,7 +825,7 @@ export default function StoryPage() {
                             <div className="space-y-4 pl-9">
                               {item.principle && (
                                 <div className="border-l-2 border-accent-emerald/50 pl-4 py-1">
-                                  <div className="text-[10px] tracking-[0.2em] uppercase text-text-muted mb-1">Principle</div>
+                                  <div className="text-xs tracking-[0.2em] uppercase text-text-muted mb-1">Principle</div>
                                   <div className="text-sm text-text-primary">{item.principle}</div>
                                 </div>
                               )}
@@ -1007,6 +1079,55 @@ export default function StoryPage() {
                     <button type="submit" className="px-8 py-3 rounded-button bg-text-primary text-midnight-bg transition-transform hover:scale-105 active:scale-95 font-sans text-sm tracking-wide shadow-soft">Save Insight</button>
                   </div>
                 </form>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Accessible Confirmation Modal */}
+      <AnimatePresence>
+        {pendingConfirm && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="story-confirm-title"
+            className="fixed inset-0 z-50 bg-midnight-bg/80 backdrop-blur-md flex items-center justify-center p-4"
+            onClick={() => setPendingConfirm(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-midnight-surface border border-midnight-border rounded-2xl max-w-md w-full p-6 shadow-elevation"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h2 id="story-confirm-title" className="font-serif text-2xl text-text-primary mb-2">
+                {pendingConfirm.title}
+              </h2>
+              <p className="text-sm text-text-secondary mb-6">{pendingConfirm.message}</p>
+              <div className="flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setPendingConfirm(null)}
+                  className="btn btn-secondary"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    const action = pendingConfirm.onConfirm;
+                    setPendingConfirm(null);
+                    await action();
+                  }}
+                  className="px-5 py-2.5 rounded-xl bg-accent-rose text-white text-sm font-semibold hover:opacity-90 transition-opacity"
+                >
+                  Confirm Delete
+                </button>
               </div>
             </motion.div>
           </motion.div>

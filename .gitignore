@@ -48,8 +48,19 @@ old_file.tsx
 # Sensitive credentials
 *.json
 !tsconfig.json
+!tsconfig.node.json
 !package.json
 !package-lock.json
+!src/atlas/dataset.json
+!public/data/atlas-core-v1.json
+
+# Scratch scripts and temp artifacts
+.gemini/scratch/
+logo/ChatGPT Image*.png
+logo/Gemini_Generated_Image*.png
+fix-breaks.cjs
+firbase.md
+security checking.md
 
 # Analysis and audit outputs
 analysis_results.json

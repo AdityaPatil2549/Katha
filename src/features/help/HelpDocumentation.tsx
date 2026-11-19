@@ -595,7 +595,7 @@ If issues persist:
             >
               <button
                 onClick={() => toggleSection(section.id)}
-                className="w-full p-6 flex items-center justify-between hover:surface-hover transition-colors"
+                className="w-full p-6 flex items-center justify-between hover:bg-midnight-surface-hover transition-colors"
               >
                 <div className="flex items-center gap-4">
                   <div className="p-2 bg-accent-primary/10 rounded-lg text-accent-primary">

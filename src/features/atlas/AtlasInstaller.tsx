@@ -185,9 +185,9 @@ export function AtlasInstaller() {
   const getProgressColor = () => {
     switch (progress.state) {
       case 'complete':
-        return 'text-emerald';
+        return 'text-accent-emerald';
       case 'error':
-        return 'text-rose';
+        return 'text-accent-rose';
       default:
         return 'text-accent-primary';
     }
@@ -202,7 +202,7 @@ export function AtlasInstaller() {
           className="surface-elevated rounded-2xl p-8 max-w-md w-full text-center"
         >
           <div className="mb-6">
-            <CheckCircle className="w-16 h-16 text-emerald mx-auto mb-4" />
+            <CheckCircle className="w-16 h-16 text-accent-emerald mx-auto mb-4" />
             <h1 className="text-2xl font-bold text-text-primary mb-2">Smriti Atlas Installed</h1>
             <p className="text-text-primary/70">Your wisdom library is ready</p>
           </div>
@@ -255,7 +255,7 @@ export function AtlasInstaller() {
           </div>
           <div className="w-full bg-midnight-border rounded-full h-2">
             <motion.div
-              className="h-full bg-gradient-cyan rounded-full"
+              className="h-full bg-accent-cyan rounded-full"
               initial={{ width: '0%' }}
               animate={{ width: `${progress.progress}%` }}
               transition={{ duration: 0.3 }}
@@ -266,7 +266,7 @@ export function AtlasInstaller() {
         <div className="mb-8">
           <p className="text-center text-text-primary/80">{progress.message}</p>
           {progress.error && (
-            <p className="text-center text-rose text-sm mt-2">{progress.error}</p>
+            <p className="text-center text-accent-rose text-sm mt-2">{progress.error}</p>
           )}
         </div>
 
@@ -287,19 +287,19 @@ export function AtlasInstaller() {
                 </p>
                 <div className="space-y-2 text-sm">
                   <div className="flex items-center gap-2 text-text-primary/60">
-                    <CheckCircle className="w-4 h-4 text-emerald" />
+                    <CheckCircle className="w-4 h-4 text-accent-emerald" />
                     <span>100+ life-changing stories</span>
                   </div>
                   <div className="flex items-center gap-2 text-text-primary/60">
-                    <CheckCircle className="w-4 h-4 text-emerald" />
+                    <CheckCircle className="w-4 h-4 text-accent-emerald" />
                     <span>Editor collections and themes</span>
                   </div>
                   <div className="flex items-center gap-2 text-text-primary/60">
-                    <CheckCircle className="w-4 h-4 text-emerald" />
+                    <CheckCircle className="w-4 h-4 text-accent-emerald" />
                     <span>Life phase recommendations</span>
                   </div>
                   <div className="flex items-center gap-2 text-text-primary/60">
-                    <CheckCircle className="w-4 h-4 text-emerald" />
+                    <CheckCircle className="w-4 h-4 text-accent-emerald" />
                     <span>Completely offline and private</span>
                   </div>
                 </div>

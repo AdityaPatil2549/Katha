@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 export type Theme = 'dark' | 'light' | 'auto';
-export type AccentColor = 'violet' | 'cyan' | 'rose' | 'emerald' | 'amber';
+export type AccentColor = 'gold' | 'violet' | 'cyan' | 'rose' | 'emerald' | 'amber';
 
 export type NotificationCategory = 'activity' | 'mentions' | 'billing' | 'security' | 'marketing';
 export type NotificationChannel = 'inApp' | 'email' | 'push' | 'sms';
@@ -20,11 +20,19 @@ interface SettingsState {
   accentColor: AccentColor;
   notificationsEnabled: boolean; // Keep for backward compatibility or basic browser permissions
   globalMute: boolean;
+  appLockEnabled: boolean;
+  encryptionEnabled: boolean;
+  autoLockTime: string;
+  backupReminder: boolean;
   notificationPreferences: NotificationPreferences;
   setTheme: (theme: Theme) => void;
   setAccentColor: (color: AccentColor) => void;
   setNotificationsEnabled: (enabled: boolean) => void;
   setGlobalMute: (muted: boolean) => void;
+  setAppLockEnabled: (enabled: boolean) => void;
+  setEncryptionEnabled: (enabled: boolean) => void;
+  setAutoLockTime: (minutes: string) => void;
+  setBackupReminder: (enabled: boolean) => void;
   updateNotificationPreference: (
     category: NotificationCategory,
     updates: Partial<CategoryPreference>
@@ -43,15 +51,23 @@ export const useSettingsStore = create<SettingsState>()(
   persist(
     (set) => ({
       theme: 'dark', // Default theme is dark
-      accentColor: 'violet', // Default accent is violet
+      accentColor: 'gold', // Default luxury accent is burnished gold
       notificationsEnabled: false,
       globalMute: false,
+      appLockEnabled: false,
+      encryptionEnabled: false,
+      autoLockTime: '30',
+      backupReminder: true,
       notificationPreferences: defaultPreferences,
       
       setTheme: (theme) => set({ theme }),
       setAccentColor: (accentColor) => set({ accentColor }),
       setNotificationsEnabled: (notificationsEnabled) => set({ notificationsEnabled }),
       setGlobalMute: (globalMute) => set({ globalMute }),
+      setAppLockEnabled: (appLockEnabled) => set({ appLockEnabled }),
+      setEncryptionEnabled: (encryptionEnabled) => set({ encryptionEnabled }),
+      setAutoLockTime: (autoLockTime) => set({ autoLockTime }),
+      setBackupReminder: (backupReminder) => set({ backupReminder }),
       updateNotificationPreference: (category, updates) => 
         set((state) => ({
           notificationPreferences: {

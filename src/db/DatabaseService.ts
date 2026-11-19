@@ -45,7 +45,9 @@ export class DatabaseService {
 
     // Start background sync queue processor
     if (typeof window !== 'undefined') {
-      syncManager.startBackgroundSync();
+      setTimeout(() => {
+        syncManager.startBackgroundSync();
+      }, 100);
     }
 
     // Proactively remove expired API cache entries on every app start.
@@ -71,11 +73,11 @@ export class DatabaseService {
       this._timeline.setCloudRepo(new FirestoreTimelineRepository(userId), userId);
     } else {
       // Disconnect Cloud Repositories
-      (this._stories as any).setCloudRepo(null, null);
-      (this._moments as any).setCloudRepo(null, null);
-      (this._sessions as any).setCloudRepo(null, null);
-      (this._knowledge as any).setCloudRepo(null, null);
-      (this._timeline as any).setCloudRepo(null, null);
+      this._stories.setCloudRepo(null, null);
+      this._moments.setCloudRepo(null, null);
+      this._sessions.setCloudRepo(null, null);
+      this._knowledge.setCloudRepo(null, null);
+      this._timeline.setCloudRepo(null, null);
     }
   }
 

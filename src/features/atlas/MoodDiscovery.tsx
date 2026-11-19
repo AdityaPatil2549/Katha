@@ -102,33 +102,33 @@ export function MoodDiscovery() {
       },
       'unmotivated': {
         gradient: 'from-yellow-500/20 to-orange-500/20',
-        borderColor: 'border-amber',
-        iconColor: 'text-amber',
-        bgColor: 'bg-amber/10',
+        borderColor: 'border-accent-amber',
+        iconColor: 'text-accent-amber',
+        bgColor: 'bg-accent-amber/10',
         title: 'Feeling Unmotivated',
         description: 'Reignite your passion'
       },
       'discouraged': {
         gradient: 'from-purple-500/20 to-pink-500/20',
-        borderColor: 'border-purple',
-        iconColor: 'text-purple',
-        bgColor: 'bg-purple/10',
+        borderColor: 'border-accent-primary',
+        iconColor: 'text-accent-primary',
+        bgColor: 'bg-accent-primary/10',
         title: 'Feeling Discouraged',
         description: 'Restore your hope'
       },
       'anxious': {
         gradient: 'from-red-500/20 to-rose-500/20',
-        borderColor: 'border-rose',
-        iconColor: 'text-rose',
-        bgColor: 'bg-rose/10',
+        borderColor: 'border-accent-rose',
+        iconColor: 'text-accent-rose',
+        bgColor: 'bg-accent-rose/10',
         title: 'Feeling Anxious',
         description: 'Find calm and clarity'
       },
       'contemplative': {
         gradient: 'from-cyan-500/20 to-teal-500/20',
-        borderColor: 'border-cyan',
-        iconColor: 'text-cyan',
-        bgColor: 'bg-cyan/10',
+        borderColor: 'border-accent-cyan',
+        iconColor: 'text-accent-cyan',
+        bgColor: 'bg-accent-cyan/10',
         title: 'Feeling Contemplative',
         description: 'Deepen your understanding'
       }
@@ -148,9 +148,9 @@ export function MoodDiscovery() {
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
-      case 'easy': return 'text-emerald';
-      case 'medium': return 'text-amber';
-      case 'heavy': return 'text-rose';
+      case 'easy': return 'text-accent-emerald';
+      case 'medium': return 'text-accent-amber';
+      case 'heavy': return 'text-accent-rose';
       default: return 'text-text-primary/60';
     }
   };
@@ -246,7 +246,7 @@ export function MoodDiscovery() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1 * index }}
                   whileHover={{ scale: 1.02 }}
-                  className="surface-elevated rounded-xl p-6 hover:surface-hover transition-all cursor-pointer"
+                  className="surface-elevated rounded-xl p-6 hover:bg-midnight-surface-hover transition-all cursor-pointer"
                   onClick={() => window.open(`/atlas?entry=${entry.id}`, '_blank')}
                 >
                   <div className="flex items-start justify-between mb-4">
@@ -331,7 +331,7 @@ export function MoodDiscovery() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 * index }}
                 whileHover={{ scale: 1.02 }}
-                className={`surface-elevated rounded-2xl overflow-hidden hover:surface-hover transition-all cursor-pointer border-l-4 ${theme.borderColor}`}
+                className={`surface-elevated rounded-2xl overflow-hidden hover:bg-midnight-surface-hover transition-all cursor-pointer border-l-4 ${theme.borderColor}`}
                 onClick={() => loadMoodEntries(mood)}
               >
                 <div className={`p-6 bg-gradient-to-br ${theme.gradient}`}>
@@ -365,11 +365,12 @@ export function MoodDiscovery() {
                       <span className="text-sm">{mood.recommendedEntryIds.length} Stories</span>
                     </div>
                     <button 
-                      onClick={() => {
-                        window.location.href = '/atlas'; // or use navigate if hook is available
-                        alert('Filters applied to Atlas view');
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        loadMoodEntries(mood);
                       }} 
-                      className={`text-sm ${theme.iconColor} hover:opacity-80 transition-opacity`}
+                      className={`text-sm ${theme.iconColor} hover:opacity-80 transition-opacity font-medium`}
                     >
                       Explore Stories →
                     </button>
@@ -394,7 +395,7 @@ export function MoodDiscovery() {
             
             <div className="grid gap-6 md:grid-cols-3">
               <div className="text-center">
-                <div className="p-4 bg-gradient-blue/20 rounded-xl mb-4 inline-block">
+                <div className="p-4 bg-accent-cyan/15 rounded-xl mb-4 inline-block">
                   <Heart className="w-8 h-8 text-accent-cyan" />
                 </div>
                 <h3 className="text-lg font-semibold text-text-primary mb-2">Emotional Matching</h3>
@@ -404,8 +405,8 @@ export function MoodDiscovery() {
               </div>
               
               <div className="text-center">
-                <div className="p-4 bg-gradient-purple/20 rounded-xl mb-4 inline-block">
-                  <Brain className="w-8 h-8 text-purple" />
+                <div className="p-4 bg-accent-primary/15 rounded-xl mb-4 inline-block">
+                  <Brain className="w-8 h-8 text-accent-primary" />
                 </div>
                 <h3 className="text-lg font-semibold text-text-primary mb-2">Psychological Principles</h3>
                 <p className="text-text-primary/70 text-sm">
@@ -414,8 +415,8 @@ export function MoodDiscovery() {
               </div>
               
               <div className="text-center">
-                <div className="p-4 bg-gradient-amber/20 rounded-xl mb-4 inline-block">
-                  <Target className="w-8 h-8 text-amber" />
+                <div className="p-4 bg-accent-amber/15 rounded-xl mb-4 inline-block">
+                  <Target className="w-8 h-8 text-accent-amber" />
                 </div>
                 <h3 className="text-lg font-semibold text-text-primary mb-2">Targeted Outcomes</h3>
                 <p className="text-text-primary/70 text-sm">
@@ -440,7 +441,7 @@ export function MoodDiscovery() {
             
             <div className="grid gap-4 md:grid-cols-2">
               <div className="flex items-start gap-3">
-                <Sun className="w-5 h-5 text-amber mt-1" />
+                <Sun className="w-5 h-5 text-accent-amber mt-1" />
                 <div>
                   <h3 className="text-text-primary font-medium mb-1">Start with Your Current Feeling</h3>
                   <p className="text-text-primary/70 text-sm">Be honest about how you're feeling right now for the best recommendations.</p>
@@ -456,7 +457,7 @@ export function MoodDiscovery() {
               </div>
               
               <div className="flex items-start gap-3">
-                <Sparkles className="w-5 h-5 text-purple mt-1" />
+                <Sparkles className="w-5 h-5 text-accent-primary mt-1" />
                 <div>
                   <h3 className="text-text-primary font-medium mb-1">Trust the Process</h3>
                   <p className="text-text-primary/70 text-sm">Sometimes the best stories are ones that challenge your current mood.</p>
@@ -464,7 +465,7 @@ export function MoodDiscovery() {
               </div>
               
               <div className="flex items-start gap-3">
-                <Heart className="w-5 h-5 text-rose mt-1" />
+                <Heart className="w-5 h-5 text-accent-rose mt-1" />
                 <div>
                   <h3 className="text-text-primary font-medium mb-1">Reflect Afterwards</h3>
                   <p className="text-text-primary/70 text-sm">Take time to process how the story made you feel and what you learned.</p>

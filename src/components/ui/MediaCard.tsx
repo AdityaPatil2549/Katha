@@ -115,7 +115,7 @@ export function MediaCard({ id, title, year, type, posterUrl, posterBase64, watc
         {/* Watchers Badge */}
         {watchers && (
           <div className="absolute top-2 right-2 z-20">
-            <div className="bg-black/60 backdrop-blur-md px-2 py-1 rounded-full text-[10px] sm:text-xs font-bold text-accent-cyan border border-white/10 flex items-center gap-1 shadow-lg">
+            <div className="bg-black/75 backdrop-blur-md px-2 py-1 rounded-full text-xs font-bold text-cyan-300 border border-white/15 flex items-center gap-1 shadow-lg">
               <Eye className="w-3 h-3" />
               {watchers}
             </div>
@@ -130,7 +130,7 @@ export function MediaCard({ id, title, year, type, posterUrl, posterBase64, watc
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
-              className="absolute inset-0 z-10 bg-gradient-to-t from-[#0f0e13] via-[#0f0e13]/80 to-transparent flex flex-col justify-end p-4"
+              className="absolute inset-0 z-10 bg-gradient-to-t from-black/95 via-black/75 to-transparent flex flex-col justify-end p-4"
             >
               {/* Fanart ClearArt Logo (if available) */}
               {fanartLogo && (
@@ -146,8 +146,8 @@ export function MediaCard({ id, title, year, type, posterUrl, posterBase64, watc
               {/* Rich Ratings Injection */}
               <div className="flex flex-col gap-2 mt-auto">
                 {isLoadingRichData && !ratings && (
-                  <div className="flex items-center gap-2 text-accent-cyan text-xs font-medium">
-                    <div className="w-3 h-3 border-2 border-accent-cyan border-t-transparent rounded-full animate-spin" />
+                  <div className="flex items-center gap-2 text-cyan-300 text-xs font-medium">
+                    <div className="w-3 h-3 border-2 border-cyan-300 border-t-transparent rounded-full animate-spin" />
                     Fetching scores...
                   </div>
                 )}
@@ -161,7 +161,7 @@ export function MediaCard({ id, title, year, type, posterUrl, posterBase64, watc
                     {ratings.slice(0, 4).map((rating, i) => (
                       <div 
                         key={i} 
-                        className={`text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded border ${getRatingStyle(rating.source)} shadow-sm uppercase tracking-wide flex items-center gap-1`}
+                        className={`text-xs font-bold px-1.5 py-0.5 rounded border ${getRatingStyle(rating.source)} shadow-sm uppercase tracking-wide flex items-center gap-1`}
                         title={`${rating.source}: ${rating.value}`}
                       >
                         {rating.source === 'imdb' ? 'IMDB' : rating.source.substring(0,4)} {rating.value}
@@ -171,7 +171,7 @@ export function MediaCard({ id, title, year, type, posterUrl, posterBase64, watc
                 )}
                 
                 <div className="mt-2 w-full">
-                   <button className="w-full py-1.5 rounded-lg bg-white/10 hover:bg-white/20 backdrop-blur-md text-white text-xs font-bold transition-colors border border-white/10 flex items-center justify-center gap-1.5">
+                   <button type="button" className="w-full py-1.5 rounded-lg bg-white/15 hover:bg-white/25 backdrop-blur-md text-white text-xs font-bold transition-colors border border-white/15 flex items-center justify-center gap-1.5">
                      <Info className="w-3 h-3" />
                      Details
                    </button>

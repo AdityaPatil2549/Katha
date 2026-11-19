@@ -75,9 +75,9 @@ export function AtlasBrowser() {
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
-      case 'easy': return 'text-emerald';
-      case 'medium': return 'text-amber';
-      case 'heavy': return 'text-rose';
+      case 'easy': return 'text-accent-emerald';
+      case 'medium': return 'text-accent-amber';
+      case 'heavy': return 'text-accent-rose';
       default: return 'text-text-primary/60';
     }
   };
@@ -86,7 +86,7 @@ export function AtlasBrowser() {
     <motion.div
       layout
       whileHover={{ scale: 1.02 }}
-      className="surface-elevated rounded-xl p-6 cursor-pointer hover:surface-hover transition-all"
+      className="surface-elevated rounded-xl p-6 cursor-pointer hover:bg-midnight-surface-hover transition-all"
       onClick={() => setSelectedEntry(entry)}
     >
       <div className="flex items-start justify-between mb-4">
@@ -107,8 +107,8 @@ export function AtlasBrowser() {
       {searchResult && (
         <div className="mb-3">
           <div className="flex items-center gap-2 mb-2">
-            <Star className="w-4 h-4 text-amber" />
-            <span className="text-sm text-amber">Relevance: {searchResult.relevanceScore}%</span>
+            <Star className="w-4 h-4 text-accent-amber" />
+            <span className="text-sm text-accent-amber">Relevance: {searchResult.relevanceScore}%</span>
           </div>
           <div className="flex flex-wrap gap-1">
             {searchResult.matchReasons.map((reason, index) => (
@@ -132,7 +132,7 @@ export function AtlasBrowser() {
 
       <div className="flex flex-wrap gap-2 mb-4">
         {entry.themes.slice(0, 2).map((theme, index) => (
-          <span key={index} className="text-xs bg-gradient-cyan/20 text-cyan px-2 py-1 rounded-full">
+          <span key={index} className="text-xs bg-accent-cyan/15 text-accent-cyan px-2 py-1 rounded-full">
             {theme}
           </span>
         ))}
@@ -164,10 +164,10 @@ export function AtlasBrowser() {
   const CollectionCard = ({ collection }: { collection: AtlasCollection }) => (
     <motion.div
       whileHover={{ scale: 1.02 }}
-      className="surface-elevated rounded-xl p-6 cursor-pointer hover:surface-hover transition-all"
+      className="surface-elevated rounded-xl p-6 cursor-pointer hover:bg-midnight-surface-hover transition-all"
     >
       <div className="flex items-center justify-between mb-4">
-        <Sparkles className="w-6 h-6 text-amber" />
+        <Sparkles className="w-6 h-6 text-accent-amber" />
         <span className={`text-sm font-medium ${getDifficultyColor(collection.difficulty)}`}>
           {collection.difficulty}
         </span>
@@ -492,7 +492,7 @@ export function AtlasBrowser() {
                 <ul className="space-y-2">
                   {selectedEntry.lifeLessons.map((lesson, index) => (
                     <li key={index} className="flex items-start gap-2 text-text-primary/80">
-                      <Star className="w-4 h-4 text-amber mt-0.5 flex-shrink-0" />
+                      <Star className="w-4 h-4 text-accent-amber mt-0.5 flex-shrink-0" />
                       <span>{lesson}</span>
                     </li>
                   ))}

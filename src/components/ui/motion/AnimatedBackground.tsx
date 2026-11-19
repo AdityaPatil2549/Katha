@@ -10,10 +10,21 @@ import {
   useId,
 } from 'react';
 
+export type AnimatedBackgroundChildProps = {
+  'data-id': string;
+  'data-checked'?: string;
+  className?: string | ((props: { isActive: boolean; isPending?: boolean }) => string);
+  children?: React.ReactNode;
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
+  onClick?: () => void;
+  [key: string]: unknown;
+};
+
 export type AnimatedBackgroundProps = {
   children:
-    | ReactElement<{ 'data-id': string }>[]
-    | ReactElement<{ 'data-id': string }>;
+    | ReactElement<AnimatedBackgroundChildProps>[]
+    | ReactElement<AnimatedBackgroundChildProps>;
   defaultValue?: string;
   onValueChange?: (newActiveId: string | null) => void;
   className?: string;
@@ -46,7 +57,7 @@ export function AnimatedBackground({
     }
   }, [defaultValue]);
 
-  return Children.map(children, (child: any, index) => {
+  return Children.map(children, (child: ReactElement<AnimatedBackgroundChildProps>, index) => {
     const id = child.props['data-id'];
 
     const interactionProps = enableHover
@@ -58,11 +69,15 @@ export function AnimatedBackground({
           onClick: () => handleSetActiveId(id),
         };
 
+    const resolvedClassName = typeof child.props.className === 'function'
+      ? (args: { isActive: boolean; isPending?: boolean }) => cn('relative inline-flex', (child.props.className as (props: { isActive: boolean; isPending?: boolean }) => string)(args))
+      : cn('relative inline-flex', child.props.className);
+
     return cloneElement(
       child,
       {
         key: index,
-        className: cn('relative inline-flex', child.props.className),
+        className: resolvedClassName,
         'data-checked': activeId === id ? 'true' : 'false',
         ...interactionProps,
       },

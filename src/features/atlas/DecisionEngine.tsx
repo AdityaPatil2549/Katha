@@ -80,9 +80,9 @@ export function DecisionEngine() {
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
-      case 'easy': return 'text-emerald';
-      case 'medium': return 'text-amber';
-      case 'heavy': return 'text-rose';
+      case 'easy': return 'text-accent-emerald';
+      case 'medium': return 'text-accent-amber';
+      case 'heavy': return 'text-accent-rose';
       default: return 'text-text-primary/60';
     }
   };
@@ -259,15 +259,15 @@ export function DecisionEngine() {
 
           <div className="relative z-10 space-y-4 mb-8">
             <div className="flex items-center gap-4">
-              <Lightbulb className="w-5 h-5 text-amber animate-pulse" />
+              <Lightbulb className="w-5 h-5 text-accent-amber animate-pulse" />
               <div className="h-4 bg-white/10 rounded-full animate-pulse w-3/4"></div>
             </div>
             <div className="flex items-center gap-4">
-              <Heart className="w-5 h-5 text-rose animate-pulse" style={{ animationDelay: '200ms' }} />
+              <Heart className="w-5 h-5 text-accent-rose animate-pulse" style={{ animationDelay: '200ms' }} />
               <div className="h-4 bg-white/10 rounded-full animate-pulse w-2/3" style={{ animationDelay: '200ms' }}></div>
             </div>
             <div className="flex items-center gap-4">
-              <Target className="w-5 h-5 text-emerald animate-pulse" style={{ animationDelay: '400ms' }} />
+              <Target className="w-5 h-5 text-accent-emerald animate-pulse" style={{ animationDelay: '400ms' }} />
               <div className="h-4 bg-white/10 rounded-full animate-pulse w-5/6" style={{ animationDelay: '400ms' }}></div>
             </div>
           </div>
@@ -306,7 +306,7 @@ export function DecisionEngine() {
               </button>
               <button
                 onClick={resetDecision}
-                className="text-sm text-text-primary/40 hover:text-rose transition-colors"
+                className="text-sm text-text-primary/60 hover:text-accent-rose transition-colors"
               >
                 Start Over
               </button>
@@ -315,7 +315,7 @@ export function DecisionEngine() {
             {result.recommendations.length > 0 ? (
               <div className="surface-elevated rounded-2xl p-8 border-l-4 border-accent-primary">
                 <div className="flex items-center gap-4 mb-6">
-                  <div className="p-4 bg-gradient-violet/20 rounded-xl">
+                  <div className="p-4 bg-accent-primary/15 rounded-xl">
                     <Brain className="w-8 h-8 text-accent-primary" />
                   </div>
                   <div>
@@ -366,7 +366,7 @@ export function DecisionEngine() {
                   transition={{ duration: 0.25, ease: 'easeOut', delay: 0.1 * index }}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className={`surface-elevated rounded-xl p-6 hover:surface-hover transition-all cursor-pointer relative overflow-hidden group ${
+                  className={`surface-elevated rounded-xl p-6 hover:bg-midnight-surface-hover transition-all cursor-pointer relative overflow-hidden group ${
                     index === 0 ? 'ring-2 ring-accent-primary shadow-[0_0_20px_rgba(139,92,246,0.3)]' : ''
                   }`}
                   onClick={() => window.open(`/atlas?entry=${entry.id}`, '_blank')}
@@ -430,15 +430,15 @@ export function DecisionEngine() {
             transition={{ duration: 0.25, ease: 'easeOut', delay: 0.4 }}
             className="mt-8"
           >
-            <div className="surface-elevated rounded-xl p-8 border border-white/5 relative overflow-hidden">
-              <div className="absolute right-0 top-0 w-32 h-32 bg-amber/5 rounded-full blur-[40px] pointer-events-none" />
-              <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-                <Lightbulb className="w-5 h-5 text-amber" />
+            <div className="surface-elevated rounded-xl p-8 border border-midnight-border relative overflow-hidden">
+              <div className="absolute right-0 top-0 w-32 h-32 bg-accent-amber/10 rounded-full blur-[40px] pointer-events-none" />
+              <h3 className="text-xl font-bold text-text-primary mb-6 flex items-center gap-2">
+                <Lightbulb className="w-5 h-5 text-accent-amber" />
                 Enhancement Tips
               </h3>
               <div className="grid gap-4 md:grid-cols-3">
                 {result.alternatives.map((alternative, index) => (
-                  <div key={index} className="flex items-start gap-3 p-4 bg-black/20 rounded-lg border border-white/5 hover:border-amber/20 transition-colors">
+                  <div key={index} className="flex items-start gap-3 p-4 bg-midnight-surface rounded-lg border border-midnight-border hover:border-accent-amber/40 transition-colors">
                     <span className="text-sm font-medium text-text-primary/90 leading-relaxed">{alternative}</span>
                   </div>
                 ))}

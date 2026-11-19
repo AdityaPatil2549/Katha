@@ -1,27 +1,53 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
-import { Dropdown } from '@/components/ui/Dropdown';
 
 export type EntryType = 'insight' | 'principle' | 'quote' | 'story' | 'lesson' | 'session' | 'knowledge';
+
+export interface DataEntryFormValues {
+  title?: string;
+  description?: string;
+  content?: string;
+  attribution?: string;
+  name?: string;
+  narrative?: string;
+  details?: string;
+}
 
 interface DataEntryModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: any) => void;
+  onSubmit: (data: DataEntryFormValues) => void | Promise<void>;
   type: EntryType;
 }
 
 export function DataEntryModal({ isOpen, onClose, onSubmit, type }: DataEntryModalProps) {
-  const [formData, setFormData] = useState<any>({});
+  const [formData, setFormData] = useState<DataEntryFormValues>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
-    setFormData({}); // reset
-    onClose();
+    setIsSubmitting(true);
+    try {
+      await onSubmit(formData);
+      setFormData({});
+      onClose();
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const renderFields = () => {
@@ -97,21 +123,29 @@ export function DataEntryModal({ isOpen, onClose, onSubmit, type }: DataEntryMod
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-black/60 backdrop-blur-2xl flex items-center justify-center z-50 p-4 sm:p-6"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="data-entry-modal-title"
+        className="fixed inset-0 bg-text-primary/40 dark:bg-black/75 backdrop-blur-md flex items-center justify-center z-50 p-4 sm:p-6"
         onClick={onClose}
       >
         <motion.div
           initial={{ scale: 0.95, opacity: 0, y: 20 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.95, opacity: 0, y: 20 }}
-          transition={{ type: "spring", stiffness: 400, damping: 30 }}
-          className="bg-midnight-surface/60 backdrop-blur-3xl border border-white/10 rounded-[2rem] max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-glow"
+          transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+          className="bg-surface-primary border border-border-default rounded-[2rem] max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-elevation"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="p-8 md:p-10">
-            <div className="flex items-center justify-between mb-10 pb-6 border-b border-midnight-border/50">
-              <h2 className="font-serif text-3xl text-text-primary capitalize">Add {type}</h2>
-              <button onClick={onClose} className="p-2 rounded-full hover:bg-midnight-surface/50 text-text-muted hover:text-text-primary transition-colors">
+            <div className="flex items-center justify-between mb-10 pb-6 border-b border-border-default">
+              <h2 id="data-entry-modal-title" className="font-serif text-3xl text-text-primary capitalize">Add {type}</h2>
+              <button
+                type="button"
+                aria-label="Close entry dialog"
+                onClick={onClose}
+                className="p-2 rounded-full hover:bg-surface-hover text-text-muted hover:text-text-primary transition-colors"
+              >
                 <X className="w-6 h-6" />
               </button>
             </div>
@@ -123,8 +157,8 @@ export function DataEntryModal({ isOpen, onClose, onSubmit, type }: DataEntryMod
                 <button type="button" onClick={onClose} className="btn btn-secondary">
                   Cancel
                 </button>
-                <button type="submit" className="btn btn-primary">
-                  Save {type}
+                <button type="submit" disabled={isSubmitting} className="btn btn-primary disabled:opacity-50">
+                  {isSubmitting ? 'Saving...' : `Save ${type}`}
                 </button>
               </div>
             </form>

@@ -7,10 +7,10 @@
 *Your personal memory engine for the stories that shape your life.*
 
 [![Vercel](https://img.shields.io/badge/Vercel-Deployed-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://katha.vercel.app)
-[![React](https://img.shields.io/badge/React-18-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)]()
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-007ACC?style=for-the-badge&logo=typescript&logoColor=white)]()
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)]()
-[![Framer Motion](https://img.shields.io/badge/Framer_Motion-11.0-0055FF?style=for-the-badge&logo=framer&logoColor=white)]()
+[![React](https://img.shields.io/badge/React-19-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)]()
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-007ACC?style=for-the-badge&logo=typescript&logoColor=white)]()
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.x-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)]()
+[![Framer Motion](https://img.shields.io/badge/Framer_Motion-12.x-0055FF?style=for-the-badge&logo=framer&logoColor=white)]()
 [![Google Gemini](https://img.shields.io/badge/Gemini_AI-Powered-4285F4?style=for-the-badge&logo=google&logoColor=white)]()
 
 ---
@@ -59,27 +59,27 @@ A visual representation of your media life.
 </details>
 
 <details>
-<summary><b>🎨 Midnight Library Design System</b></summary>
+<summary><b>🎨 Editorial Archival Design System</b></summary>
 <br/>
 
-Katha features a custom, ultra-premium design system built on top of Tailwind CSS and Framer Motion, inspired by the intersection of Apple's polished UI and Netflix's immersive cinematic experience.
+Katha pairs literary editorial typography (`Cormorant Garamond` display headings with `Outfit` UI text) with an atmospheric dark Obsidian Paper (`#121316`) and light Warm Alabaster (`#FAF9F6`) theme.
 
-- 🌌 **Canvas:** Deep midnight black (`#04050C` / `#0B0C14`).
-- 🪞 **Surfaces:** Translucent glassmorphism with dynamic ambient glows and deep drop shadows.
-- 🎬 **Motion Primitives:** Hardware-accelerated cinematic animations including *Magnetic* buttons, *Tilt* physics on story cards, *GlowEffects*, and a custom *Cinematic Cursor*.
-- 🌈 **Neon Accents:** 🟣 Violet (Wisdom), 🔵 Cyan (Memory), 🔴 Rose (Emotion), 🟢 Emerald (Growth).
+- 🕯️ **Canvas:** Obsidian Paper (`#121316` / `#1A1C20`) in dark mode, Warm Alabaster (`#FAF9F6` / `#F2EFE9`) in light mode.
+- 🪩 **Motion Primitives:** Tactile spring transitions, layout animations, and accessible focus indicators.
+- 🌈 **Accents:** Violet (Wisdom), Cyan (Memory), Rose (Emotion), Emerald (Growth), Amber (Reflection).
 
 </details>
 
 <details>
-<summary><b>🔒 Security & Privacy Architecture</b></summary>
+<summary><b>🔒 Local-First Privacy & Optional Sync</b></summary>
 <br/>
 
-We believe your personal stories and emotional data are intimately yours. Katha is built with strict privacy and security standards.
+We believe your personal stories and reflections belong to you. Katha runs **Local-First by default** and never forces an account sign-in gate.
 
-* 🛡️ **Zero Cloud Storage:** Your media data never leaves your device. Everything is stored locally in your browser using IndexedDB.
-* 🔐 **Secure Edge APIs:** All external integrations (TMDB, Gemini) are routed through Vercel Edge Functions with strict `Zod` payload validation and active rate limiting to prevent abuse and prompt injection.
-* 📦 **Data Portability:** Complete data portability. Export everything instantly to JSON, PDF, or Word documents. You own your memories.
+* 🛡️ **Local Vault by Default:** Stories, moments, sessions, and insights are stored in your browser via Dexie (IndexedDB).
+* ☁️ **Optional Cloud Backup:** Sign in with Google only if you want multi-device Firebase Firestore sync, Google Drive AppData backup, or authenticated AI analysis.
+* 🔐 **Hardened Edge APIs:** All external API proxies (`tmdb`, `jikan`, `omdb`, `rawg`, `trakt`, `gemini`, etc.) validate relative paths, enforce rate limits, and verify Firebase ID tokens on AI routes.
+* 📦 **True Portability:** Export your complete archive anytime to Word (`.docx`), PDF (`.pdf`), Markdown (`.md`), or JSON, and restore from local JSON backups.
 
 </details>
 
@@ -89,13 +89,14 @@ We believe your personal stories and emotional data are intimately yours. Katha 
 
 | Domain | Technology | Purpose |
 | :--- | :--- | :--- |
-| **Core Framework** | React 18, TypeScript, Vite | Fast rendering, strict typing, rapid HMR. |
-| **Styling** | Tailwind CSS | Utility-first styling for complex glassmorphic UI. |
-| **Motion/Animation** | Framer Motion | High-performance spring physics and layout animations. |
-| **State Management** | Zustand | Lightweight, un-opinionated global state. |
-| **Local Database** | Dexie.js (IndexedDB) | Robust, typed wrapper for local browser storage. |
-| **AI Integration** | Google Gemini API | Powers the Smriti intelligence and reasoning engines. |
-| **Hosting & Deploy** | Vercel & Edge Functions | High-speed global CDN, secure API routing, and SSR proxying. |
+| **Core Framework** | React 19, TypeScript, Vite | Fast rendering, strict typing, rapid HMR. |
+| **Styling** | Tailwind CSS v4 | Token-based dark & light editorial theming. |
+| **Motion/Animation** | Framer Motion 12 | Spring physics and accessible reduced-motion transitions. |
+| **State Management** | Zustand | Persistent preferences and reactive store caches. |
+| **Local Database** | Dexie.js (IndexedDB) | Local-first offline storage with multi-user outbox isolation. |
+| **Optional Cloud** | Firebase Auth & Firestore / Google Drive | User-initiated cross-device sync and AppData snapshots. |
+| **AI Integration** | Google Gemini API (Edge Proxy) | Powers optional Smriti reflection & pattern analysis. |
+| **Hosting & Deploy** | Vercel & Edge Functions | Global CDN and validated API proxy routes. |
 
 <br/>
 

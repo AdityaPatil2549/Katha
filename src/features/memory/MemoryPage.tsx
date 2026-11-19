@@ -172,7 +172,7 @@ export function MemoryPage() {
                 {moment.context && (
                   <div className="mb-4 bg-midnight-bg/30 p-4 rounded-2xl border border-midnight-border/30">
                     <p className="text-sm font-sans text-text-secondary leading-relaxed">
-                      <span className="text-text-primary font-medium tracking-wide uppercase text-[10px] block mb-1 opacity-70">Context</span>
+                      <span className="text-text-primary font-medium tracking-wide uppercase text-xs block mb-1 opacity-70">Context</span>
                       {moment.context}
                     </p>
                   </div>
@@ -181,7 +181,7 @@ export function MemoryPage() {
                 {moment.thoughts && (
                   <div className="mb-4">
                     <p className="text-sm font-sans text-text-secondary leading-relaxed">
-                      <span className="text-text-primary font-medium tracking-wide uppercase text-[10px] block mb-1 opacity-70">Thoughts</span>
+                      <span className="text-text-primary font-medium tracking-wide uppercase text-xs block mb-1 opacity-70">Thoughts</span>
                       {moment.thoughts}
                     </p>
                   </div>

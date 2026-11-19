@@ -26,7 +26,9 @@ export class BrowserSystemService implements SystemService {
 
     // Get connection info
     if ('connection' in navigator) {
-      const connection = (navigator as unknown as { connection: any }).connection;
+      const connection = (navigator as unknown as {
+        connection: { effectiveType?: string; downlink?: number; rtt?: number };
+      }).connection;
       info.connection = {
         effectiveType: connection.effectiveType || 'unknown',
         downlink: connection.downlink || 0,
@@ -81,8 +83,7 @@ export class BrowserSystemService implements SystemService {
   async registerServiceWorker(): Promise<void> {
     if ('serviceWorker' in navigator) {
       try {
-        const registration = await navigator.serviceWorker.register('/sw.js');
-        console.log('Service Worker registered:', registration);
+        await navigator.serviceWorker.register('/sw.js');
       } catch (error) {
         console.error('Service Worker registration failed:', error);
       }

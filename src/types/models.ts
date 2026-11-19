@@ -1,4 +1,4 @@
-export type StoryCategory = 'anime' | 'series' | 'movie' | 'documentary' | 'youtube' | 'game';
+export type StoryCategory = 'anime' | 'series' | 'movie' | 'documentary' | 'youtube' | 'game' | 'book';
 export type StoryStatus = 'planning' | 'watching' | 'completed' | 'paused';
 
 export type UUID = string;
@@ -77,12 +77,12 @@ export type TimelineEvent = {
 export type Settings = {
   id: UUID;
   key: string;
-  value: any;
+  value: unknown;
 };
 
 export type ApiCacheEntry = {
   id: string; // e.g., 'tmdb_/search/movie?query=interstellar'
   service: string; // 'tmdb', 'omdb', 'youtube'
-  data: any;
+  data: unknown;
   timestamp: number;
 };

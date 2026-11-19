@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Play, Plus, Sparkles, BookOpen, Info } from 'lucide-react';
+import { Plus, Sparkles, BookOpen, Info, Calendar, Book, Send, Flame, Compass, Users, Target, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TextEffect } from '@/components/ui/motion/TextEffect';
@@ -11,16 +11,25 @@ import { GlowEffect } from '@/components/ui/motion/GlowEffect';
 import { TextShimmer } from '@/components/ui/motion/TextShimmer';
 import { AtlasNavigation } from '@/components/atlas/AtlasNavigation';
 import { useStoriesStore, useMomentsStore } from '@/store';
+import { personalRepository } from '@/db/repositories/PersonalRepository';
+import { useToastStore } from '@/store/toastStore';
 
 export function HomePage() {
   const navigate = useNavigate();
   const { stories, loadStories, loading } = useStoriesStore();
   const { moments, loadMoments } = useMomentsStore();
   const [userName, setUserName] = useState('Explorer');
+  const [quickReflection, setQuickReflection] = useState('');
+  const [isSavingReflection, setIsSavingReflection] = useState(false);
+  const [journalCount, setJournalCount] = useState(0);
+  const addToast = useToastStore((s) => s.addToast);
 
   useEffect(() => {
     loadStories();
     loadMoments();
+    personalRepository.getAllJournalEntries().then(entries => {
+      setJournalCount(entries.length);
+    }).catch(() => {});
     
     const updateName = () => {
       const storedName = localStorage.getItem('katha_username');
@@ -34,10 +43,26 @@ export function HomePage() {
     return () => window.removeEventListener('katha_user_updated', updateName);
   }, [loadStories, loadMoments]);
 
+  const handleSaveQuickReflection = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!quickReflection.trim()) return;
+    setIsSavingReflection(true);
+    try {
+      await personalRepository.addJournalEntry(quickReflection.trim(), ['Quick Reflection', 'Home']);
+      setQuickReflection('');
+      setJournalCount(prev => prev + 1);
+      addToast({ type: 'success', message: 'Reflection recorded in your Journal vault.' });
+    } catch {
+      addToast({ type: 'error', message: 'Failed to record reflection.' });
+    } finally {
+      setIsSavingReflection(false);
+    }
+  };
+
   const featuredStory = stories.find(s => s.status === 'watching') || stories[0];
 
   return (
-    <div className="w-full min-h-screen bg-transparent pb-24">
+    <div className="w-full min-h-screen bg-transparent pb-32 md:pb-24">
       
       {/* Hero Banner Section */}
       <div className="relative w-full min-h-[85vh] flex items-end pt-32 pb-24 px-6 md:px-12 lg:px-16 overflow-hidden">
@@ -54,7 +79,7 @@ export function HomePage() {
           {featuredStory ? (
             <>
               <FadeIn className="flex items-center gap-3 mb-6">
-                <span className="px-3 py-1 bg-accent-rose/20 text-accent-rose border border-accent-rose/30 rounded-full text-[10px] font-bold tracking-widest uppercase backdrop-blur-md">
+                <span className="px-3 py-1 bg-accent-rose/20 text-accent-rose border border-accent-rose/30 rounded-full text-xs font-bold tracking-widest uppercase backdrop-blur-md">
                   Continue Watching
                 </span>
                 <span className="text-text-secondary text-sm font-medium tracking-wide uppercase">{featuredStory.category}</span>
@@ -63,7 +88,7 @@ export function HomePage() {
               <TextEffect
                 preset="blur"
                 per="word"
-                className="font-serif text-6xl md:text-8xl lg:text-9xl font-bold text-gradient-cinematic leading-none mb-6 drop-shadow-[0_0_40px_rgba(0,242,254,0.4)] tracking-tighter"
+                className="font-serif text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-bold text-gradient-cinematic leading-none mb-6 drop-shadow-[0_0_40px_rgba(0,242,254,0.25)] tracking-tighter"
                 delay={0.3}
               >
                 {featuredStory.title}
@@ -75,10 +100,14 @@ export function HomePage() {
                 className="font-sans text-lg md:text-xl text-text-muted max-w-2xl mb-10 leading-relaxed font-light"
                 delay={0.2}
               >
-                {featuredStory.notes?.split('\n')[1] || `A fantastic ${featuredStory.category} tracking your cinematic journey.`}
+                {featuredStory.notes
+                  ?.split('\n')
+                  .map((line) => line.replace(/\[.*?\]/g, '').trim())
+                  .find((line) => line.length > 0) ||
+                  `A curated ${featuredStory.category} in your personal story archive.`}
               </TextEffect>
               
-              <FadeIn delay={0.9} className="flex items-center gap-6">
+              <FadeIn delay={0.9} className="flex flex-wrap items-center gap-4 sm:gap-6">
                 <Magnetic>
                   <div className="relative">
                     <GlowEffect
@@ -89,21 +118,21 @@ export function HomePage() {
                       scale={1.1}
                     />
                     <button 
-                      className="bg-high-contrast text-text-high-contrast hover:bg-text-secondary px-8 py-4 rounded-xl font-bold tracking-wide transition-transform hover:scale-105 active:scale-95 flex items-center gap-3 text-lg relative z-10"
+                      className="bg-high-contrast text-text-high-contrast hover:opacity-90 px-8 py-4 rounded-xl font-bold tracking-wide transition-transform hover:scale-105 active:scale-95 flex items-center gap-3 text-lg relative z-10"
                       onClick={() => navigate(`/story/${featuredStory.id}`)}
                     >
-                      <Play className="w-6 h-6 fill-current" />
-                      Play Now
+                      <BookOpen className="w-5 h-5" />
+                      Open Story
                     </button>
                   </div>
                 </Magnetic>
                 <Magnetic>
                   <button 
-                    className="bg-midnight-surface/50 backdrop-blur-md text-text-primary border border-text-primary/20 hover:bg-text-primary/10 px-8 py-4 rounded-xl font-bold tracking-wide transition-colors flex items-center gap-3 text-lg"
+                    className="bg-midnight-surface/60 backdrop-blur-md text-text-primary border border-midnight-border hover:bg-midnight-surface-hover px-8 py-4 rounded-xl font-bold tracking-wide transition-colors flex items-center gap-3 text-lg"
                     onClick={() => navigate(`/library`)}
                   >
-                    <Info className="w-6 h-6" />
-                    More Info
+                    <Info className="w-5 h-5" />
+                    My Library
                   </button>
                 </Magnetic>
               </FadeIn>
@@ -120,7 +149,7 @@ export function HomePage() {
               <TextEffect
                 preset="blur"
                 per="word"
-                className="font-serif text-6xl md:text-8xl lg:text-[140px] font-bold text-text-primary leading-none mb-8 tracking-tighter drop-shadow-2xl"
+                className="font-serif text-5xl sm:text-7xl md:text-8xl lg:text-8xl xl:text-9xl font-bold text-text-primary leading-none mb-8 tracking-tighter drop-shadow-2xl"
                 delay={0.3}
               >
                 {`Welcome, ${userName}`}
@@ -129,10 +158,10 @@ export function HomePage() {
               <TextEffect
                 preset="fade-in-blur"
                 per="line"
-                className="font-sans text-xl md:text-2xl text-text-muted max-w-3xl mb-16 leading-relaxed font-light tracking-wide mx-auto"
+                className="font-sans text-lg sm:text-xl md:text-2xl text-text-muted max-w-3xl mb-14 leading-relaxed font-light tracking-wide mx-auto"
                 delay={0.6}
               >
-                The canvas is blank. Start curating your cinematic universe by adding your favorite movies, series, and books.
+                The canvas is blank. Start curating your personal universe by adding your favorite movies, series, games, and books.
               </TextEffect>
               
               <FadeIn delay={0.9} className="flex flex-col sm:flex-row items-center gap-6">
@@ -146,10 +175,9 @@ export function HomePage() {
                       scale={1.1}
                     />
                     <button 
-                      className="bg-gradient-cyan text-midnight-bg px-10 py-5 rounded-[2rem] font-bold tracking-wide transition-all hover:scale-105 hover:shadow-glow-cyan active:scale-95 flex items-center gap-3 text-lg relative overflow-hidden group z-10"
+                      className="bg-sky-700 hover:bg-sky-600 text-white px-10 py-5 rounded-[2rem] font-bold tracking-wide transition-all hover:scale-105 hover:shadow-glow-cyan active:scale-95 flex items-center gap-3 text-lg relative overflow-hidden group z-10"
                       onClick={() => navigate(`/add-story`)}
                     >
-                      <div className="absolute inset-0 bg-white/20 translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300 ease-out" />
                       <Plus className="w-6 h-6 relative z-10" />
                       <span className="relative z-10">Add Your First Story</span>
                     </button>
@@ -163,7 +191,93 @@ export function HomePage() {
       </div>
 
       {/* Swimlane Rows */}
-      <div className="space-y-20 relative z-20 mt-[-5vh]">
+      <div className="space-y-16 relative z-20 mt-4">
+        
+        {/* Habit & Reflection Section */}
+        <section className="px-6 md:px-12 lg:px-16">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            {/* Quick Reflection Card */}
+            <div className="lg:col-span-2 glass-card p-6 rounded-2xl border border-midnight-border shadow-card relative overflow-hidden group">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <Book className="w-5 h-5 text-accent-primary" />
+                  <h3 className="font-sans text-base font-bold text-text-primary">Daily Reflection</h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => navigate('/journal')}
+                  className="min-h-[44px] px-3.5 py-2 rounded-full bg-accent-primary/10 border border-accent-primary/25 hover:bg-accent-primary/20 text-xs font-bold uppercase tracking-wider text-accent-primary transition-all duration-300 flex items-center gap-1.5 shadow-sm hover:scale-105 active:scale-95"
+                  aria-label="Open Full Journal"
+                >
+                  <span>Open Full Journal</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+              <p className="text-xs text-text-secondary mb-3">Capture a lingering thought, dialogue revelation, or perspective shift from what you experienced today.</p>
+              <form onSubmit={handleSaveQuickReflection} className="flex gap-2">
+                <input
+                  type="text"
+                  value={quickReflection}
+                  onChange={(e) => setQuickReflection(e.target.value)}
+                  placeholder="What idea changed you today? (e.g. 'I have no enemies...')"
+                  className="flex-1 min-h-[44px] px-4 py-2 rounded-xl bg-midnight-bg/60 border border-midnight-border text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent-primary/50 transition-colors"
+                />
+                <button
+                  type="submit"
+                  disabled={isSavingReflection || !quickReflection.trim()}
+                  className="min-h-[44px] px-5 py-2 rounded-xl bg-accent-primary text-high-contrast font-bold text-xs uppercase tracking-wider hover:opacity-90 disabled:opacity-40 transition-all flex items-center gap-1.5 shrink-0"
+                >
+                  <Send className="w-3.5 h-3.5" />
+                  <span>Record</span>
+                </button>
+              </form>
+            </div>
+
+            {/* Habit & Streak Dock */}
+            <div className="glass-card p-6 rounded-2xl border border-midnight-border shadow-card flex flex-col justify-between">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <Flame className="w-5 h-5 text-accent-amber animate-pulse" />
+                  <h3 className="font-sans text-base font-bold text-text-primary">Vault Milestones</h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => navigate('/calendar')}
+                  className="min-h-[44px] px-3.5 py-2 rounded-full bg-accent-primary/10 border border-accent-primary/25 hover:bg-accent-primary/20 text-xs font-bold uppercase tracking-wider text-accent-primary transition-all duration-300 flex items-center gap-1.5 shadow-sm hover:scale-105 active:scale-95"
+                  aria-label="View Activity Calendar"
+                >
+                  <span>Calendar</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+              
+              <div className="grid grid-cols-3 gap-2 py-2 text-center">
+                <div className="p-2.5 rounded-xl bg-midnight-surface/60 border border-midnight-border/50">
+                  <div className="font-serif text-2xl font-bold text-text-primary">{stories.length}</div>
+                  <div className="text-[10px] text-text-muted uppercase font-bold tracking-wider">Stories</div>
+                </div>
+                <div className="p-2.5 rounded-xl bg-midnight-surface/60 border border-midnight-border/50">
+                  <div className="font-serif text-2xl font-bold text-text-primary">{moments.length}</div>
+                  <div className="text-[10px] text-text-muted uppercase font-bold tracking-wider">Moments</div>
+                </div>
+                <div className="p-2.5 rounded-xl bg-midnight-surface/60 border border-midnight-border/50">
+                  <div className="font-serif text-2xl font-bold text-text-primary">{journalCount}</div>
+                  <div className="text-[10px] text-text-muted uppercase font-bold tracking-wider">Reflections</div>
+                </div>
+              </div>
+
+              <div className="pt-2 flex items-center justify-between text-xs text-text-secondary border-t border-midnight-border/40 mt-2">
+                <span>Current Watch Streak</span>
+                <span className="font-bold text-accent-amber flex items-center gap-1">
+                  <Calendar className="w-3.5 h-3.5" />
+                  <span>{stories.length > 0 ? 'Active' : 'Start Today'}</span>
+                </span>
+              </div>
+            </div>
+
+          </div>
+        </section>
         
         {/* Your List Row */}
         <section className="px-6 md:px-12 lg:px-16">
@@ -194,13 +308,21 @@ export function HomePage() {
                   viewport={{ once: true, margin: "-50px" }}
                   transition={{ duration: 0.8, delay: index * 0.1, ease: [0.25, 0.46, 0.45, 0.94] }}
                   whileHover={{ scale: 1.05, rotateY: -2, zIndex: 40, transition: { type: 'spring', stiffness: 300, damping: 20 } }}
-                  className="flex-none w-[280px] aspect-[16/9] bg-midnight-surface rounded-xl overflow-hidden cursor-pointer group snap-start relative shadow-card transition-all duration-300 hover:shadow-glow-cyan z-10 [transform-style:preserve-3d]"
+                  className="flex-none w-[280px] aspect-[16/9] bg-midnight-surface border border-midnight-border rounded-xl overflow-hidden cursor-pointer group snap-start relative shadow-card transition-all duration-300 hover:shadow-glow-cyan z-10 [transform-style:preserve-3d]"
                   onClick={() => navigate(`/story/${item.id}`)}
                 >
                   <Tilt rotationFactor={8} isRevese>
-                    <div className="absolute inset-0 bg-gradient-to-t from-midnight-bg via-midnight-bg/40 to-transparent z-10 opacity-90 group-hover:opacity-100 transition-opacity duration-700 [transform:translateZ(10px)]" />
+                    {item.posterUrl && (
+                      <img
+                        src={item.posterUrl}
+                        alt={item.title}
+                        loading="lazy"
+                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      />
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-midnight-bg via-midnight-bg/55 to-transparent z-10 opacity-95 group-hover:opacity-100 transition-opacity duration-700 [transform:translateZ(10px)]" />
                     
-                    <div className="absolute bottom-0 left-0 right-0 p-5 z-20 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500 [transform:translateZ(30px)]">
+                    <div className="absolute bottom-0 left-0 right-0 p-5 z-20 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-500 [transform:translateZ(30px)]">
                       <motion.div layoutId={`story-title-${item.id}`} className="font-serif text-2xl font-bold text-text-primary leading-tight mb-2 truncate">{item.title}</motion.div>
                       <div className="flex items-center gap-3 text-xs font-bold text-text-secondary uppercase tracking-wider">
                         <span className="text-accent-cyan">{item.category}</span>
@@ -209,9 +331,9 @@ export function HomePage() {
                       </div>
                     </div>
                     
-                    <div className="absolute inset-0 z-30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 bg-midnight-bg/20 backdrop-blur-sm [transform:translateZ(50px)]">
+                    <div className="absolute inset-0 z-30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 bg-midnight-bg/25 backdrop-blur-sm [transform:translateZ(50px)]">
                       <div className="bg-high-contrast text-text-high-contrast rounded-full p-4 transform scale-75 group-hover:scale-100 transition-transform duration-500 shadow-glow">
-                        <Play className="w-6 h-6 fill-current ml-1" />
+                        <BookOpen className="w-5 h-5" />
                       </div>
                     </div>
                   </Tilt>

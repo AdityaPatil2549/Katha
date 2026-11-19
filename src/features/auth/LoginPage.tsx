@@ -21,8 +21,8 @@ export default function LoginPage() {
     try {
       await signInWithGoogle();
       navigate(from, { replace: true });
-    } catch (err: any) {
-      setError(err.message || 'Failed to sign in with Google');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to sign in with Google');
       setIsLoggingIn(false);
     }
   };
@@ -84,12 +84,12 @@ export default function LoginPage() {
           <h1 className="text-5xl md:text-6xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-br from-fuchsia-400 via-purple-300 to-cyan-400 mb-2 drop-shadow-[0_0_15px_rgba(236,72,153,0.3)]">
             Katha
           </h1>
-          <p className="text-[10px] md:text-xs uppercase tracking-[0.4em] text-cyan-300 font-bold mb-10 drop-shadow-md">
+          <p className="text-xs uppercase tracking-[0.4em] text-cyan-300 font-bold mb-10 drop-shadow-md">
             Powered by Smriti
           </p>
           
-          <p className="text-white font-medium text-base leading-relaxed mb-12 drop-shadow-sm px-2">
-            Sign in to synchronize your cinematic universe across all your devices.
+          <p className="text-white font-medium text-base leading-relaxed mb-10 drop-shadow-sm px-2">
+            Sign in to optionally synchronize your personal archive across devices.
           </p>
 
           {error && (
@@ -99,6 +99,7 @@ export default function LoginPage() {
           )}
 
           <button
+            type="button"
             onClick={handleLogin}
             disabled={isLoggingIn}
             className="w-full relative group h-14 rounded-2xl bg-white text-black font-bold text-sm flex items-center justify-center gap-3 overflow-hidden transition-all duration-300 hover:scale-[1.02] active:scale-95 disabled:opacity-70 disabled:hover:scale-100 shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_30px_rgba(255,255,255,0.2)]"
@@ -118,6 +119,14 @@ export default function LoginPage() {
               </>
             )}
             <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-r from-violet-500/20 to-cyan-500/20 mix-blend-overlay" />
+          </button>
+
+          <button
+            type="button"
+            onClick={() => navigate('/')}
+            className="mt-4 w-full py-3 rounded-xl text-sm font-semibold text-white/75 hover:text-white hover:bg-white/10 transition-colors border border-white/10"
+          >
+            Continue Local-Only (No Account Required)
           </button>
           </div>
         </Tilt>

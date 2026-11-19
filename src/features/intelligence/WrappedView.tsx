@@ -2,8 +2,29 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Heart, Compass, Clock, Lightbulb, Play, Pause, ChevronRight } from 'lucide-react';
 
+interface WrappedInsights {
+  emotionalJourney: {
+    dominantMood: string;
+    emotionalGrowth: { growth: number };
+  };
+  tasteEvolution: {
+    genres: Array<{ genre: string; current: number }>;
+    sophisticationScore: number;
+  };
+  lifePatterns: {
+    viewingHabits: {
+      peakTime: string;
+      consistency: number;
+      bingeTendency: number;
+    };
+  };
+  wisdomExtraction: {
+    topLessons: Array<{ lesson: string; stories: string[] }>;
+  };
+}
+
 interface WrappedViewProps {
-  insights: any;
+  insights: WrappedInsights;
   onClose: () => void;
 }
 
@@ -93,7 +114,10 @@ export default function WrappedView({ insights, onClose }: WrappedViewProps) {
     {
       id: 'taste',
       render: () => {
-        const topGenre = insights.tasteEvolution.genres.reduce((prev: any, current: any) => (prev.current > current.current) ? prev : current);
+        const topGenre = insights.tasteEvolution.genres.reduce(
+          (prev: { genre: string; current: number }, current: { genre: string; current: number }) =>
+            prev.current > current.current ? prev : current
+        );
         
         return (
           <div className="flex flex-col items-center justify-center h-full text-center p-8 space-y-8">
@@ -227,7 +251,7 @@ export default function WrappedView({ insights, onClose }: WrappedViewProps) {
                 transition={{ delay: 0.4 }}
                 className="text-4xl md:text-5xl font-serif italic text-transparent bg-clip-text bg-gradient-to-r from-amber-200 to-orange-400 leading-tight"
               >
-                "{topLesson.lesson}"
+                "{topLesson?.lesson ?? 'Every story leaves a mark.'}"
               </motion.div>
               <motion.p
                 initial={{ opacity: 0 }}
@@ -235,7 +259,7 @@ export default function WrappedView({ insights, onClose }: WrappedViewProps) {
                 transition={{ delay: 0.8 }}
                 className="text-lg text-secondary"
               >
-                From <span className="text-white font-bold">{topLesson.stories.join(', ')}</span>
+                {topLesson?.stories?.length ? (<>From <span className="text-white font-bold">{topLesson.stories.join(', ')}</span></>) : 'From your personal vault'}
               </motion.p>
             </div>
             
@@ -255,8 +279,8 @@ export default function WrappedView({ insights, onClose }: WrappedViewProps) {
   ];
 
   useEffect(() => {
-    let timer: any;
-    let progressTimer: any;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    let progressTimer: ReturnType<typeof setInterval> | undefined;
 
     if (isPlaying && currentSlide < slides.length - 1) {
       setProgress(0);

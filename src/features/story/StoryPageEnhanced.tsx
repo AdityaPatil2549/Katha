@@ -22,9 +22,10 @@ import {
   TrendingUp,
   Lightbulb
 } from 'lucide-react';
-import { useStoriesStore, useMomentsStore } from '@/store';
+import { useStoriesStore, useMomentsStore, useSessionsStore, useKnowledgeStore } from '@/store';
+import { useToastStore } from '@/store/toastStore';
 import type { Story, Moment } from '@/types/models';
-import { DataEntryModal, EntryType } from '@/components/modals/DataEntryModal';
+import { DataEntryModal, EntryType, type DataEntryFormValues } from '@/components/modals/DataEntryModal';
 
 import { tmdbService } from '@/services/TMDBService';
 import { fanartService, FanartResult } from '@/services/FanartService';
@@ -33,11 +34,14 @@ import { watchmodeService } from '@/services/WatchmodeService';
 import { youtubeService, YouTubeSearchResult } from '@/services/YouTubeService';
 
 export default function StoryPageEnhanced() {
-  const { id } = useParams<{ id: string }>();
+  const { storyId } = useParams<{ storyId: string }>();
   const navigate = useNavigate();
   
   const { stories, loading, updateStory, deleteStory } = useStoriesStore();
   const { moments, addMoment, updateMoment, deleteMoment, getMomentsByStory } = useMomentsStore();
+  const { addSession } = useSessionsStore();
+  const { addKnowledge } = useKnowledgeStore();
+  const addToast = useToastStore((s) => s.addToast);
 
   const [story, setStory] = useState<Story | null>(null);
   const [showAddMoment, setShowAddMoment] = useState(false);
@@ -52,18 +56,40 @@ export default function StoryPageEnhanced() {
   const [trailer, setTrailer] = useState<YouTubeSearchResult | null>(null);
   const [streaming, setStreaming] = useState<{ primaryPlatform: string; allSourcesText: string } | null>(null);
 
-  const handleSaveData = (data: any) => {
-    console.log('Saved', modalType, data);
-    alert(`${modalType} added successfully to this story!`);
+  const handleSaveData = async (data: DataEntryFormValues) => {
+    if (!story) return;
+    try {
+      if (modalType === 'session') {
+        const parsedMinutes = Number(data.details);
+        await addSession({
+          storyId: story.id,
+          duration: Number.isFinite(parsedMinutes) && parsedMinutes > 0 ? parsedMinutes : 30,
+          mood: 'neutral',
+          notes: data.details ?? data.description ?? '',
+          date: new Date().toISOString(),
+        });
+      } else {
+        await addKnowledge({
+          storyId: story.id,
+          lesson: data.title ?? data.details ?? '',
+          principle: data.name ?? '',
+          reflection: data.description ?? data.content ?? data.details ?? '',
+          date: new Date().toISOString(),
+        });
+      }
+      addToast({ type: 'success', message: `${modalType} saved to this story.` });
+    } catch {
+      addToast({ type: 'error', message: `Failed to save ${modalType}.` });
+    }
   };
 
   useEffect(() => {
-    const foundStory = stories.find(s => s.id === id);
-    if (foundStory) {
-      setStory(foundStory);
-      if (id) getMomentsByStory(id);
+    const foundStory = stories.find(s => s.id === storyId);
+    setStory(foundStory ?? null);
+    if (foundStory && storyId) {
+      getMomentsByStory(storyId);
     }
-  }, [id, stories, getMomentsByStory]);
+  }, [storyId, stories, getMomentsByStory]);
 
   // Rich Data Fetching
   useEffect(() => {
@@ -106,7 +132,7 @@ export default function StoryPageEnhanced() {
   if (loading || !story) {
     return (
       <div className="min-h-screen bg-gradient-midnight flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-cyan border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-accent-cyan border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -189,7 +215,7 @@ export default function StoryPageEnhanced() {
 
                 <div className="flex items-center gap-6">
                   <div className="flex items-center gap-2">
-                    <Star className="w-5 h-5 text-amber fill-current" />
+                    <Star className="w-5 h-5 text-accent-amber fill-current" />
                     <span className="text-h3 font-semibold text-primary">{story.rating}</span>
                     <span className="text-small text-secondary">/10</span>
                   </div>
@@ -233,10 +259,16 @@ export default function StoryPageEnhanced() {
             </div>
 
             <div className="flex items-center gap-2">
+              <button 
+                onClick={() => navigate(`/story/${story.id}`)} 
+                className="btn btn-secondary flex items-center gap-2 border border-midnight-border/60 hover:border-text-primary/40 text-text-secondary hover:text-text-primary"
+              >
+                &larr; Standard Vault
+              </button>
               <button onClick={() => setShowAddMoment(true)} className="btn btn-primary flex items-center gap-2">
                 <Plus className="w-4 h-4" />Save Moment
               </button>
-              <button onClick={() => { updateStory(story.id, { status: 'watching' }); alert('Resumed watching'); }} className="btn btn-secondary flex items-center gap-2">
+              <button onClick={() => { updateStory(story.id, { status: 'watching' }); addToast({ type: 'success', message: 'Resumed watching' }); }} className="btn btn-secondary flex items-center gap-2">
                 <Eye className="w-4 h-4" />Continue Watching
               </button>
             </div>
@@ -248,17 +280,17 @@ export default function StoryPageEnhanced() {
       <div className="max-w-7xl mx-auto px-4 py-page">
         <div className="surface-elevated rounded-card overflow-hidden">
           {/* Tab Navigation */}
-          <div className="flex border-b border-midnight-border bg-midnight-surface/50">
-            {[
+          <div className="flex border-b border-midnight-border bg-midnight-surface/50 overflow-x-auto">
+            {([
               { id: 'overview', label: 'Overview', icon: <BookOpen className="w-4 h-4" /> },
               { id: 'sessions', label: 'Sessions', icon: <Clock className="w-4 h-4" /> },
               { id: 'moments', label: 'Moments', icon: <Quote className="w-4 h-4" /> },
               { id: 'knowledge', label: 'Knowledge', icon: <Lightbulb className="w-4 h-4" /> },
               { id: 'stats', label: 'Stats', icon: <BarChart3 className="w-4 h-4" /> }
-            ].map((tab) => (
+            ] as const).map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
+                onClick={() => setActiveTab(tab.id)}
                 className={`flex items-center gap-2 px-6 py-4 text-small font-medium transition-all border-b-2 ${
                   activeTab === tab.id 
                     ? 'text-accent-primary border-accent-primary bg-midnight-bg/50' 
@@ -425,8 +457,8 @@ export default function StoryPageEnhanced() {
                             <span>{new Date(moment.date).toLocaleDateString()}</span>
                           </div>
                           <div className="flex gap-1">
-                            <button onClick={() => setShowAddMoment(true)} className="btn btn-ghost p-2"><Edit className="w-4 h-4" /></button>
-                            <button onClick={() => deleteMoment(moment.id)} className="btn btn-ghost p-2 text-rose">
+                            <button type="button" aria-label="Edit moment" onClick={() => setShowAddMoment(true)} className="btn btn-ghost p-2"><Edit className="w-4 h-4" /></button>
+                            <button type="button" aria-label="Delete moment" onClick={() => deleteMoment(moment.id)} className="btn btn-ghost p-2 text-accent-rose">
                               <Trash2 className="w-4 h-4" />
                             </button>
                           </div>
@@ -459,7 +491,7 @@ export default function StoryPageEnhanced() {
                     <div className="text-h2 font-semibold text-primary">{storyMoments.length}</div>
                   </div>
                   <div className="surface-interactive p-6 rounded-card text-center hover:shadow-glow-amber">
-                    <Star className="w-8 h-8 text-amber mx-auto mb-3" />
+                    <Star className="w-8 h-8 text-accent-amber mx-auto mb-3" />
                     <div className="text-caption text-secondary mb-1">Your Rating</div>
                     <div className="text-h2 font-semibold text-primary">{story.rating}</div>
                   </div>

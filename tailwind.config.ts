@@ -7,50 +7,62 @@ export default {
       colors: {
         // Dynamic Theme variables
         midnight: {
-          bg: 'var(--color-bg-base)',        // True deep space black-violet
-          surface: 'var(--color-surface)',    // Deep cinematic indigo
-          'surface-hover': 'var(--color-surface-hover)', 
-          border: 'var(--color-border)',     // Brightened borders for better contrast
-          divider: 'var(--color-divider)',    
+          bg: 'var(--color-bg-base)',
+          surface: 'var(--color-surface)',
+          'surface-hover': 'var(--color-surface-hover)',
+          border: 'var(--color-border)',
+          divider: 'var(--color-divider)',
+        },
+
+        surface: {
+          primary: 'var(--color-surface)',
+          hover: 'var(--color-surface-hover)',
+        },
+
+        border: {
+          default: 'var(--color-border)',
         },
         
         // Text Colors
         text: {
-          primary: 'var(--color-text-primary)',    // Crisp white for highest contrast
-          secondary: 'var(--color-text-secondary)',  // Cool metallic gray
-          muted: 'var(--color-text-muted)',      // Cool muted gray
+          primary: 'var(--color-text-primary)',
+          secondary: 'var(--color-text-secondary)',
+          muted: 'var(--color-text-muted)',
           quote: 'var(--color-text-quote)',
-          'high-contrast': 'var(--color-high-contrast-text)',       
+          'high-contrast': 'var(--color-high-contrast-text)',
         },
         
         // High Contrast Backgrounds
         'high-contrast': 'var(--color-high-contrast-bg)',
         
-        // Accent System (Vibrant & Neon)
+        // Accent System (Accessible Atmospheric Accents)
         accent: {
           primary: 'var(--color-accent-primary)',
-          violet: '#8A2BE2',    // Electric Purple
-          cyan: '#00F2FE',      // Neon Cyan
-          rose: '#FF007F',      // Neon Magenta/Pink
-          emerald: '#00FA9A',   // Neon Mint/Emerald
-          amber: '#FFD700',     // Vivid Cinematic Gold
+          gold: '#C5A059',
+          'gold-light': '#DFBA73',
+          'gold-dark': '#9B7830',
+          violet: '#8B5CF6',
+          cyan: '#0EA5E9',
+          rose: '#F43F5E',
+          emerald: '#10B981',
+          amber: '#F59E0B',
         },
         
-        // Mood Color Mapping (Highly Saturated)
+        // Mood Color Mapping
         mood: {
-          inspired: '#00F2FE',  // Cyan
-          emotional: '#FF007F', // Magenta
-          calm: '#00FA9A',      // Mint
-          thoughtful: '#8A2BE2', // Purple
-          intense: '#FF4500',   // Orange/Red
-          dark: '#11121C',      // Deep Indigo
+          inspired: '#0EA5E9',
+          emotional: '#F43F5E',
+          calm: '#10B981',
+          thoughtful: '#8B5CF6',
+          intense: '#EA580C',
+          dark: '#334155',
         },
       },
       
       // Typography System
       fontFamily: {
         sans: ['Outfit', 'system-ui', '-apple-system', 'sans-serif'],
-        serif: ['Playfair Display', 'serif'],
+        serif: ['Cormorant Garamond', 'Georgia', 'serif'],
       },
       
       fontSize: {
@@ -87,6 +99,7 @@ export default {
         'card-hover': '0 20px 40px var(--color-shadow-hover)',
         'soft': '0 10px 40px var(--color-shadow)',
         'glow': '0 0 40px var(--color-accent-glow)', // Dynamic primary glow
+        'glow-gold': '0 0 40px rgba(197, 160, 89, 0.4)', // Burnished gold glow
         'glow-cyan': '0 0 40px rgba(0, 242, 254, 0.4)', // Cyan glow
         'glow-rose': '0 0 40px rgba(255, 0, 127, 0.4)', // Magenta glow
       },
@@ -138,6 +151,7 @@ export default {
       backgroundImage: {
         'gradient-midnight': 'radial-gradient(circle at top right, var(--color-surface) 0%, var(--color-bg-base) 100%)',
         'gradient-primary': 'linear-gradient(135deg, var(--color-accent-primary) 0%, var(--color-accent-secondary) 100%)',
+        'gradient-gold': 'linear-gradient(135deg, #DFBA73 0%, #C5A059 50%, #9B7830 100%)',
         'gradient-violet': 'linear-gradient(135deg, #8A2BE2 0%, #4A00E0 100%)', 
         'gradient-cyan': 'linear-gradient(135deg, #00F2FE 0%, #4FACFE 100%)',   
         'gradient-rose': 'linear-gradient(135deg, #FF007F 0%, #B92B27 100%)',   

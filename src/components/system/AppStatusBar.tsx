@@ -29,14 +29,14 @@ export function AppStatusBar() {
   }, [online]);
 
   return (
-    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 pointer-events-auto">
+    <div className="hidden md:block fixed bottom-6 left-1/2 -translate-x-1/2 z-50 pointer-events-auto">
       <div className="glass-card flex items-center gap-6 px-6 py-2 text-xs text-text-secondary tracking-widest uppercase font-bold shadow-glow-cyan hover:shadow-glow-rose transition-shadow duration-500">
         <div className="flex items-center gap-2">
           <div className={`w-2 h-2 rounded-full ${online ? 'bg-accent-emerald animate-pulse-soft' : 'bg-accent-rose'}`} />
           {label}
         </div>
-        <div className="w-px h-4 bg-white/20" />
-        <div className="select-none text-[10px]">Local-only • No cloud • No tracking</div>
+        <div className="w-px h-4 bg-midnight-border" />
+        <div className="select-none text-xs">Local-first • Optional sync</div>
       </div>
     </div>
   );

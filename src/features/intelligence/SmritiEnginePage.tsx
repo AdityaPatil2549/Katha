@@ -34,53 +34,128 @@ import {
   Search
 } from 'lucide-react';
 import { useStoriesStore, useMomentsStore, useSessionsStore, useKnowledgeStore } from '@/store';
+import { useToastStore } from '@/store/toastStore';
+import type { Knowledge, Moment, Session, Story } from '@/types/models';
 
-// Mock Intelligence Data - In production this would be computed from real user data
-const INTELLIGENCE_INSIGHTS = {
-  emotionalJourney: {
-    dominantMood: 'inspired',
-    moodRange: ['inspired', 'emotional', 'thoughtful'],
-    emotionalGrowth: { growth: 18, trend: 'up' },
-    catharticMoments: ['interstellar-climax', 'vinland-farmland']
-  },
-  tasteEvolution: {
-    genres: [
-      { genre: 'Drama', current: 35, previous: 25 },
-      { genre: 'Sci-Fi', current: 20, previous: 30 },
-      { genre: 'Documentary', current: 15, previous: 10 },
-      { genre: 'Comedy', current: 12, previous: 15 },
-      { genre: 'Thriller', current: 18, previous: 20 }
-    ],
-    sophisticationScore: 78,
-    undergroundRatio: 0.22,
-    decadePreference: '2010s'
-  },
-  lifePatterns: {
-    viewingHabits: {
-      peakTime: 'Evening (8-10 PM)',
-      consistency: 0.85,
-      bingeTendency: 0.4
+interface TooltipPayloadEntry {
+  name?: string;
+  dataKey?: string;
+  value?: number | string;
+  color?: string;
+  stroke?: string;
+  payload?: { subject?: string };
+}
+
+interface CustomTooltipProps {
+  active?: boolean;
+  payload?: TooltipPayloadEntry[];
+  label?: string;
+}
+
+function buildLocalIntelligenceHeuristic(
+  stories: Story[],
+  moments: Moment[],
+  sessions: Session[],
+  knowledge: Knowledge[],
+): KathaIntelligenceResult {
+  const moodCounts = new Map<string, number>();
+  moments.forEach((m) => {
+    if (m.mood) moodCounts.set(m.mood, (moodCounts.get(m.mood) || 0) + 1);
+  });
+  const sortedMoods = Array.from(moodCounts.entries()).sort((a, b) => b[1] - a[1]);
+  const dominantMood = sortedMoods[0]?.[0] || (moments.length === 0 ? 'reflective' : 'balanced');
+  const moodRange = sortedMoods.slice(0, 6).map(([mood]) => mood);
+
+  const genreCounts = new Map<string, number>();
+  stories.forEach((s) => {
+    (s.genre || []).forEach((g) => {
+      genreCounts.set(g, (genreCounts.get(g) || 0) + 1);
+    });
+  });
+  const topGenres = Array.from(genreCounts.entries())
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .map(([genre, count]) => {
+      const pct = stories.length > 0 ? Math.min(100, Math.round((count / stories.length) * 100)) : 0;
+      return { genre, current: pct, previous: Math.max(0, pct - 8) };
+    });
+
+  const decades = new Map<string, number>();
+  stories.forEach((s) => {
+    if (s.releaseYear && s.releaseYear > 1900) {
+      const decade = `${Math.floor(s.releaseYear / 10) * 10}s`;
+      decades.set(decade, (decades.get(decade) || 0) + 1);
+    }
+  });
+  const decadePreference =
+    Array.from(decades.entries()).sort((a, b) => b[1] - a[1])[0]?.[0] || 'Not enough data yet';
+
+  const rated = stories.filter((s) => (s.impactIndex || 0) > 0);
+  const avgImpact =
+    rated.length > 0
+      ? Math.round(rated.reduce((acc, s) => acc + (s.impactIndex || 0), 0) / rated.length)
+      : Math.min(100, stories.length * 4 + knowledge.length * 6);
+
+  const catharticMoments = moments
+    .filter((m) => m.quote || m.thoughts)
+    .slice(0, 4)
+    .map((m) => m.quote || m.thoughts);
+
+  const lessonCounts = new Map<string, number>();
+  knowledge.forEach((k) => {
+    if (k.lesson) lessonCounts.set(k.lesson, (lessonCounts.get(k.lesson) || 0) + 1);
+  });
+
+  const topGenreName = topGenres[0]?.genre || 'Mixed Narratives';
+
+  return {
+    emotionalJourney: {
+      dominantMood,
+      moodRange: moodRange.length > 0 ? moodRange : ['reflective'],
+      emotionalGrowth: {
+        growth: Math.min(100, moments.length * 4 + knowledge.length * 5),
+        trend: 'up',
+      },
+      catharticMoments:
+        catharticMoments.length > 0
+          ? catharticMoments
+          : ['Add story moments with quotes or reflections to surface cathartic highlights here.'],
     },
-    socialVsSolo: 0.8,
-    moodInfluence: 'high'
-  },
-  wisdomExtraction: {
-    topLessons: [
-      { lesson: 'Love transcends time and space', stories: ['Interstellar', 'The Time Traveler\'s Wife'], frequency: 12 },
-      { lesson: 'True strength lies in compassion', stories: ['Vinland Saga', 'Avatar'], frequency: 8 },
-      { lesson: 'Face your fears to grow', stories: ['The Wizard of Oz', 'Inside Out'], frequency: 7 },
-      { lesson: 'Every choice creates new possibilities', stories: ['The Matrix', 'Sliding Doors'], frequency: 6 }
-    ],
-    philosophyScore: 82,
-    recurringThemes: ['compassion', 'time', 'growth']
-  },
-  predictions: {
-    nextFavoriteGenre: 'Philosophical Drama',
-    emotionalReadiness: 'Ready for emotionally challenging content',
-    optimalWatchTime: 'Weekend mornings',
-    lifePhaseTransition: 'Entering wisdom-seeking phase'
-  }
-};
+    tasteEvolution: {
+      genres:
+        topGenres.length > 0
+          ? topGenres
+          : [{ genre: 'Add genres to stories', current: 0, previous: 0 }],
+      sophisticationScore: Math.min(100, avgImpact),
+      undergroundRatio: stories.length > 0 ? Math.min(1, stories.filter((s) => s.tags.length > 0).length / stories.length) : 0,
+      decadePreference,
+    },
+    lifePatterns: {
+      viewingHabits: {
+        peakTime: sessions.length > 0 ? `${sessions.length} logged session${sessions.length === 1 ? '' : 's'}` : 'No sessions yet',
+        consistency: sessions.length > 0 ? Math.min(1, sessions.length / Math.max(1, stories.length * 2)) : 0,
+        bingeTendency: stories.length > 0 ? Math.min(1, sessions.filter((s) => (s.duration || 0) >= 120).length / Math.max(1, sessions.length)) : 0,
+      },
+      socialVsSolo: 0.8,
+      moodInfluence: moments.length > 5 ? 'high' : moments.length > 0 ? 'emerging' : 'none yet',
+    },
+    wisdomExtraction: {
+      topLessons: knowledge.slice(0, 5).map((k) => ({
+        lesson: k.lesson,
+        stories: [k.principle || 'Story Reflection'],
+        frequency: lessonCounts.get(k.lesson) || 1,
+      })),
+      philosophyScore: Math.min(100, knowledge.length * 10 + stories.length * 2),
+      recurringThemes: moodRange.slice(0, 4),
+    },
+    predictions: {
+      nextFavoriteGenre: topGenreName,
+      emotionalReadiness: moments.length > 0 ? `Resonating most with ${dominantMood} stories` : 'Log a few moments to detect emotional readiness',
+      optimalWatchTime: sessions.length > 0 ? 'Based on your logged sessions' : 'Log sessions to find your peak watch window',
+      lifePhaseTransition: knowledge.length > 0 ? `${knowledge.length} documented insight${knowledge.length === 1 ? '' : 's'}` : 'Building personal archive',
+    },
+  };
+}
 
 const INTELLIGENCE_MODULES = [
   {
@@ -89,7 +164,6 @@ const INTELLIGENCE_MODULES = [
     description: 'Understand your emotional patterns and growth',
     icon: <Heart className="w-5 h-5" />,
     color: 'rose',
-    insights: 12
   },
   {
     id: 'taste',
@@ -97,7 +171,6 @@ const INTELLIGENCE_MODULES = [
     description: 'Track how your preferences change over time',
     icon: <Compass className="w-5 h-5" />,
     color: 'violet',
-    insights: 8
   },
   {
     id: 'patterns',
@@ -105,7 +178,6 @@ const INTELLIGENCE_MODULES = [
     description: 'Discover connections between stories and life phases',
     icon: <Activity className="w-5 h-5" />,
     color: 'cyan',
-    insights: 15
   },
   {
     id: 'wisdom',
@@ -113,7 +185,6 @@ const INTELLIGENCE_MODULES = [
     description: 'Extract life lessons from your journey',
     icon: <Lightbulb className="w-5 h-5" />,
     color: 'emerald',
-    insights: 23
   },
   {
     id: 'predictions',
@@ -121,46 +192,53 @@ const INTELLIGENCE_MODULES = [
     description: 'AI-powered recommendations based on patterns',
     icon: <Target className="w-5 h-5" />,
     color: 'amber',
-    insights: 6
   }
 ];
 
 export default function SmritiEnginePage() {
-  const { stories: allStories } = useStoriesStore();
-  const { moments: allMoments } = useMomentsStore();
+  const addToast = useToastStore((s) => s.addToast);
+  const { stories: allStories, loadStories } = useStoriesStore();
+  const { moments: allMoments, loadMoments } = useMomentsStore();
   const { sessions: allSessions, loadSessions } = useSessionsStore();
   const { knowledge: allKnowledge, loadKnowledge } = useKnowledgeStore();
   const [activeModule, setActiveModule] = useState('emotional');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [lastAnalysis, setLastAnalysis] = useState(new Date());
   const [selectedTimeframe, setSelectedTimeframe] = useState('6months');
-  const [insights, setInsights] = useState<KathaIntelligenceResult>(INTELLIGENCE_INSIGHTS as unknown as KathaIntelligenceResult);
-  const [isFallback, setIsFallback] = useState(false);
+  const [insights, setInsights] = useState<KathaIntelligenceResult>(() =>
+    buildLocalIntelligenceHeuristic([], [], [], []),
+  );
+  const [isFallback, setIsFallback] = useState(true);
 
   useEffect(() => {
-    loadSessions();
-    loadKnowledge();
-  }, [loadSessions, loadKnowledge]);
+    void loadStories();
+    void loadMoments();
+    void loadSessions();
+    void loadKnowledge();
+  }, [loadStories, loadMoments, loadSessions, loadKnowledge]);
 
   useEffect(() => {
     if (allStories.length > 0 || allMoments.length > 0 || allKnowledge.length > 0) {
-      handleRunAnalysis();
+      setInsights(buildLocalIntelligenceHeuristic(allStories, allMoments, allSessions, allKnowledge));
+      void handleRunAnalysis();
+    } else {
+      setInsights(buildLocalIntelligenceHeuristic([], [], [], []));
     }
-  }, [allStories.length, allMoments.length, allKnowledge.length]);
+  }, [allStories.length, allMoments.length, allSessions.length, allKnowledge.length]);
 
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-[#0f0e13]/95 backdrop-blur-xl p-3 border border-white/10 rounded-xl shadow-[0_0_25px_rgba(139,92,246,0.25)] ring-1 ring-white/5">
-          <p className="text-xs font-bold text-white/60 uppercase tracking-wider mb-2">{label || payload[0]?.payload?.subject || 'Metric'}</p>
+        <div className="bg-surface-primary border border-border-default p-3 rounded-xl shadow-elevation">
+          <p className="text-xs font-bold text-text-secondary uppercase tracking-wider mb-2">{label || payload[0]?.payload?.subject || 'Metric'}</p>
           <div className="space-y-1.5">
-            {payload.map((entry: any, index: number) => (
+            {payload.map((entry, index) => (
               <div key={index} className="flex items-center gap-3 justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full shadow-[0_0_5px_currentColor]" style={{ backgroundColor: entry.color || entry.stroke || '#fff', color: entry.color || entry.stroke || '#fff' }} />
-                  <span className="text-sm font-medium text-white/90">{entry.name || entry.dataKey}</span>
+                  <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color || entry.stroke || '#8B5CF6' }} />
+                  <span className="text-sm font-medium text-text-primary">{entry.name || entry.dataKey}</span>
                 </div>
-                <span className="text-sm font-bold text-white tabular-nums">{entry.value}%</span>
+                <span className="text-sm font-bold text-text-primary tabular-nums">{entry.value}%</span>
               </div>
             ))}
           </div>
@@ -171,6 +249,14 @@ export default function SmritiEnginePage() {
   };
 
   const handleRunAnalysis = async () => {
+    const baseline = buildLocalIntelligenceHeuristic(allStories, allMoments, allSessions, allKnowledge);
+    if (allStories.length === 0 && allMoments.length === 0 && allKnowledge.length === 0) {
+      setInsights(baseline);
+      setIsFallback(true);
+      setLastAnalysis(new Date());
+      return;
+    }
+
     setIsAnalyzing(true);
     try {
       const { geminiService } = await import('@/services/GeminiService');
@@ -186,33 +272,16 @@ export default function SmritiEnginePage() {
       
       if (result) {
         setInsights({
-          ...INTELLIGENCE_INSIGHTS,
+          ...baseline,
           ...result
         });
         setIsFallback(false);
       } else {
-        throw new Error('No result from Gemini');
+        setInsights(baseline);
+        setIsFallback(true);
       }
-    } catch (error) {
-      console.error('Failed to run AI analysis:', error);
-      // Fallback to basic heuristics if API fails
-      const moodCounts: Record<string, number> = {};
-      allMoments.forEach(m => {
-        if (m.mood) moodCounts[m.mood] = (moodCounts[m.mood] || 0) + 1;
-      });
-      const dominantMood = Object.entries(moodCounts).sort((a,b) => b[1] - a[1])[0]?.[0] || 'inspired';
-
-      setInsights(prev => ({
-        ...prev,
-        emotionalJourney: {
-          ...(prev.emotionalJourney || {}),
-          dominantMood
-        },
-        tasteEvolution: {
-          ...(prev.tasteEvolution || {}),
-          sophisticationScore: Math.min(100, (allStories.length * 2) + 40)
-        }
-      } as KathaIntelligenceResult));
+    } catch {
+      setInsights(baseline);
       setIsFallback(true);
     } finally {
       setIsAnalyzing(false);
@@ -308,17 +377,17 @@ export default function SmritiEnginePage() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="relative group p-5 bg-black/40 border border-white/5 rounded-2xl overflow-hidden transition-all duration-300 hover:border-rose-500/30 hover:shadow-[0_0_20px_rgba(244,63,94,0.15)]"
+              className="relative group p-5 bg-midnight-surface/80 border border-midnight-border rounded-2xl overflow-hidden transition-all duration-300 hover:border-accent-rose/40 hover:shadow-[0_0_20px_rgba(244,63,94,0.15)]"
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-rose-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="absolute inset-0 bg-gradient-to-r from-accent-rose/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               <div className="flex gap-4 relative z-10">
-                <div className="w-10 h-10 rounded-full bg-rose-500/10 flex items-center justify-center border border-rose-500/20 group-hover:shadow-[0_0_15px_rgba(244,63,94,0.4)] group-hover:bg-rose-500/20 transition-all duration-300 flex-shrink-0">
-                  <TrendingUp className="w-5 h-5 text-rose-400" />
+                <div className="w-10 h-10 rounded-full bg-accent-rose/10 flex items-center justify-center border border-accent-rose/25 transition-all duration-300 flex-shrink-0">
+                  <TrendingUp className="w-5 h-5 text-accent-rose" />
                 </div>
                 <div>
-                  <h4 className="font-bold text-white mb-2 group-hover:text-rose-300 transition-colors">Growth Pattern Detected</h4>
+                  <h4 className="font-bold text-text-primary mb-2 group-hover:text-accent-rose transition-colors">Recorded Moments Pattern</h4>
                   <p className="text-secondary text-sm leading-relaxed">
-                    You've shown an <strong className="text-rose-400 font-bold">18% increase</strong> in emotional awareness over the past 6 months. Your emotional responses are becoming more nuanced and thoughtful.
+                    You have logged <strong className="text-accent-rose font-bold">{allMoments.length}</strong> personal moments across <strong className="text-text-primary font-semibold">{allStories.length}</strong> stories (growth score +{insights.emotionalJourney?.emotionalGrowth?.growth || 0}%).
                   </p>
                 </div>
               </div>
@@ -328,15 +397,15 @@ export default function SmritiEnginePage() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="relative group p-5 bg-black/40 border border-white/5 rounded-2xl overflow-hidden transition-all duration-300 hover:border-violet-500/30 hover:shadow-[0_0_20px_rgba(139,92,246,0.15)]"
+              className="relative group p-5 bg-midnight-surface/80 border border-midnight-border rounded-2xl overflow-hidden transition-all duration-300 hover:border-accent-primary/40 hover:shadow-[0_0_20px_rgba(139,92,246,0.15)]"
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-violet-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="absolute inset-0 bg-gradient-to-r from-accent-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               <div className="flex gap-4 relative z-10">
-                <div className="w-10 h-10 rounded-full bg-violet-500/10 flex items-center justify-center border border-violet-500/20 group-hover:shadow-[0_0_15px_rgba(139,92,246,0.4)] group-hover:bg-violet-500/20 transition-all duration-300 flex-shrink-0">
-                  <Heart className="w-5 h-5 text-violet-400" />
+                <div className="w-10 h-10 rounded-full bg-accent-primary/10 flex items-center justify-center border border-accent-primary/25 transition-all duration-300 flex-shrink-0">
+                  <Heart className="w-5 h-5 text-accent-primary" />
                 </div>
                 <div>
-                  <h4 className="font-bold text-white mb-2 group-hover:text-violet-300 transition-colors">Emotional Resilience</h4>
+                  <h4 className="font-bold text-text-primary mb-2 group-hover:text-accent-primary transition-colors">Emotional Resilience</h4>
                   <p className="text-secondary text-sm leading-relaxed">
                     You're gravitating toward content that challenges you emotionally, indicating increased emotional maturity and readiness for complex narratives.
                   </p>
@@ -348,15 +417,15 @@ export default function SmritiEnginePage() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="relative group p-5 bg-black/40 border border-white/5 rounded-2xl overflow-hidden transition-all duration-300 hover:border-emerald-500/30 hover:shadow-[0_0_20px_rgba(16,185,129,0.15)]"
+              className="relative group p-5 bg-midnight-surface/80 border border-midnight-border rounded-2xl overflow-hidden transition-all duration-300 hover:border-accent-emerald/40 hover:shadow-[0_0_20px_rgba(16,185,129,0.15)]"
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="absolute inset-0 bg-gradient-to-r from-accent-emerald/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               <div className="flex gap-4 relative z-10">
-                <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 group-hover:shadow-[0_0_15px_rgba(16,185,129,0.4)] group-hover:bg-emerald-500/20 transition-all duration-300 flex-shrink-0">
-                  <Activity className="w-5 h-5 text-emerald-400" />
+                <div className="w-10 h-10 rounded-full bg-accent-emerald/10 flex items-center justify-center border border-accent-emerald/25 transition-all duration-300 flex-shrink-0">
+                  <Activity className="w-5 h-5 text-accent-emerald" />
                 </div>
                 <div>
-                  <h4 className="font-bold text-white mb-2 group-hover:text-emerald-300 transition-colors">Balance Achievement</h4>
+                  <h4 className="font-bold text-text-primary mb-2 group-hover:text-accent-emerald transition-colors">Balance Achievement</h4>
                   <p className="text-secondary text-sm leading-relaxed">
                     Your emotional palette is becoming more diverse, showing healthy balance between inspiration, reflection, and emotional engagement.
                   </p>
@@ -437,33 +506,29 @@ export default function SmritiEnginePage() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="relative group p-5 bg-black/40 border border-white/5 rounded-2xl overflow-hidden transition-all duration-300 hover:border-cyan-500/30 hover:shadow-[0_0_20px_rgba(6,182,212,0.15)]"
+              className="relative group p-5 bg-midnight-surface/80 border border-midnight-border rounded-2xl overflow-hidden transition-all duration-300 hover:border-accent-cyan/40 hover:shadow-[0_0_20px_rgba(6,182,212,0.15)]"
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="absolute inset-0 bg-gradient-to-r from-accent-cyan/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               <div className="flex flex-col relative z-10">
                 <div className="flex gap-4 mb-4">
-                  <div className="w-10 h-10 rounded-full bg-cyan-500/10 flex items-center justify-center border border-cyan-500/20 group-hover:shadow-[0_0_15px_rgba(6,182,212,0.4)] group-hover:bg-cyan-500/20 transition-all duration-300 flex-shrink-0">
-                    <PieChart className="w-5 h-5 text-cyan-400" />
+                  <div className="w-10 h-10 rounded-full bg-accent-cyan/10 flex items-center justify-center border border-accent-cyan/25 transition-all duration-300 flex-shrink-0">
+                    <PieChart className="w-5 h-5 text-accent-cyan" />
                   </div>
-                  <h4 className="font-bold text-white mt-2 group-hover:text-cyan-300 transition-colors">Underground Ratio</h4>
+                  <h4 className="font-bold text-text-primary mt-2 group-hover:text-accent-cyan transition-colors">Underground Ratio</h4>
                 </div>
                 
                 <div className="flex items-center gap-4">
-                  <div className="text-h3 font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 drop-shadow-[0_0_8px_rgba(6,182,212,0.5)] tabular-nums">
+                  <div className="text-h3 font-bold text-accent-cyan tabular-nums">
                     {((insights.tasteEvolution?.undergroundRatio || 0) * 100).toFixed(0)}%
                   </div>
                   <div className="flex-1">
-                    <div className="h-3.5 bg-black/40 rounded-full border border-white/5 relative overflow-visible">
-                      <div className="absolute inset-0 rounded-full shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)] pointer-events-none" />
+                    <div className="h-3.5 bg-midnight-bg/50 rounded-full border border-midnight-border relative overflow-visible">
                       <motion.div 
                         initial={{ width: 0, opacity: 0 }}
                         animate={{ width: `${(insights.tasteEvolution?.undergroundRatio || 0) * 100}%`, opacity: 1 }}
                         transition={{ duration: 1.2, delay: 0.1, type: "spring", bounce: 0.4 }}
-                        className="h-full rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 shadow-[0_0_20px_rgba(6,182,212,0.6)] relative"
-                      >
-                        <div className="absolute right-0 top-0 bottom-0 w-3 rounded-full bg-cyan-300 blur-[2px] opacity-80" />
-                        <div className="absolute right-0 top-0 bottom-0 w-1 bg-white rounded-full opacity-90 shadow-[0_0_8px_white]" />
-                      </motion.div>
+                        className="h-full rounded-full bg-gradient-to-r from-accent-cyan to-blue-500 shadow-[0_0_20px_rgba(6,182,212,0.4)] relative"
+                      />
                     </div>
                   </div>
                 </div>
@@ -488,24 +553,24 @@ export default function SmritiEnginePage() {
           <h3 className="heading-3 text-primary mb-section">Viewing Patterns</h3>
           <div className="space-y-8">
             <div className="grid grid-cols-2 gap-4">
-              <div className="relative group overflow-hidden p-6 bg-black/40 border border-white/5 rounded-2xl flex flex-col items-center justify-center gap-3 transition-all duration-300 hover:border-accent-cyan/30 hover:bg-accent-cyan/5">
+              <div className="relative group overflow-hidden p-6 bg-midnight-surface/80 border border-midnight-border rounded-2xl flex flex-col items-center justify-center gap-3 transition-all duration-300 hover:border-accent-cyan/40 hover:bg-accent-cyan/5">
                 <div className="absolute inset-0 bg-gradient-to-br from-accent-cyan/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <div className="w-12 h-12 rounded-full bg-accent-cyan/10 flex items-center justify-center shadow-[0_0_15px_rgba(6,182,212,0.2)] group-hover:shadow-[0_0_25px_rgba(6,182,212,0.5)] transition-all duration-300">
+                <div className="w-12 h-12 rounded-full bg-accent-cyan/10 flex items-center justify-center transition-all duration-300">
                   <Clock className="w-6 h-6 text-accent-cyan" />
                 </div>
                 <div className="text-center z-10">
                   <div className="text-xs font-bold text-text-muted uppercase tracking-wider mb-1">Peak Time</div>
-                  <div className="text-lg font-bold text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]">{insights.lifePatterns?.viewingHabits?.peakTime || 'N/A'}</div>
+                  <div className="text-lg font-bold text-text-primary">{insights.lifePatterns?.viewingHabits?.peakTime || 'N/A'}</div>
                 </div>
               </div>
-              <div className="relative group overflow-hidden p-6 bg-black/40 border border-white/5 rounded-2xl flex flex-col items-center justify-center gap-3 transition-all duration-300 hover:border-purple-500/30 hover:bg-purple-500/5">
-                <div className="absolute inset-0 bg-gradient-to-bl from-purple-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <div className="w-12 h-12 rounded-full bg-purple-500/10 flex items-center justify-center shadow-[0_0_15px_rgba(168,85,247,0.2)] group-hover:shadow-[0_0_25px_rgba(168,85,247,0.5)] transition-all duration-300">
-                  <Activity className="w-6 h-6 text-purple-400" />
+              <div className="relative group overflow-hidden p-6 bg-midnight-surface/80 border border-midnight-border rounded-2xl flex flex-col items-center justify-center gap-3 transition-all duration-300 hover:border-accent-primary/40 hover:bg-accent-primary/5">
+                <div className="absolute inset-0 bg-gradient-to-bl from-accent-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="w-12 h-12 rounded-full bg-accent-primary/10 flex items-center justify-center transition-all duration-300">
+                  <Activity className="w-6 h-6 text-accent-primary" />
                 </div>
                 <div className="text-center z-10">
                   <div className="text-xs font-bold text-text-muted uppercase tracking-wider mb-1">Mood Influence</div>
-                  <div className="text-lg font-bold text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.3)] capitalize">{insights.lifePatterns?.moodInfluence || 'N/A'}</div>
+                  <div className="text-lg font-bold text-text-primary capitalize">{insights.lifePatterns?.moodInfluence || 'N/A'}</div>
                 </div>
               </div>
             </div>
@@ -797,15 +862,15 @@ export default function SmritiEnginePage() {
           {/* Ambient Glow */}
           <div className="absolute inset-0 bg-gradient-to-r from-accent-primary/20 via-purple-500/20 to-accent-emerald/20 blur-3xl opacity-50 pointer-events-none rounded-full" />
           
-          <div className="relative z-50 glass-card shadow-glass p-2 pr-2 rounded-[24px] flex flex-wrap items-center justify-between gap-4 border border-white/10 bg-[#0f0e13]/80 backdrop-blur-2xl w-full max-w-4xl mx-auto">
+          <div className="relative z-50 glass-card shadow-glass p-2 pr-2 rounded-[24px] flex flex-wrap items-center justify-between gap-4 border border-midnight-border bg-midnight-surface/90 backdrop-blur-2xl w-full max-w-4xl mx-auto">
             
             <div className="flex items-center gap-4 pl-2">
               <div className="w-12 h-12 rounded-full bg-accent-primary/10 border border-accent-primary/20 flex items-center justify-center shadow-[0_0_15px_rgba(139,92,246,0.2)]">
                 <Brain className="w-6 h-6 text-accent-primary animate-pulse" />
               </div>
               <div className="flex flex-col justify-center">
-                <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider mb-0.5">Neural Engine Status</span>
-                <span className="text-sm text-white font-medium flex items-center gap-2">
+                <span className="text-xs font-bold text-text-muted uppercase tracking-wider mb-0.5">Neural Engine Status</span>
+                <span className="text-sm text-text-primary font-medium flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-accent-emerald shadow-[0_0_8px_rgba(16,185,129,0.8)] animate-pulse" />
                   Synchronized: {lastAnalysis.toLocaleDateString()}
                 </span>
@@ -826,7 +891,7 @@ export default function SmritiEnginePage() {
                   ]}
                 />
               </div>
-              <div className="hidden sm:block h-8 w-px bg-white/10 mx-1" />
+              <div className="hidden sm:block h-8 w-px bg-midnight-border mx-1" />
               <Magnetic>
                 <button
                   onClick={handleRunAnalysis}
@@ -897,13 +962,13 @@ export default function SmritiEnginePage() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 1.05 }}
-              className="flex flex-col items-center justify-center py-32 glass-card shadow-glass rounded-card border border-emerald/20"
+              className="flex flex-col items-center justify-center py-32 glass-card shadow-glass rounded-card border border-accent-emerald/20"
             >
               <div className="relative mb-8">
-                <div className="absolute inset-0 bg-emerald/20 blur-xl rounded-full animate-pulse" />
-                <Brain className="w-16 h-16 text-emerald animate-bounce relative z-10" />
+                <div className="absolute inset-0 bg-accent-emerald/20 blur-xl rounded-full animate-pulse" />
+                <Brain className="w-16 h-16 text-accent-emerald animate-bounce relative z-10" />
               </div>
-              <h3 className="heading-3 text-emerald mb-2">Neural Link Active</h3>
+              <h3 className="heading-3 text-accent-emerald mb-2">Neural Link Active</h3>
               <p className="text-secondary text-center max-w-md animate-pulse">
                 Gemini AI is currently analyzing your emotional journey, taste evolution, and life patterns to generate deep insights.
               </p>
@@ -939,22 +1004,32 @@ export default function SmritiEnginePage() {
                 Download your complete intelligence report as PDF or share insights with others.
               </p>
             </div>
-            <div className="flex gap-4">
+            <div className="flex flex-wrap gap-4">
               <Magnetic>
-                <button onClick={() => {
-                  alert('Analysis process triggered. Check console for details.');
-                  console.log('Running analysis...');
-                }} className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-accent-primary to-purple-600 text-white text-sm font-bold tracking-wide flex items-center gap-2 shadow-[0_0_15px_rgba(139,92,246,0.4)] hover:shadow-[0_0_25px_rgba(139,92,246,0.6)] hover:-translate-y-0.5 transition-all duration-300">
+                <button
+                  onClick={() => void handleRunAnalysis()}
+                  disabled={isAnalyzing}
+                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-accent-primary to-purple-600 text-white text-sm font-bold tracking-wide flex items-center gap-2 shadow-[0_0_15px_rgba(139,92,246,0.4)] hover:shadow-[0_0_25px_rgba(139,92,246,0.6)] hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-50"
+                >
                   <Brain className="w-4 h-4 text-white" />
-                  Run Full Analysis
+                  {isAnalyzing ? 'Analyzing...' : 'Run Full Analysis'}
                 </button>
               </Magnetic>
-              <button onClick={() => {
-                alert('Models optimized for local execution.');
-                console.log('Optimizing...');
-              }} className="px-5 py-2.5 rounded-xl border border-white/10 hover:bg-white/5 text-text-secondary hover:text-primary text-sm font-medium flex items-center gap-2 transition-colors duration-300">
-                <Settings className="w-4 h-4" />
-                Optimize Models
+              <button
+                onClick={() => {
+                  const blob = new Blob([JSON.stringify(insights, null, 2)], { type: 'application/json' });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = `katha-smriti-report-${new Date().toISOString().slice(0, 10)}.json`;
+                  a.click();
+                  URL.revokeObjectURL(url);
+                  addToast({ type: 'success', message: 'Intelligence report downloaded.' });
+                }}
+                className="px-5 py-2.5 rounded-xl border border-midnight-border hover:bg-surface-hover text-text-secondary hover:text-primary text-sm font-medium flex items-center gap-2 transition-colors duration-300"
+              >
+                <Download className="w-4 h-4" />
+                Export JSON Report
               </button>
             </div>
           </div>

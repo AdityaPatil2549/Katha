@@ -25,19 +25,16 @@ import { Dropdown } from '@/components/ui/Dropdown';
 import { Magnetic } from '@/components/ui/motion/Magnetic';
 import { Tilt } from '@/components/ui/motion/Tilt';
 
+type LibrarySortField = 'updatedAt' | 'title' | 'rating' | 'impactIndex';
+type QuickFilter = 'all' | 'favorites' | 'watching' | 'completed';
+
 export default function LibraryPage() {
   const navigate = useNavigate();
-  const { 
-    stories, 
-    loading, 
-    error, 
-    loadStories, 
-    searchStories, 
-    filterByCategory, 
-    filterByStatus, 
-    getFavorites,
-    getWatching,
-    getCompleted
+  const {
+    allStories,
+    loading,
+    error,
+    loadStories,
   } = useStoriesStore();
 
   const { pendingIds } = useSyncStore();
@@ -45,63 +42,50 @@ export default function LibraryPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedStatus, setSelectedStatus] = useState('all');
+  const [quickFilter, setQuickFilter] = useState<QuickFilter>('all');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [sortBy, setSortBy] = useState<'updatedAt' | 'title' | 'rating' | 'impactIndex'>('updatedAt');
+  const [sortBy, setSortBy] = useState<LibrarySortField>('updatedAt');
 
   useEffect(() => {
-    loadStories();
+    void loadStories();
   }, [loadStories]);
-
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      if (searchQuery.trim()) {
-        searchStories(searchQuery);
-      } else {
-        applyFilters();
-      }
-    }, 300);
-    return () => clearTimeout(timeoutId);
-  }, [searchQuery]);
-
-  useEffect(() => {
-    applyFilters();
-  }, [selectedCategory, selectedStatus]);
-
-  const applyFilters = useCallback(() => {
-    if (selectedCategory === 'all' && selectedStatus === 'all') {
-      loadStories();
-    } else if (selectedCategory !== 'all') {
-      filterByCategory(selectedCategory);
-    } else if (selectedStatus !== 'all') {
-      filterByStatus(selectedStatus);
-    }
-  }, [selectedCategory, selectedStatus, loadStories, filterByCategory, filterByStatus]);
 
   const handleCategoryChange = useCallback((category: string) => {
     setSelectedCategory(category);
-    setSelectedStatus('all');
   }, []);
 
   const handleStatusChange = useCallback((status: string) => {
     setSelectedStatus(status);
-    setSelectedCategory('all');
+    setQuickFilter('all');
+  }, []);
+
+  const toggleQuickFilter = useCallback((next: Exclude<QuickFilter, 'all'>) => {
+    setQuickFilter((prev) => (prev === next ? 'all' : next));
   }, []);
 
   const getFilteredAndSortedStories = useCallback(() => {
-    let filtered = stories;
+    let filtered = allStories;
+
+    if (quickFilter === 'favorites') {
+      filtered = filtered.filter((story) => story.favorite);
+    } else if (quickFilter === 'watching') {
+      filtered = filtered.filter((story) => story.status === 'watching');
+    } else if (quickFilter === 'completed') {
+      filtered = filtered.filter((story) => story.status === 'completed');
+    }
 
     if (selectedCategory !== 'all') {
-      filtered = filtered.filter(story => story.category === selectedCategory);
+      filtered = filtered.filter((story) => story.category === selectedCategory);
     }
     if (selectedStatus !== 'all') {
-      filtered = filtered.filter(story => story.status === selectedStatus);
+      filtered = filtered.filter((story) => story.status === selectedStatus);
     }
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(story =>
+      filtered = filtered.filter((story) =>
         story.title.toLowerCase().includes(query) ||
-        story.genre.some(g => g.toLowerCase().includes(query)) ||
-        story.tags.some(t => t.toLowerCase().includes(query))
+        story.genre.some((g) => g.toLowerCase().includes(query)) ||
+        story.tags.some((t) => t.toLowerCase().includes(query))
       );
     }
 
@@ -114,7 +98,7 @@ export default function LibraryPage() {
         default: return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
       }
     });
-  }, [stories, selectedCategory, selectedStatus, searchQuery, sortBy]);
+  }, [allStories, quickFilter, selectedCategory, selectedStatus, searchQuery, sortBy]);
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -202,6 +186,8 @@ export default function LibraryPage() {
                 { label: 'Movie', value: 'movie' },
                 { label: 'Documentary', value: 'documentary' },
                 { label: 'YouTube', value: 'youtube' },
+                { label: 'Game', value: 'game' },
+                { label: 'Book', value: 'book' },
               ]}
             />
 
@@ -221,7 +207,7 @@ export default function LibraryPage() {
             {/* Sort */}
             <Dropdown
               value={sortBy}
-              onChange={(value) => setSortBy(value as any)}
+              onChange={(value) => setSortBy(value as LibrarySortField)}
               options={[
                 { label: 'Recently Updated', value: 'updatedAt' },
                 { label: 'Title', value: 'title' },
@@ -252,16 +238,46 @@ export default function LibraryPage() {
 
         {/* Quick Filters */}
         <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
-          <button onClick={getFavorites} aria-label="Filter by Favorites" className="group flex items-center gap-3 px-6 py-2.5 rounded-chip border border-midnight-border/50 text-sm text-text-secondary hover:text-text-primary hover:border-text-primary transition-all duration-300">
-            <Heart className="w-4 h-4 group-hover:text-accent-rose transition-colors" />
+          <button
+            type="button"
+            onClick={() => toggleQuickFilter('favorites')}
+            aria-pressed={quickFilter === 'favorites'}
+            aria-label="Filter by Favorites"
+            className={`group flex items-center gap-3 px-6 py-2.5 rounded-chip border text-sm transition-all duration-300 ${
+              quickFilter === 'favorites'
+                ? 'border-accent-rose bg-accent-rose/10 text-text-primary'
+                : 'border-midnight-border/50 text-text-secondary hover:text-text-primary hover:border-text-primary'
+            }`}
+          >
+            <Heart className={`w-4 h-4 transition-colors ${quickFilter === 'favorites' ? 'text-accent-rose' : 'group-hover:text-accent-rose'}`} />
             Favorites
           </button>
-          <button onClick={getWatching} aria-label="Filter by Watching" className="group flex items-center gap-3 px-6 py-2.5 rounded-chip border border-midnight-border/50 text-sm text-text-secondary hover:text-text-primary hover:border-text-primary transition-all duration-300">
-            <Play className="w-4 h-4 group-hover:text-accent-cyan transition-colors" />
+          <button
+            type="button"
+            onClick={() => toggleQuickFilter('watching')}
+            aria-pressed={quickFilter === 'watching'}
+            aria-label="Filter by Watching"
+            className={`group flex items-center gap-3 px-6 py-2.5 rounded-chip border text-sm transition-all duration-300 ${
+              quickFilter === 'watching'
+                ? 'border-accent-cyan bg-accent-cyan/10 text-text-primary'
+                : 'border-midnight-border/50 text-text-secondary hover:text-text-primary hover:border-text-primary'
+            }`}
+          >
+            <Play className={`w-4 h-4 transition-colors ${quickFilter === 'watching' ? 'text-accent-cyan' : 'group-hover:text-accent-cyan'}`} />
             Watching
           </button>
-          <button onClick={getCompleted} aria-label="Filter by Completed" className="group flex items-center gap-3 px-6 py-2.5 rounded-chip border border-midnight-border/50 text-sm text-text-secondary hover:text-text-primary hover:border-text-primary transition-all duration-300">
-            <Check className="w-4 h-4 group-hover:text-accent-emerald transition-colors" />
+          <button
+            type="button"
+            onClick={() => toggleQuickFilter('completed')}
+            aria-pressed={quickFilter === 'completed'}
+            aria-label="Filter by Completed"
+            className={`group flex items-center gap-3 px-6 py-2.5 rounded-chip border text-sm transition-all duration-300 ${
+              quickFilter === 'completed'
+                ? 'border-accent-emerald bg-accent-emerald/10 text-text-primary'
+                : 'border-midnight-border/50 text-text-secondary hover:text-text-primary hover:border-text-primary'
+            }`}
+          >
+            <Check className={`w-4 h-4 transition-colors ${quickFilter === 'completed' ? 'text-accent-emerald' : 'group-hover:text-accent-emerald'}`} />
             Completed
           </button>
         </div>
@@ -322,7 +338,7 @@ export default function LibraryPage() {
                   {/* Story Info (Grid) */}
                   <div className="space-y-2">
                     <h3 className="font-serif text-2xl font-medium text-text-primary leading-tight line-clamp-1">{story.title}</h3>
-                    <div className="flex items-center justify-between font-sans text-[10px] text-text-secondary tracking-[0.15em] uppercase">
+                    <div className="flex items-center justify-between font-sans text-xs text-text-secondary tracking-[0.15em] uppercase">
                       <span>{story.category}</span>
                       <div className="flex items-center gap-1.5">
                         <Star className="w-3 h-3 text-accent-cyan" />

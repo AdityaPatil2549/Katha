@@ -58,33 +58,33 @@ export function LifePhaseRecommendations() {
     const themes = {
       'College': {
         gradient: 'from-blue-500/20 to-cyan-500/20',
-        borderColor: 'border-cyan',
-        iconColor: 'text-cyan',
-        bgColor: 'bg-cyan/10',
+        borderColor: 'border-accent-cyan',
+        iconColor: 'text-accent-cyan',
+        bgColor: 'bg-accent-cyan/10',
         title: 'College Years',
         description: 'Discovery, growth, and foundation building'
       },
       'Career': {
         gradient: 'from-emerald-500/20 to-green-500/20',
-        borderColor: 'border-emerald',
-        iconColor: 'text-emerald',
-        bgColor: 'bg-emerald/10',
+        borderColor: 'border-accent-emerald',
+        iconColor: 'text-accent-emerald',
+        bgColor: 'bg-accent-emerald/10',
         title: 'Career Building',
         description: 'Professional growth and achievement'
       },
       'Midlife': {
         gradient: 'from-amber-500/20 to-orange-500/20',
-        borderColor: 'border-amber',
-        iconColor: 'text-amber',
-        bgColor: 'bg-amber/10',
+        borderColor: 'border-accent-amber',
+        iconColor: 'text-accent-amber',
+        bgColor: 'bg-accent-amber/10',
         title: 'Midlife Journey',
         description: 'Reflection, wisdom, and transition'
       },
       'Rebuilding': {
         gradient: 'from-purple-500/20 to-pink-500/20',
-        borderColor: 'border-purple',
-        iconColor: 'text-purple',
-        bgColor: 'bg-purple/10',
+        borderColor: 'border-accent-primary',
+        iconColor: 'text-accent-primary',
+        bgColor: 'bg-accent-primary/10',
         title: 'Rebuilding Phase',
         description: 'Renewal, transformation, and new beginnings'
       }
@@ -104,9 +104,9 @@ export function LifePhaseRecommendations() {
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
-      case 'easy': return 'text-emerald';
-      case 'medium': return 'text-amber';
-      case 'heavy': return 'text-rose';
+      case 'easy': return 'text-accent-emerald';
+      case 'medium': return 'text-accent-amber';
+      case 'heavy': return 'text-accent-rose';
       default: return 'text-text-primary/60';
     }
   };
@@ -173,7 +173,7 @@ export function LifePhaseRecommendations() {
                   <h3 className="text-lg font-semibold text-text-primary mb-3">Recommended Themes</h3>
                   <div className="flex flex-wrap gap-2">
                     {selectedPhase.recommendedThemes.map((theme, index) => (
-                      <span key={index} className="px-3 py-1 rounded-full text-sm bg-gradient-cyan/20 text-cyan">
+                      <span key={index} className="px-3 py-1 rounded-full text-sm bg-sky-500/15 text-accent-primary">
                         {theme}
                       </span>
                     ))}
@@ -212,7 +212,7 @@ export function LifePhaseRecommendations() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1 * index }}
                   whileHover={{ scale: 1.02 }}
-                  className="surface-elevated rounded-xl p-6 hover:surface-hover transition-all cursor-pointer"
+                  className="surface-elevated rounded-xl p-6 hover:bg-midnight-surface-hover transition-all cursor-pointer"
                   onClick={() => window.open(`/atlas?entry=${entry.id}`, '_blank')}
                 >
                   <div className="flex items-start justify-between mb-4">
@@ -238,7 +238,7 @@ export function LifePhaseRecommendations() {
 
                   <div className="flex flex-wrap gap-2 mb-4">
                     {entry.themes.slice(0, 2).map((theme, idx) => (
-                      <span key={idx} className="text-xs bg-gradient-cyan/20 text-cyan px-2 py-1 rounded-full">
+                      <span key={idx} className="text-xs bg-sky-500/15 text-accent-primary px-2 py-1 rounded-full">
                         {theme}
                       </span>
                     ))}
@@ -297,7 +297,7 @@ export function LifePhaseRecommendations() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 * index }}
                 whileHover={{ scale: 1.02 }}
-                className={`surface-elevated rounded-2xl overflow-hidden hover:surface-hover transition-all cursor-pointer border-l-4 ${theme.borderColor}`}
+                className={`surface-elevated rounded-2xl overflow-hidden hover:bg-midnight-surface-hover transition-all cursor-pointer border-l-4 ${theme.borderColor}`}
                 onClick={() => loadPhaseEntries(phase)}
               >
                 <div className={`p-8 bg-gradient-to-br ${theme.gradient}`}>
@@ -334,9 +334,9 @@ export function LifePhaseRecommendations() {
                     <div className="bg-midnight-surface/50 rounded-xl p-4">
                       <h3 className="text-sm font-semibold text-text-primary mb-2">Key Themes</h3>
                       <div className="flex flex-wrap gap-1">
-                        {phase.recommendedThemes.slice(0, 2).map((theme, idx) => (
-                          <span key={idx} className="text-xs px-2 py-1 rounded-full bg-gradient-cyan/20 text-cyan">
-                            {theme}
+                        {phase.recommendedThemes.slice(0, 2).map((t, idx) => (
+                          <span key={idx} className="text-xs px-2 py-1 rounded-full bg-accent-cyan/15 text-accent-cyan">
+                            {t}
                           </span>
                         ))}
                         {phase.recommendedThemes.length > 2 && (
@@ -354,11 +354,12 @@ export function LifePhaseRecommendations() {
                       <span>{phase.entryIds.length} Stories</span>
                     </div>
                     <button 
-                      onClick={() => {
-                        window.location.href = '/atlas';
-                        alert('Filters applied to Atlas view');
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        loadPhaseEntries(phase);
                       }}
-                      className={`text-accent-primary hover:text-accent-primary/80 transition-colors`}
+                      className="text-accent-primary hover:text-accent-primary/80 transition-colors font-medium"
                     >
                       Explore Stories →
                     </button>
@@ -383,8 +384,8 @@ export function LifePhaseRecommendations() {
             
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
               <div className="text-center">
-                <div className="p-4 bg-gradient-cyan/20 rounded-xl mb-4 inline-block">
-                  <Users className="w-8 h-8 text-cyan" />
+                <div className="p-4 bg-accent-cyan/15 rounded-xl mb-4 inline-block">
+                  <Users className="w-8 h-8 text-accent-cyan" />
                 </div>
                 <h3 className="text-lg font-semibold text-text-primary mb-2">Life Context</h3>
                 <p className="text-text-primary/70 text-sm">
@@ -393,7 +394,7 @@ export function LifePhaseRecommendations() {
               </div>
               
               <div className="text-center">
-                <div className="p-4 bg-gradient-violet/20 rounded-xl mb-4 inline-block">
+                <div className="p-4 bg-accent-primary/15 rounded-xl mb-4 inline-block">
                   <Heart className="w-8 h-8 text-accent-primary" />
                 </div>
                 <h3 className="text-lg font-semibold text-text-primary mb-2">Emotional Needs</h3>
@@ -403,8 +404,8 @@ export function LifePhaseRecommendations() {
               </div>
               
               <div className="text-center">
-                <div className="p-4 bg-gradient-amber/20 rounded-xl mb-4 inline-block">
-                  <Brain className="w-8 h-8 text-amber" />
+                <div className="p-4 bg-accent-amber/15 rounded-xl mb-4 inline-block">
+                  <Brain className="w-8 h-8 text-accent-amber" />
                 </div>
                 <h3 className="text-lg font-semibold text-text-primary mb-2">Thematic Relevance</h3>
                 <p className="text-text-primary/70 text-sm">
@@ -413,8 +414,8 @@ export function LifePhaseRecommendations() {
               </div>
               
               <div className="text-center">
-                <div className="p-4 bg-gradient-emerald/20 rounded-xl mb-4 inline-block">
-                  <Sparkles className="w-8 h-8 text-emerald" />
+                <div className="p-4 bg-accent-emerald/15 rounded-xl mb-4 inline-block">
+                  <Sparkles className="w-8 h-8 text-accent-emerald" />
                 </div>
                 <h3 className="text-lg font-semibold text-text-primary mb-2">Growth Focus</h3>
                 <p className="text-text-primary/70 text-sm">

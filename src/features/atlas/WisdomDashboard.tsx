@@ -6,17 +6,22 @@ import { StaggerContainer } from '@/components/ui/motion/StaggerContainer';
 import { Brain, BookOpen, Heart, Target, TrendingUp, Calendar, Clock, Star, Quote, Lightbulb, Users, Download, Search, Plus, Filter } from 'lucide-react';
 import { wisdomRepository } from '@/db/repositories/WisdomRepository';
 import { personalRepository } from '@/db/repositories/PersonalRepository';
+import { useToastStore } from '@/store/toastStore';
 import type { PersonalWisdom, PersonalInsight, PersonalPrinciple, PersonalQuote } from '@/types/knowledge';
 
-import { DataEntryModal, EntryType } from '@/components/modals/DataEntryModal';
+import { DataEntryModal, EntryType, type DataEntryFormValues } from '@/components/modals/DataEntryModal';
+
+type WisdomStatsData = Awaited<ReturnType<typeof wisdomRepository.getWisdomStats>>;
+type WisdomSearchResult = Awaited<ReturnType<typeof wisdomRepository.searchWisdom>>[number];
 
 export function WisdomDashboard() {
+  const addToast = useToastStore((s) => s.addToast);
   const [wisdom, setWisdom] = useState<PersonalWisdom | null>(null);
-  const [stats, setStats] = useState<any>(null);
+  const [stats, setStats] = useState<WisdomStatsData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'overview' | 'insights' | 'principles' | 'quotes' | 'stories' | 'lessons'>('overview');
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searchResults, setSearchResults] = useState<WisdomSearchResult[]>([]);
 
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState<EntryType>('insight');
@@ -71,15 +76,106 @@ export function WisdomDashboard() {
     }
   };
 
-  const handleSaveEntry = async (data: any) => {
+  const handleSaveEntry = async (data: DataEntryFormValues) => {
+    const now = new Date();
     try {
-      // Mock saving to DB
-      console.log('Saved entry:', modalType, data);
-      alert(`${modalType} saved successfully!`);
-      // Reload wisdom data
-      loadWisdomData();
+      if (modalType === 'insight') {
+        await wisdomRepository.addInsight({
+          timestamp: now,
+          sourceEntryId: 'manual',
+          title: (data.title || 'Untitled Insight').trim(),
+          description: (data.description || '').trim(),
+          category: 'intellectual',
+          depth: 7,
+          context: 'Personal reflection',
+          personalConnection: '',
+          lifeArea: 'general',
+          actionable: true,
+          actionSteps: [],
+          appliedCount: 0,
+          relatedInsights: [],
+          relatedPrinciples: [],
+          evolutionHistory: [],
+          currentRelevance: 8,
+        });
+      } else if (modalType === 'principle') {
+        await wisdomRepository.addPrinciple({
+          timestamp: now,
+          name: (data.name || 'Untitled Principle').trim(),
+          description: (data.description || '').trim(),
+          category: 'life',
+          importance: 8,
+          originStory: 'Captured in Wisdom Dashboard',
+          supportingInsights: [],
+          applicationAreas: [],
+          personalInterpretation: (data.description || '').trim(),
+          active: true,
+          lastApplied: now,
+        });
+      } else if (modalType === 'quote') {
+        await wisdomRepository.addQuote({
+          timestamp: now,
+          content: (data.content || '').trim(),
+          source: (data.attribution || 'Unknown').trim(),
+          attribution: (data.attribution || 'Unknown').trim(),
+          category: 'wisdom',
+          tags: [],
+          resonance: 8,
+          personalMeaning: '',
+          context: '',
+          emotionalImpact: 7,
+          favoriteCount: 0,
+          relatedInsights: [],
+          relatedPrinciples: [],
+        });
+      } else if (modalType === 'story') {
+        await wisdomRepository.addStory({
+          timestamp: now,
+          title: (data.title || 'Untitled Story').trim(),
+          narrative: (data.narrative || '').trim(),
+          genre: 'learning',
+          emotionalArc: {
+            startEmotion: 'curious',
+            endEmotion: 'grounded',
+            journey: [],
+            climax: { emotion: 'clarity', intensity: 7, context: '', trigger: '', timestamp: Date.now() },
+            resolution: { emotion: 'peace', intensity: 8, context: '', trigger: '', timestamp: Date.now() },
+          },
+          timeSpan: { startDate: now, endDate: now, period: 'moment' },
+          characters: [],
+          themes: [],
+          lifeLessons: [],
+          personalGrowth: '',
+          turningPoints: [],
+          narrativeStyle: { perspective: 'first', tone: 'reflective', pacing: 'moderate', structure: 'linear' },
+          sharingLevel: 'private',
+        });
+      } else if (modalType === 'lesson') {
+        await wisdomRepository.addLifeLesson({
+          timestamp: now,
+          title: (data.title || 'Untitled Lesson').trim(),
+          description: (data.description || '').trim(),
+          category: 'life',
+          difficulty: 6,
+          value: 8,
+          sourceEvent: 'Manual entry',
+          learningProcess: (data.description || '').trim(),
+          applicationAreas: [],
+          teachable: true,
+          currentUnderstanding: (data.description || '').trim(),
+        });
+      } else {
+        addToast({ type: 'error', message: `Unsupported wisdom entry type: ${modalType}` });
+        return;
+      }
+
+      addToast({ type: 'success', message: `${modalType.charAt(0).toUpperCase() + modalType.slice(1)} saved to your Wisdom Vault.` });
+      await loadWisdomData();
     } catch (error) {
-      console.error('Failed to save entry:', error);
+      addToast({
+        type: 'error',
+        message: error instanceof Error ? error.message : 'Failed to save entry.',
+      });
     }
   };
 
@@ -173,40 +269,40 @@ export function WisdomDashboard() {
           >
             <div className="surface-interactive rounded-xl p-4 hover:shadow-glow-amber">
               <div className="flex items-center gap-2 mb-2">
-                <Lightbulb className="w-4 h-4 text-amber" />
-                <span className="text-text-primary/60 text-sm">Insights</span>
+                <Lightbulb className="w-4 h-4 text-accent-amber" />
+                <span className="text-text-secondary text-sm">Insights</span>
               </div>
               <p className="text-2xl font-bold text-text-primary">{stats.totalInsights}</p>
             </div>
             
             <div className="surface-interactive rounded-xl p-4 hover:shadow-glow-emerald">
               <div className="flex items-center gap-2 mb-2">
-                <Target className="w-4 h-4 text-emerald" />
-                <span className="text-text-primary/60 text-sm">Principles</span>
+                <Target className="w-4 h-4 text-accent-emerald" />
+                <span className="text-text-secondary text-sm">Principles</span>
               </div>
               <p className="text-2xl font-bold text-text-primary">{stats.totalPrinciples}</p>
             </div>
             
             <div className="surface-interactive rounded-xl p-4 hover:shadow-glow-cyan">
               <div className="flex items-center gap-2 mb-2">
-                <Quote className="w-4 h-4 text-cyan" />
-                <span className="text-text-primary/60 text-sm">Quotes</span>
+                <Quote className="w-4 h-4 text-accent-cyan" />
+                <span className="text-text-secondary text-sm">Quotes</span>
               </div>
               <p className="text-2xl font-bold text-text-primary">{stats.totalQuotes}</p>
             </div>
             
-            <div className="surface-interactive rounded-xl p-4 hover:shadow-[0_0_40px_rgba(138,43,226,0.4)]">
+            <div className="surface-interactive rounded-xl p-4 hover:shadow-glow">
               <div className="flex items-center gap-2 mb-2">
-                <BookOpen className="w-4 h-4 text-purple" />
-                <span className="text-text-primary/60 text-sm">Stories</span>
+                <BookOpen className="w-4 h-4 text-accent-primary" />
+                <span className="text-text-secondary text-sm">Stories</span>
               </div>
               <p className="text-2xl font-bold text-text-primary">{stats.totalStories}</p>
             </div>
             
             <div className="surface-interactive rounded-xl p-4 hover:shadow-glow-rose">
               <div className="flex items-center gap-2 mb-2">
-                <Heart className="w-4 h-4 text-rose" />
-                <span className="text-text-primary/60 text-sm">Lessons</span>
+                <Heart className="w-4 h-4 text-accent-rose" />
+                <span className="text-text-secondary text-sm">Lessons</span>
               </div>
               <p className="text-2xl font-bold text-text-primary">{stats.totalLifeLessons}</p>
             </div>
@@ -214,22 +310,22 @@ export function WisdomDashboard() {
         )}
 
         {/* Tabs */}
-        <div className="flex gap-2 mb-8 border-b border-midnight-border">
-          {[
+        <div className="flex gap-2 mb-8 border-b border-midnight-border overflow-x-auto">
+          {([
             { id: 'overview', label: 'Overview', icon: Brain },
             { id: 'insights', label: 'Insights', icon: Lightbulb },
             { id: 'principles', label: 'Principles', icon: Target },
             { id: 'quotes', label: 'Quotes', icon: Quote },
             { id: 'stories', label: 'Stories', icon: BookOpen },
             { id: 'lessons', label: 'Life Lessons', icon: Heart }
-          ].map((tab) => (
+          ] as const).map((tab) => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
-              className={`flex items-center gap-2 px-4 py-3 border-b-2 transition-colors ${
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center gap-2 px-4 py-3 border-b-2 transition-colors whitespace-nowrap ${
                 activeTab === tab.id
                   ? 'border-accent-primary text-accent-primary'
-                  : 'border-transparent text-text-primary/60 hover:text-text-primary'
+                  : 'border-transparent text-text-secondary hover:text-text-primary'
               }`}
             >
               <tab.icon className="w-4 h-4" />
@@ -250,13 +346,13 @@ export function WisdomDashboard() {
             >
               {/* Personal Philosophy */}
               {wisdom.personalPhilosophy && (
-                <div className="surface-interactive rounded-xl p-6 hover:shadow-[0_0_40px_rgba(138,43,226,0.2)]">
+                <div className="surface-interactive rounded-xl p-6 hover:shadow-glow">
                   <h3 className="text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
-                    <Brain className="w-5 h-5 text-purple" />
+                    <Brain className="w-5 h-5 text-accent-primary" />
                     Personal Philosophy
                   </h3>
                   <h4 className="text-xl font-medium text-text-primary mb-2">{wisdom.personalPhilosophy.title}</h4>
-                  <p className="text-text-primary/70 mb-4">{wisdom.personalPhilosophy.description}</p>
+                  <p className="text-text-secondary mb-4">{wisdom.personalPhilosophy.description}</p>
                   
                   {wisdom.personalPhilosophy.coreBeliefs.length > 0 && (
                     <div>
@@ -265,8 +361,8 @@ export function WisdomDashboard() {
                         {wisdom.personalPhilosophy.coreBeliefs.map((belief, index) => (
                           <div key={index} className="flex items-center gap-3">
                             <div className="w-2 h-2 bg-accent-primary rounded-full" />
-                            <span className="text-text-primary/80">{belief.statement}</span>
-                            <span className="text-text-primary/60 text-sm">({belief.confidence}/10)</span>
+                            <span className="text-text-primary">{belief.statement}</span>
+                            <span className="text-text-secondary text-sm">({belief.confidence}/10)</span>
                           </div>
                         ))}
                       </div>
@@ -277,19 +373,19 @@ export function WisdomDashboard() {
 
               {/* Recent Activity */}
               {stats && stats.recentActivity.length > 0 && (
-                <div className="surface-interactive rounded-xl p-6 hover:shadow-[0_0_40px_rgba(0,242,254,0.2)]">
+                <div className="surface-interactive rounded-xl p-6 hover:shadow-glow-cyan">
                   <h3 className="text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
-                    <Clock className="w-5 h-5 text-cyan" />
+                    <Clock className="w-5 h-5 text-accent-cyan" />
                     Recent Activity
                   </h3>
                   <div className="space-y-3">
-                    {stats.recentActivity.slice(0, 5).map((activity: any, index: any) => (
+                    {stats.recentActivity.slice(0, 5).map((activity, index) => (
                       <div key={index} className="flex items-center gap-3">
                         <div className="w-2 h-2 bg-accent-primary rounded-full" />
                         <div className="flex-1">
                           <p className="text-text-primary text-sm">{activity.title}</p>
-                          <p className="text-text-primary/60 text-xs">
-                            {activity.type} • {activity.timestamp.toLocaleDateString()}
+                          <p className="text-text-secondary text-xs">
+                            {activity.type} • {new Date(activity.timestamp).toLocaleDateString()}
                           </p>
                         </div>
                       </div>
@@ -311,7 +407,7 @@ export function WisdomDashboard() {
               <div className="glass-card rounded-xl p-6">
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-lg font-semibold text-text-primary flex items-center gap-2">
-                    <Lightbulb className="w-5 h-5 text-amber" />
+                    <Lightbulb className="w-5 h-5 text-accent-amber" />
                     Personal Insights
                   </h3>
                   <button onClick={() => { setModalType('insight'); setShowModal(true); }} className="btn btn-primary flex items-center gap-2">
@@ -323,11 +419,11 @@ export function WisdomDashboard() {
                 {wisdom.insights.length > 0 ? (
                   <div className="space-y-4">
                     {wisdom.insights.map((insight) => (
-                      <div key={insight.id} className="border-l-4 border-amber/50 pl-4">
+                      <div key={insight.id} className="border-l-4 border-accent-amber/50 pl-4">
                         <h4 className="text-text-primary font-medium mb-2">{insight.title}</h4>
                         <p className="text-text-primary/70 mb-3">{insight.description}</p>
                         <div className="flex items-center gap-4 text-sm">
-                          <span className="text-amber capitalize">{insight.category}</span>
+                          <span className="text-accent-amber capitalize">{insight.category}</span>
                           <span className="text-text-primary/60">Depth: {insight.depth}/10</span>
                           <span className="text-text-primary/60">Relevance: {insight.currentRelevance}/10</span>
                         </div>
@@ -355,7 +451,7 @@ export function WisdomDashboard() {
               <div className="glass-card rounded-xl p-6">
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-lg font-semibold text-text-primary flex items-center gap-2">
-                    <Target className="w-5 h-5 text-emerald" />
+                    <Target className="w-5 h-5 text-accent-emerald" />
                     Personal Principles
                   </h3>
                   <button onClick={() => { setModalType('principle'); setShowModal(true); }} className="btn btn-primary flex items-center gap-2">
@@ -371,7 +467,7 @@ export function WisdomDashboard() {
                         <h4 className="text-text-primary font-medium mb-2">{principle.name}</h4>
                         <p className="text-text-primary/70 text-sm mb-3">{principle.description}</p>
                         <div className="flex items-center gap-4 text-sm">
-                          <span className="text-emerald capitalize">{principle.category}</span>
+                          <span className="text-accent-emerald capitalize">{principle.category}</span>
                           <span className="text-text-primary/60">Importance: {principle.importance}/10</span>
                         </div>
                       </div>
@@ -398,7 +494,7 @@ export function WisdomDashboard() {
               <div className="glass-card rounded-xl p-6">
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-lg font-semibold text-text-primary flex items-center gap-2">
-                    <Quote className="w-5 h-5 text-cyan" />
+                    <Quote className="w-5 h-5 text-accent-cyan" />
                     Meaningful Quotes
                   </h3>
                   <button onClick={() => { setModalType('quote'); setShowModal(true); }} className="btn btn-primary flex items-center gap-2">
@@ -410,14 +506,14 @@ export function WisdomDashboard() {
                 {wisdom.quotes.length > 0 ? (
                   <div className="space-y-4">
                     {wisdom.quotes.map((quote) => (
-                      <div key={quote.id} className="border-l-4 border-cyan/50 pl-4">
+                      <div key={quote.id} className="border-l-4 border-accent-cyan/50 pl-4">
                         <blockquote className="text-text-primary text-lg mb-2">"{quote.content}"</blockquote>
                         <p className="text-text-primary/60 mb-2">— {quote.attribution}</p>
                         {quote.personalMeaning && (
                           <p className="text-text-primary/70 text-sm italic">{quote.personalMeaning}</p>
                         )}
                         <div className="flex items-center gap-4 text-sm mt-2">
-                          <span className="text-cyan">{quote.category}</span>
+                          <span className="text-accent-cyan">{quote.category}</span>
                           <span className="text-text-primary/60">Resonance: {quote.resonance}/10</span>
                         </div>
                       </div>
@@ -444,7 +540,7 @@ export function WisdomDashboard() {
               <div className="glass-card rounded-xl p-6">
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-lg font-semibold text-text-primary flex items-center gap-2">
-                    <BookOpen className="w-5 h-5 text-purple" />
+                    <BookOpen className="w-5 h-5 text-accent-primary" />
                     Personal Stories
                   </h3>
                   <button onClick={() => { setModalType('story'); setShowModal(true); }} className="btn btn-primary flex items-center gap-2">
@@ -459,7 +555,7 @@ export function WisdomDashboard() {
                       <h4 className="text-text-primary font-medium mb-2">{wisdom.stories.title}</h4>
                       <p className="text-text-primary/70 text-sm mb-3 line-clamp-3">{wisdom.stories.narrative}</p>
                       <div className="flex items-center gap-4 text-sm">
-                        <span className="text-purple capitalize">{wisdom.stories.genre}</span>
+                        <span className="text-accent-primary capitalize">{wisdom.stories.genre}</span>
                         <span className="text-text-primary/60">Sharing: {wisdom.stories.sharingLevel}</span>
                       </div>
                     </div>
@@ -485,7 +581,7 @@ export function WisdomDashboard() {
               <div className="glass-card rounded-xl p-6">
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-lg font-semibold text-text-primary flex items-center gap-2">
-                    <Heart className="w-5 h-5 text-rose" />
+                    <Heart className="w-5 h-5 text-accent-rose" />
                     Life Lessons
                   </h3>
                   <button onClick={() => { setModalType('lesson'); setShowModal(true); }} className="btn btn-primary flex items-center gap-2">
@@ -501,7 +597,7 @@ export function WisdomDashboard() {
                         <h4 className="text-text-primary font-medium mb-2">{lesson.title}</h4>
                         <p className="text-text-primary/70 text-sm mb-3">{lesson.description}</p>
                         <div className="flex items-center gap-4 text-sm">
-                          <span className="text-rose">{lesson.category}</span>
+                          <span className="text-accent-rose">{lesson.category}</span>
                           <span className="text-text-primary/60">Value: {lesson.value}/10</span>
                           <span className="text-text-primary/60">Difficulty: {lesson.difficulty}/10</span>
                         </div>

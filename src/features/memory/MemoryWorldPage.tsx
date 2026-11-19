@@ -29,9 +29,11 @@ import {
   List
 } from 'lucide-react';
 import { useMomentsStore, useStoriesStore } from '@/store';
+import { useToastStore } from '@/store/toastStore';
 import type { Moment } from '@/types/models';
 
 export default function MemoryWorldPage() {
+  const addToast = useToastStore((s) => s.addToast);
   const { 
     moments, 
     loading, 
@@ -44,7 +46,7 @@ export default function MemoryWorldPage() {
     getMomentsByMood
   } = useMomentsStore();
 
-  const { stories } = useStoriesStore();
+  const { stories, loadStories } = useStoriesStore();
 
   const [activeRealm, setActiveRealm] = useState<'timeline' | 'gallery' | 'emotional' | 'journal'>('timeline');
   const [searchQuery, setSearchQuery] = useState('');
@@ -54,6 +56,7 @@ export default function MemoryWorldPage() {
   const [editingMoment, setEditingMoment] = useState<Moment | null>(null);
   const [showAddMoment, setShowAddMoment] = useState(false);
   const [memoryResurface, setMemoryResurface] = useState<Moment | null>(null);
+  const [pendingDeleteMomentId, setPendingDeleteMomentId] = useState<string | null>(null);
 
   const [newMoment, setNewMoment] = useState<Partial<Moment>>({
     storyId: '',
@@ -65,18 +68,22 @@ export default function MemoryWorldPage() {
   });
 
   useEffect(() => {
-    loadMoments();
-    // Generate memory resurface
-    generateMemoryResurface();
-  }, [loadMoments]);
+    void loadMoments();
+    void loadStories();
+  }, [loadMoments, loadStories]);
 
   const generateMemoryResurface = () => {
     if (moments.length > 0) {
-      const today = new Date();
       const randomMemory = moments[Math.floor(Math.random() * moments.length)];
       setMemoryResurface(randomMemory || null);
     }
   };
+
+  useEffect(() => {
+    if (moments.length > 0 && !memoryResurface) {
+      generateMemoryResurface();
+    }
+  }, [moments, memoryResurface]);
 
   const handleAddMomentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -85,6 +92,7 @@ export default function MemoryWorldPage() {
       ...newMoment,
       date: new Date().toISOString()
     } as Omit<Moment, 'id'>);
+    addToast({ type: 'success', message: 'Memory saved to your vault.' });
     setShowAddMoment(false);
     setNewMoment({
       storyId: '',
@@ -102,9 +110,15 @@ export default function MemoryWorldPage() {
     setEditingMoment(null);
   };
 
-  const handleDeleteMoment = async (momentId: string) => {
-    if (!confirm('Are you sure you want to delete this memory?')) return;
-    await deleteMoment(momentId);
+  const handleDeleteMoment = (momentId: string) => {
+    setPendingDeleteMomentId(momentId);
+  };
+
+  const confirmDeleteMoment = async () => {
+    if (!pendingDeleteMomentId) return;
+    await deleteMoment(pendingDeleteMomentId);
+    setPendingDeleteMomentId(null);
+    addToast({ type: 'success', message: 'Memory deleted.' });
   };
 
   const handleTogglePrivacy = async (moment: Moment) => {
@@ -185,7 +199,7 @@ export default function MemoryWorldPage() {
     return (
       <div className="min-h-screen bg-gradient-midnight flex items-center justify-center">
         <div className="surface-elevated p-8 rounded-card text-center max-w-md">
-          <p className="text-rose mb-4">Error: {error}</p>
+          <p className="text-accent-rose mb-4">Error: {error}</p>
           <button onClick={loadMoments} className="btn btn-primary">
             Try Again
           </button>
@@ -258,15 +272,15 @@ export default function MemoryWorldPage() {
         <FadeIn>
         <div className="glass-card rounded-card p-1.5 mb-page">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-1">
-            {[
+            {([
               { id: 'timeline', label: 'Smriti Timeline', icon: <GitBranch className="w-4 h-4" /> },
               { id: 'gallery', label: 'Moments Gallery', icon: <MessageSquare className="w-4 h-4" /> },
               { id: 'emotional', label: 'Emotional Map', icon: <Heart className="w-4 h-4" /> },
               { id: 'journal', label: 'Life Journal', icon: <BookOpen className="w-4 h-4" /> }
-            ].map((realm) => (
+            ] as const).map((realm) => (
               <button
                 key={realm.id}
-                onClick={() => setActiveRealm(realm.id as any)}
+                onClick={() => setActiveRealm(realm.id)}
                 className={`relative p-3 rounded-[12px] transition-colors duration-300 flex flex-col items-center gap-2 ${
                   activeRealm === realm.id
                     ? 'text-white'
@@ -384,7 +398,7 @@ export default function MemoryWorldPage() {
 
                 {loading ? (
                   <div className="flex justify-center py-12">
-                    <div className="w-8 h-8 border-2 border-cyan border-t-transparent rounded-full animate-spin" />
+                    <div className="w-8 h-8 border-2 border-accent-cyan border-t-transparent rounded-full animate-spin" />
                   </div>
                 ) : filteredMoments.length === 0 ? (
                   <div className="text-center py-12">
@@ -442,7 +456,7 @@ export default function MemoryWorldPage() {
                                         </span>
                                       )}
                                       {moment.isPrivate && (
-                                        <span className="flex items-center gap-1 text-amber">
+                                        <span className="flex items-center gap-1 text-accent-amber">
                                           <EyeOff className="w-3 h-3" />
                                           <span className="text-caption">Private</span>
                                         </span>
@@ -458,7 +472,7 @@ export default function MemoryWorldPage() {
                                       </button>
                                       <button
                                         onClick={() => handleDeleteMoment(moment.id)}
-                                        className="btn btn-ghost p-2 text-rose hover:bg-rose/10"
+                                        className="btn btn-ghost p-2 text-accent-rose hover:bg-accent-rose/10"
                                         aria-label="Delete memory"
                                       >
                                         <Trash2 className="w-4 h-4" />
@@ -529,7 +543,7 @@ export default function MemoryWorldPage() {
 
                 {loading ? (
                   <div className="flex justify-center py-12">
-                    <div className="w-8 h-8 border-2 border-cyan border-t-transparent rounded-full animate-spin" />
+                    <div className="w-8 h-8 border-2 border-accent-cyan border-t-transparent rounded-full animate-spin" />
                   </div>
                 ) : filteredMoments.length === 0 ? (
                   <div className="text-center py-12">
@@ -562,7 +576,7 @@ export default function MemoryWorldPage() {
                                 </span>
                               )}
                               {moment.isPrivate && (
-                                <span className="flex items-center gap-1 text-amber">
+                                <span className="flex items-center gap-1 text-accent-amber">
                                   <EyeOff className="w-3 h-3" />
                                   <span className="text-caption">Private</span>
                                 </span>
@@ -578,7 +592,7 @@ export default function MemoryWorldPage() {
                               </button>
                               <button
                                 onClick={() => handleDeleteMoment(moment.id)}
-                                className="btn btn-ghost p-2 text-rose hover:bg-rose/10"
+                                className="btn btn-ghost p-2 text-accent-rose hover:bg-accent-rose/10"
                                 aria-label="Delete memory"
                               >
                                 <Trash2 className="w-4 h-4" />
@@ -620,7 +634,7 @@ export default function MemoryWorldPage() {
 
                 {loading ? (
                   <div className="flex justify-center py-12">
-                    <div className="w-8 h-8 border-2 border-cyan border-t-transparent rounded-full animate-spin" />
+                    <div className="w-8 h-8 border-2 border-accent-cyan border-t-transparent rounded-full animate-spin" />
                   </div>
                 ) : moments.length === 0 ? (
                   <div className="text-center py-12">
@@ -853,6 +867,39 @@ export default function MemoryWorldPage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Delete Memory Confirmation */}
+      {pendingDeleteMomentId && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="delete-moment-title"
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          onClick={() => setPendingDeleteMomentId(null)}
+        >
+          <div
+            className="surface-elevated border border-midnight-border rounded-card max-w-md w-full p-6 space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 id="delete-moment-title" className="heading-3 text-primary">Delete Memory?</h3>
+            <p className="text-small text-secondary">
+              This memory and its reflection will be permanently removed from your local archive.
+            </p>
+            <div className="flex justify-end gap-3 pt-2">
+              <button type="button" onClick={() => setPendingDeleteMomentId(null)} className="btn btn-secondary">
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => void confirmDeleteMoment()}
+                className="btn btn-secondary text-accent-rose border-accent-rose hover:bg-accent-rose/10"
+              >
+                Delete Memory
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

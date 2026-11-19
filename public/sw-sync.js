@@ -14,12 +14,8 @@ self.addEventListener('sync', (event) => {
         }
 
         if (!handledByClient) {
-          // If no client is open, we would ideally need to read IndexedDB and post to Firebase directly from the SW.
-          // However, bringing the entire Firebase SDK into the Service Worker is very heavy.
-          // Since the prompt is to "make sure regular offline sink is working", 
-          // the fact that we try to wake up any background clients is a massive improvement.
-          // For a true headless sync, we would implement the REST calls here.
-          console.log('[Service Worker] Katha Sync triggered, but no open clients found to process it.');
+          // No open window clients found; pending outbox mutations remain queued in IndexedDB
+          // and flush automatically the next time a Katha client opens online.
         }
       })()
     );

@@ -4,6 +4,9 @@ import userEvent from '@testing-library/user-event';
 import { render } from '@/test/utils/testUtils';
 import { mockLocalStorage } from '@/test/utils/testUtils';
 import AddStoryPage from '@/features/story/AddStoryPage';
+import { useToastStore } from '@/store/toastStore';
+
+const addToastMock = vi.fn();
 
 // Mock the router
 vi.mock('react-router-dom', async () => {
@@ -32,6 +35,7 @@ describe('Add Story Flow Integration', () => {
     user = userEvent.setup();
     mockLocalStorage();
     vi.clearAllMocks();
+    useToastStore.setState({ addToast: addToastMock, toasts: [] });
   });
 
   it('renders the first step of the wizard successfully', async () => {
@@ -44,17 +48,16 @@ describe('Add Story Flow Integration', () => {
 
   it('validates required fields on step 1 before continuing', async () => {
     render(<AddStoryPage />);
-    
-    // Mock window alert
-    const alertMock = vi.spyOn(window, 'alert').mockImplementation(() => {});
 
     // Try to continue without filling fields
     const continueBtn = screen.getByRole('button', { name: /Continue/i });
     await user.click(continueBtn);
 
-    // Should alert
-    expect(alertMock).toHaveBeenCalledWith('Title is required');
-    alertMock.mockRestore();
+    // Should notify via in-app toast rather than blocking browser alert
+    expect(addToastMock).toHaveBeenCalledWith({
+      type: 'error',
+      message: 'Title is required'
+    });
   });
 
   it('navigates to step 2 after filling step 1', async () => {

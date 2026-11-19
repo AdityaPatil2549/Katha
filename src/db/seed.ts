@@ -276,6 +276,4 @@ export async function seedIfEmpty() {
     await db.knowledge.bulkAdd(knowledge);
     await db.timeline.bulkAdd(timeline);
   });
-
-  console.log('Database seeded with sample data');
 }

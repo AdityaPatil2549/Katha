@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
 import {
   Sparkles, Brain, Heart, Target, BookOpen, Users, Compass,
-  ArrowRight, ArrowLeft, Check, X, Play, Settings, HelpCircle,
-  Lightbulb, Shield, User, Zap, Star, Film, TrendingUp,
+  ArrowRight, ArrowLeft, Check, X, Play, HelpCircle,
+  Lightbulb, Shield, User, Zap, Star, TrendingUp,
 } from 'lucide-react';
 
 const steps = [
@@ -89,7 +88,6 @@ export function UserOnboarding() {
   const [currentStep, setCurrentStep] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
   const [username, setUsername] = useState('');
-  const navigate = useNavigate();
 
   useEffect(() => {
     const done = localStorage.getItem('smriti-onboarding-completed');
@@ -116,6 +114,17 @@ export function UserOnboarding() {
     setIsVisible(false);
   };
 
+  useEffect(() => {
+    if (!isVisible) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        handleComplete();
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  });
+
   if (!isVisible) return <></>;
 
   const step = steps[currentStep];
@@ -126,11 +135,13 @@ export function UserOnboarding() {
     <AnimatePresence>
       <motion.div
         key="overlay"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="onboarding-step-title"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-hidden"
-        style={{ background: 'rgba(4,5,12,0.85)', backdropFilter: 'blur(32px)' }}
+        className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 overflow-hidden bg-midnight-bg/85 backdrop-blur-2xl"
       >
         {/* Cinematic ambient background */}
         <div
@@ -153,8 +164,8 @@ export function UserOnboarding() {
             backdropFilter: 'blur(20px)'
           }}
         >
-          {/* ─── LEFT PANEL ─── */}
-          <div className="relative w-[240px] flex-shrink-0 flex flex-col items-center justify-between py-12 px-6 overflow-hidden bg-black/40">
+          {/* ─── LEFT PANEL (Desktop Only) ─── */}
+          <div className="relative hidden md:flex w-[240px] flex-shrink-0 flex-col items-center justify-between py-12 px-6 overflow-hidden bg-black/40">
             {/* Left panel subtle cinematic gradient */}
             <motion.div
               key={`bg-${currentStep}`}
@@ -175,10 +186,9 @@ export function UserOnboarding() {
             <div className="relative flex flex-col items-center gap-3">
               <div className="w-16 h-16 relative group flex items-center justify-center">
                 <div className="absolute inset-0 bg-gradient-to-br from-violet-500/30 to-fuchsia-500/30 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
-                <img src="/icons/logo-dark.png" alt="Katha" className="w-full h-full object-contain logo-dark drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]" />
-                <img src="/icons/logo-light.png" alt="Katha" className="w-full h-full object-contain logo-light drop-shadow-[0_0_15px_rgba(0,0,0,0.1)]" />
+                <img src="/icons/logo-dark.png" alt="Katha" className="w-full h-full object-contain drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]" />
               </div>
-              <span className="text-white/40 text-[10px] font-bold tracking-[0.3em] uppercase">Katha</span>
+              <span className="text-white/50 text-xs font-bold tracking-[0.3em] uppercase">Katha</span>
             </div>
 
             {/* Center: large step icon */}
@@ -233,6 +243,8 @@ export function UserOnboarding() {
               {steps.map((s, i) => (
                 <motion.button
                   key={s.id}
+                  type="button"
+                  aria-label={`Go to step ${i + 1}: ${s.title}`}
                   onClick={() => setCurrentStep(i)}
                   animate={{
                     height: i === currentStep ? 28 : 8,
@@ -258,18 +270,29 @@ export function UserOnboarding() {
             />
 
             {/* Top bar */}
-            <div className="flex items-center justify-between px-10 pt-8 pb-2 relative z-10 flex-shrink-0">
-              <div className="text-white/40 text-[10px] font-bold tracking-[0.25em] uppercase">Step {currentStep + 1} of {steps.length}</div>
-              <button
-                onClick={handleComplete}
-                className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/40 hover:text-white transition-all border border-white/5"
-              >
-                <X className="w-4 h-4" />
-              </button>
+            <div className="flex items-center justify-between px-6 sm:px-10 pt-6 sm:pt-8 pb-2 relative z-10 flex-shrink-0">
+              <div className="text-white/60 text-xs font-bold tracking-[0.25em] uppercase">Step {currentStep + 1} of {steps.length}</div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleComplete}
+                  className="px-3 py-1.5 rounded-full text-xs font-semibold text-white/70 hover:text-white hover:bg-white/10 transition-colors"
+                >
+                  Skip Tour
+                </button>
+                <button
+                  type="button"
+                  aria-label="Close onboarding tour"
+                  onClick={handleComplete}
+                  className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/60 hover:text-white transition-all border border-white/10"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
             </div>
 
             {/* Gradient accent line */}
-            <div className="px-10 relative z-10 flex-shrink-0">
+            <div className="px-6 sm:px-10 relative z-10 flex-shrink-0">
               <motion.div
                 key={`line-${currentStep}`}
                 initial={{ scaleX: 0, opacity: 0 }}
@@ -287,7 +310,7 @@ export function UserOnboarding() {
             </div>
 
             {/* Content area */}
-            <div className="flex-1 overflow-y-auto px-10 py-8 relative z-10 scrollbar-hide min-h-0">
+            <div className="flex-1 overflow-y-auto px-6 sm:px-10 py-6 sm:py-8 relative z-10 scrollbar-hide min-h-0">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={currentStep}
@@ -299,10 +322,10 @@ export function UserOnboarding() {
                 >
                   {/* Title */}
                   <div className="mb-8 flex-shrink-0">
-                    <h2 className="font-sans tracking-tight text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white to-white/60 mb-3 drop-shadow-lg leading-tight">
+                    <h2 id="onboarding-step-title" className="font-serif tracking-tight text-3xl sm:text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white to-white/75 mb-3 drop-shadow-lg leading-tight">
                       {step.title}
                     </h2>
-                    <p className="text-white/60 text-base font-medium tracking-wide">{step.subtitle}</p>
+                    <p className="text-white/70 text-base font-medium tracking-wide">{step.subtitle}</p>
                   </div>
 
                   {/* Step-specific content */}

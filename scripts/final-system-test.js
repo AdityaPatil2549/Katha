@@ -8,6 +8,7 @@
 import fs from 'fs';
 import path from 'path';
 import { execSync } from 'child_process';
+import { pathToFileURL } from 'url';
 
 // Test configuration
 const TEST_CONFIG = {
@@ -30,7 +31,7 @@ class FinalSystemTester {
     log(message, type = 'info') {
         const timestamp = new Date().toISOString();
         const prefix = `[${timestamp}] [${type.toUpperCase()}]`;
-        console.log(`${prefix} ${message}`);
+        process.stdout.write(`${prefix} ${message}\n`);
     }
 
     logError(message) {
@@ -105,7 +106,7 @@ class FinalSystemTester {
             const requiredDeps = ['react', 'react-dom', 'typescript', 'vite'];
 
             for (const dep of requiredDeps) {
-                if (!packageJson.dependencies ? .[dep] && !packageJson.devDependencies ? .[dep]) {
+                if (!packageJson.dependencies?.[dep] && !packageJson.devDependencies?.[dep]) {
                     throw new Error(`Required dependency missing: ${dep}`);
                 }
             }
@@ -199,10 +200,11 @@ class FinalSystemTester {
 
                     // Validate specific data structures
                     if (file === 'atlas-core-v1.json') {
-                        if (!Array.isArray(parsed)) {
-                            throw new Error('atlas-core-v1.json should be an array');
+                        const entries = Array.isArray(parsed) ? parsed : parsed?.entries;
+                        if (!Array.isArray(entries)) {
+                            throw new Error('atlas-core-v1.json should contain an entries array');
                         }
-                        results[file].entryCount = parsed.length;
+                        results[file].entryCount = entries.length;
                     }
 
                 } catch (error) {
@@ -618,7 +620,7 @@ class FinalSystemTester {
 }
 
 // Run tests if called directly
-if (require.main === module) {
+if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
     const tester = new FinalSystemTester();
     tester.runAllTests()
         .then(report => {
@@ -630,4 +632,4 @@ if (require.main === module) {
         });
 }
 
-module.exports = FinalSystemTester;
+export default FinalSystemTester;

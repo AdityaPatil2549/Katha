@@ -24,7 +24,7 @@ import {
   Medal,
   Gem
 } from 'lucide-react';
-import { useStoriesStore, useMomentsStore } from '@/store';
+import { useStoriesStore, useMomentsStore, useSessionsStore } from '@/store';
 
 interface Achievement {
   id: string;
@@ -43,19 +43,34 @@ interface Achievement {
 }
 
 export default function AchievementsSystem() {
-  const { stories } = useStoriesStore();
-  const momentsStore: any = useMomentsStore();
-  const { moments, sessions = [] } = momentsStore;
+  const { stories, loadStories } = useStoriesStore();
+  const { moments, loadMoments } = useMomentsStore();
+  const { sessions, loadSessions } = useSessionsStore();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [showUnlocked, setShowUnlocked] = useState(false);
+
+  useEffect(() => {
+    void loadStories();
+    void loadMoments();
+    void loadSessions();
+  }, [loadStories, loadMoments, loadSessions]);
 
   // Calculate user stats
   const userStats = useMemo(() => {
     const completedStories = stories.filter(s => s.status === 'completed').length;
     const totalMoments = moments.length;
     const totalSessions = sessions.length;
-    const activeDays = new Set(sessions.map((s: any) => s.date?.toDateString?.() || '')).size;
-    const uniqueGenres = new Set(stories.map(s => s.genre).filter(Boolean)).size;
+    const activeDays = new Set(
+      sessions
+        .map((s) => {
+          const parsed = new Date(s.date);
+          return Number.isNaN(parsed.getTime()) ? '' : parsed.toDateString();
+        })
+        .filter(Boolean)
+    ).size;
+    const uniqueGenres = new Set(
+      stories.flatMap(s => (Array.isArray(s.genre) ? s.genre : s.genre ? [s.genre] : [])).filter(Boolean)
+    ).size;
     const highRatedStories = stories.filter(s => s.rating && s.rating >= 8).length;
     
     return {
@@ -487,7 +502,7 @@ export default function AchievementsSystem() {
                         </div>
                         
                         {!isLocked && (
-                          <div className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border ${config.border} ${config.text} bg-midnight-bg/40`}>
+                          <div className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest border ${config.border} ${config.text} bg-midnight-bg/40`}>
                             {achievement.rarity}
                           </div>
                         )}
@@ -504,13 +519,13 @@ export default function AchievementsSystem() {
                       
                       {/* Progress Bar */}
                       <div className="mt-auto">
-                        <div className="flex justify-between text-[10px] font-bold tracking-wider uppercase text-text-muted mb-2">
+                        <div className="flex justify-between text-xs font-bold tracking-wider uppercase text-text-muted mb-2">
                           <span>Progress</span>
                           <span className={isLocked ? 'text-text-muted' : config.text}>
                             {achievement.progress} / {achievement.requirement.value}
                           </span>
                         </div>
-                        <div className="w-full bg-midnight-surface rounded-full h-1.5 overflow-hidden border border-white/5">
+                        <div className="w-full bg-midnight-surface rounded-full h-1.5 overflow-hidden border border-midnight-border">
                           <motion.div
                             className={`h-full ${isLocked ? 'bg-white/30' : config.progress}`}
                             initial={{ width: 0 }}

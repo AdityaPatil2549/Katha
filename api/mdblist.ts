@@ -1,74 +1,47 @@
 import { checkRateLimit, rateLimitResponse } from './_lib/rate-limit';
-export const config = {
-  runtime: 'edge',
-};
+import { jsonResponse } from './_lib/proxy';
+
+export const config = { runtime: 'edge' };
+
+const SAFE_ID_PATTERN = /^[a-zA-Z0-9_-]{1,32}$/;
 
 export default async function handler(req: Request) {
+  const limitCheck = checkRateLimit(req, 60, 60);
+  if (!limitCheck.success) return rateLimitResponse(limitCheck.ip, 60);
+
+  const MDBLIST_API_KEY = process.env.MDBLIST_API_KEY;
+  if (!MDBLIST_API_KEY) return jsonResponse({ error: 'MDBLIST API key not configured' }, 500);
+
+  const url = new URL(req.url);
+  const id = url.searchParams.get('id');
+  const m = url.searchParams.get('m');
+  const t = url.searchParams.get('t');
+
+  if (!id && !m && !t) return jsonResponse({ error: 'Missing id parameters' }, 400);
+
+  const targetUrl = new URL('https://mdblist.com/api/');
+  targetUrl.searchParams.set('apikey', MDBLIST_API_KEY);
+
+  if (m && SAFE_ID_PATTERN.test(m)) {
+    targetUrl.searchParams.set('tm', m);
+  } else if (t && SAFE_ID_PATTERN.test(t)) {
+    targetUrl.searchParams.set('tv', t);
+  } else if (id && SAFE_ID_PATTERN.test(id)) {
+    targetUrl.searchParams.set(id.startsWith('tt') ? 'i' : 'tm', id);
+  } else {
+    return jsonResponse({ error: 'Invalid id format' }, 400);
+  }
+
   try {
-    const limitCheck = checkRateLimit(req, 60, 60); // 60 requests per 60s
-    if (!limitCheck.success) return rateLimitResponse(limitCheck.ip);
-
-    const url = new URL(req.url);
-    const MDBLIST_API_KEY = process.env.MDBLIST_API_KEY;
-
-    if (!MDBLIST_API_KEY) {
-      return new Response(JSON.stringify({ error: 'MDBLIST API key not configured' }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
-
-    const id = url.searchParams.get('id'); // e.g. tt0111161 or tmdb ID
-    const m = url.searchParams.get('m'); // tmdb id can be passed as m
-    const t = url.searchParams.get('t'); // tvdb id can be passed as t
-
-    if (!id && !m && !t) {
-      return new Response(JSON.stringify({ error: 'Missing id parameters' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
-
-    // Determine the query parameter based on the type of ID provided
-    let queryParam = '';
-    if (id) {
-      // If it starts with tt, it's an imdb id
-      if (id.startsWith('tt')) {
-        queryParam = `i=${id}`;
-      } else {
-        // MDBList takes 'm' for TMDB movie/tv id, or we just pass the IMDB id
-        queryParam = `tm=${id}`; // Note: mdblist uses tm= for tmdb id
-      }
-    }
-    
-    // Fallbacks if specified explicitly
-    if (m) queryParam = `tm=${m}`;
-    if (t) queryParam = `tv=${t}`;
-
-    const targetUrl = `https://mdblist.com/api/?apikey=${MDBLIST_API_KEY}&${queryParam}`;
-
-    const response = await fetch(targetUrl);
-    const data = await response.json();
-    
+    const response = await fetch(targetUrl.toString());
+    const data = (await response.json()) as { response?: string; error?: unknown };
     if (data.response === 'False' || data.error) {
-      return new Response(JSON.stringify(data), {
-        status: 404,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return jsonResponse(data, 404, 'no-store');
     }
-
-    return new Response(JSON.stringify(data), {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/json',
-        'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=43200',
-      },
-    });
+    const cacheControl = response.ok ? 'public, s-maxage=86400, stale-while-revalidate=43200' : 'no-store';
+    return jsonResponse(data, response.status, cacheControl);
   } catch (error) {
     console.error('MDBList Proxy Error:', error);
-    return new Response(JSON.stringify({ error: 'Internal Server Error' }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return jsonResponse({ error: 'Internal Server Error' }, 500, 'no-store');
   }
 }

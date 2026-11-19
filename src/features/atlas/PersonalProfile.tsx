@@ -158,11 +158,11 @@ export function PersonalProfile() {
   ];
 
   const moods = [
-    { value: 'terrible', label: 'Terrible', color: 'text-rose' },
-    { value: 'bad', label: 'Bad', color: 'text-orange' },
-    { value: 'neutral', label: 'Neutral', color: 'text-yellow' },
-    { value: 'good', label: 'Good', color: 'text-emerald' },
-    { value: 'excellent', label: 'Excellent', color: 'text-cyan' }
+    { value: 'terrible', label: 'Terrible', color: 'text-accent-rose' },
+    { value: 'bad', label: 'Bad', color: 'text-accent-amber' },
+    { value: 'neutral', label: 'Neutral', color: 'text-accent-amber' },
+    { value: 'good', label: 'Good', color: 'text-accent-emerald' },
+    { value: 'excellent', label: 'Excellent', color: 'text-accent-cyan' }
   ];
 
   const categories = [
@@ -354,7 +354,7 @@ export function PersonalProfile() {
 
               <div className="surface-elevated rounded-xl p-6">
                 <h3 className="text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
-                  <TrendingUp className="w-5 h-5 text-emerald" />
+                  <TrendingUp className="w-5 h-5 text-accent-emerald" />
                   Quick Stats
                 </h3>
                 
@@ -395,7 +395,7 @@ export function PersonalProfile() {
             >
               <div className="surface-elevated rounded-xl p-6">
                 <h3 className="text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
-                  <Heart className="w-5 h-5 text-rose" />
+                  <Heart className="w-5 h-5 text-accent-rose" />
                   Emotional Intelligence
                 </h3>
                 
@@ -494,7 +494,7 @@ export function PersonalProfile() {
             >
               <div className="surface-elevated rounded-xl p-6">
                 <h3 className="text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
-                  <BookOpen className="w-5 h-5 text-cyan" />
+                  <BookOpen className="w-5 h-5 text-accent-cyan" />
                   Story Preferences
                 </h3>
                 
@@ -550,7 +550,11 @@ export function PersonalProfile() {
                     {isEditing ? (
                       <Dropdown
                         value={profile.storyPreferences.preferredLength}
-                        onChange={(val) => updateStoryPreferences({ preferredLength: val as any })}
+                        onChange={(val) =>
+                          updateStoryPreferences({
+                            preferredLength: val as 'short' | 'medium' | 'long',
+                          })
+                        }
                         options={lengths}
                       />
                     ) : (
@@ -596,7 +600,7 @@ export function PersonalProfile() {
             >
               <div className="surface-elevated rounded-xl p-6">
                 <h3 className="text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
-                  <Brain className="w-5 h-5 text-purple" />
+                  <Brain className="w-5 h-5 text-accent-primary" />
                   Learning Profile
                 </h3>
                 

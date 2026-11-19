@@ -28,7 +28,7 @@ export class KathaDb extends Dexie {
     userId: string;
     table: string;
     action: 'CREATE' | 'UPDATE' | 'DELETE';
-    data: any;
+    data: Record<string, unknown>;
     timestamp: number;
   }, string>;
 
@@ -85,7 +85,7 @@ export class KathaDb extends Dexie {
     });
 
     // Version 3: Unified Personal, Wisdom, and Atlas Databases into KathaDb
-    this.version(3).stores({
+    const v3Stores = {
       // Base
       stories: 'id, category, status, favorite, impactIndex, updatedAt, createdAt, *tags, *moods',
       moments: 'id, storyId, date, mood, isPrivate',
@@ -124,8 +124,14 @@ export class KathaDb extends Dexie {
       atlasLifePhases: 'id, phase, entryIds',
       atlasMoodMap: 'mood, recommendedEntryIds',
       atlasMeta: 'name, version, createdAt'
-    }).upgrade(tx => {
-      // Future data migrations go here
+    };
+
+    this.version(3).stores(v3Stores);
+
+    // Version 4: Index userId on syncQueue for multi-account queue isolation
+    this.version(4).stores({
+      ...v3Stores,
+      syncQueue: 'id, userId, table, timestamp',
     });
   }
 }
