@@ -80,7 +80,7 @@ export function SystemStatus({ className = '' }: SystemStatusProps) {
           ) : dbHealth === 'error' ? (
             <AlertCircle className="w-4 h-4 text-accent-rose" />
           ) : (
-            <div className="w-4 h-4 border-2 border-midnight-border border-t-accent-cyan rounded-full animate-spin" />
+            <div className="w-4 h-4 border-2 border-midnight-border border-t-accent-gold rounded-full animate-spin" />
           )}
           <span className="text-small text-text-secondary">
             Database {dbHealth === 'healthy' ? 'Ready' : dbHealth === 'error' ? 'Error' : 'Checking...'}
@@ -88,7 +88,7 @@ export function SystemStatus({ className = '' }: SystemStatusProps) {
         </div>
         <div className={`w-2 h-2 rounded-full ${
           dbHealth === 'healthy' ? 'bg-accent-emerald' : 
-          dbHealth === 'error' ? 'bg-accent-rose' : 'bg-accent-cyan'
+          dbHealth === 'error' ? 'bg-accent-rose' : 'bg-accent-gold'
         }`} />
       </div>
 
@@ -107,7 +107,7 @@ export function SystemStatus({ className = '' }: SystemStatusProps) {
           
           <div className="w-full bg-midnight-border rounded-full h-1">
             <div 
-              className="bg-accent-cyan h-full rounded-full transition-all duration-slow"
+              className="bg-accent-gold h-full rounded-full transition-all duration-slow"
               style={{ width: `${Math.min((storageQuota.used / storageQuota.quota) * 100, 100)}%` }}
             />
           </div>

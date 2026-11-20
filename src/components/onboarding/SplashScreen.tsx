@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, type Variants } from 'framer-motion';
 import { ArrowRight, BookOpen, Brain, Shield, Sparkles } from 'lucide-react';
 
 interface OnboardingScreen {
@@ -27,7 +27,7 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
       subtitle: 'Track Everything',
       description: 'Movies, anime, series, and books. Your entire entertainment universe beautifully organized in one place.',
       icon: <BookOpen className="w-8 h-8 text-white" />,
-      color: 'from-cyan-500 to-blue-600'
+      color: 'from-amber-500 to-accent-gold'
     },
     {
       id: 1,
@@ -76,13 +76,13 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
   };
 
   // ─── ANIMATION VARIANTS ───
-  const containerVariants: any = {
+  const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: { opacity: 1, transition: { duration: 1.2, ease: 'easeOut' } },
     exit: { opacity: 0, transition: { duration: 0.8, ease: 'easeInOut' } }
   };
 
-  const staggerContainer: any = {
+  const staggerContainer: Variants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
@@ -90,12 +90,12 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
     }
   };
 
-  const fadeUp: any = {
+  const fadeUp: Variants = {
     hidden: { opacity: 0, y: 30 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } }
   };
 
-  const slideVariants: any = {
+  const slideVariants: Variants = {
     enter: (direction: number) => ({ x: direction > 0 ? 80 : -80, opacity: 0, filter: 'blur(8px)' }),
     center: { x: 0, opacity: 1, filter: 'blur(0px)', transition: { duration: 0.6, ease: [0.32, 0.72, 0, 1] } },
     exit: (direction: number) => ({ x: direction < 0 ? 80 : -80, opacity: 0, filter: 'blur(8px)', transition: { duration: 0.4 } })
@@ -148,7 +148,7 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
             {/* Typography */}
             <motion.div variants={fadeUp} className="space-y-3 md:space-y-4 mb-10 md:mb-16">
               <h1 className="text-5xl md:text-6xl font-bold tracking-tight text-white mb-2">Katha</h1>
-              <p className="text-[10px] md:text-xs uppercase tracking-[0.4em] text-violet-400/80 font-semibold mb-4 md:mb-6">Powered by Smriti</p>
+              <p className="text-xs uppercase tracking-[0.3em] text-violet-400/80 font-semibold mb-4 md:mb-6">Powered by Smriti</p>
               <p className="text-base md:text-lg text-white/50 max-w-sm mx-auto font-light leading-relaxed">
                 Your personal universe of stories. <br/> Remembered forever.
               </p>
@@ -237,7 +237,7 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
             {/* Typography matching Splash Screen */}
             <div className="space-y-3 md:space-y-4 mb-10 md:mb-16">
               <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-white mb-2">{screen.title}</h1>
-              <p className="text-[10px] md:text-xs uppercase tracking-[0.4em] text-white/50 font-semibold mb-4 md:mb-6">{screen.subtitle}</p>
+              <p className="text-xs uppercase tracking-[0.3em] text-white/50 font-semibold mb-4 md:mb-6">{screen.subtitle}</p>
               <p className="text-base md:text-lg text-white/50 max-w-sm mx-auto font-light leading-relaxed">
                 {screen.description}
               </p>

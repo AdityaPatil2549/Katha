@@ -18,8 +18,8 @@ export function AtlasNavigation() {
           to="/atlas-installer"
           className="flex items-center gap-3 p-4 surface-elevated rounded-lg hover:bg-midnight-surface-hover transition-all group"
         >
-          <div className="p-2 bg-accent-cyan/15 rounded-lg group-hover:bg-accent-cyan/25 transition-colors">
-            <Database className="w-5 h-5 text-accent-cyan" />
+          <div className="p-2 bg-accent-gold/15 rounded-lg group-hover:bg-accent-gold/25 transition-colors">
+            <Database className="w-5 h-5 text-accent-gold" />
           </div>
           <div className="flex-1">
             <h3 className="text-text-primary font-medium mb-1">Install Atlas</h3>
@@ -96,8 +96,8 @@ export function AtlasNavigation() {
           to="/atlas/profile"
           className="flex items-center gap-3 p-4 surface-elevated rounded-lg hover:bg-midnight-surface-hover transition-all group"
         >
-          <div className="p-2 bg-accent-cyan/15 rounded-lg group-hover:bg-accent-cyan/25 transition-colors">
-            <User className="w-5 h-5 text-accent-cyan" />
+          <div className="p-2 bg-accent-gold/15 rounded-lg group-hover:bg-accent-gold/25 transition-colors">
+            <User className="w-5 h-5 text-accent-gold" />
           </div>
           <div className="flex-1">
             <h3 className="text-text-primary font-medium mb-1">Personal Profile</h3>

@@ -112,7 +112,7 @@ export default function LibraryPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'watching': return 'text-accent-cyan';
+      case 'watching': return 'text-accent-gold';
       case 'completed': return 'text-accent-emerald';
       case 'paused': return 'text-accent-amber';
       default: return 'text-text-muted';
@@ -164,13 +164,13 @@ export default function LibraryPage() {
           {/* Search */}
           <div className="flex-1 w-full max-w-2xl">
             <div className="relative group">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-text-muted group-focus-within:text-accent-cyan transition-colors duration-500" />
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-text-muted group-focus-within:text-accent-gold transition-colors duration-500" />
               <input
                 type="text"
                 placeholder="Search your stories..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-6 py-4 bg-midnight-surface/20 border border-midnight-border/30 rounded-[1.5rem] text-text-primary placeholder-text-muted/50 focus:outline-none focus:border-accent-cyan/40 focus:ring-1 focus:ring-accent-cyan/20 transition-all duration-500 font-sans text-lg backdrop-blur-md shadow-sm"
+                className="w-full pl-12 pr-6 py-4 bg-midnight-surface/20 border border-midnight-border/30 rounded-[1.5rem] text-text-primary placeholder-text-muted/50 focus:outline-none focus:border-accent-gold/40 focus:ring-1 focus:ring-accent-gold/20 transition-all duration-500 font-sans text-lg backdrop-blur-md shadow-sm"
               />
             </div>
           </div>
@@ -331,7 +331,7 @@ export default function LibraryPage() {
                       {pendingIds.includes(story.id) && (
                         <div className="absolute top-4 left-4 z-10 p-2 bg-midnight-bg/80 backdrop-blur-md rounded-full border border-midnight-border/50 shadow-sm [transform:translateZ(30px)]">
                         <div title="Pending Sync">
-                          <Cloud className="w-4 h-4 text-accent-cyan animate-pulse" />
+                          <Cloud className="w-4 h-4 text-accent-gold animate-pulse" />
                         </div>
                         </div>
                       )}
@@ -344,7 +344,7 @@ export default function LibraryPage() {
                     <div className="flex items-center justify-between font-sans text-xs text-text-secondary tracking-[0.15em] uppercase">
                       <span>{story.category}</span>
                       <div className="flex items-center gap-1.5">
-                        <Star className="w-3 h-3 text-accent-cyan" />
+                        <Star className="w-3 h-3 text-accent-gold" />
                         <span>{story.rating || '—'}</span>
                       </div>
                     </div>
@@ -366,7 +366,7 @@ export default function LibraryPage() {
                       <h3 className="font-serif text-3xl font-medium text-text-primary truncate">{story.title}</h3>
                       {pendingIds.includes(story.id) && (
                       <div title="Pending Sync">
-                        <Cloud className="w-5 h-5 text-accent-cyan animate-pulse shrink-0" />
+                        <Cloud className="w-5 h-5 text-accent-gold animate-pulse shrink-0" />
                       </div>
                       )}
                     </div>

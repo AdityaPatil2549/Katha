@@ -79,7 +79,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               <div className="shrink-0">
                 {toast.type === 'success' && <Check className="w-5 h-5 text-accent-emerald" />}
                 {toast.type === 'error' && <AlertCircle className="w-5 h-5 text-accent-rose" />}
-                {toast.type === 'info' && <Info className="w-5 h-5 text-accent-cyan" />}
+                {toast.type === 'info' && <Info className="w-5 h-5 text-accent-gold" />}
               </div>
               
               <p className="font-sans text-sm tracking-wide text-text-primary pr-6">

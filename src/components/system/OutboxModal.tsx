@@ -72,8 +72,8 @@ export function OutboxModal({ isOpen, onClose, isOnline, isSyncing }: OutboxModa
           >
             <div className="p-6 border-b border-midnight-border flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-accent-cyan/10 rounded-full">
-                  <Cloud className="w-5 h-5 text-accent-cyan" />
+                <div className="p-2 bg-accent-gold/15 rounded-full">
+                  <Cloud className="w-5 h-5 text-accent-gold" />
                 </div>
                 <h2 id="outbox-modal-title" className="font-serif text-2xl text-text-primary">
                   Sync Outbox
@@ -170,7 +170,7 @@ export function OutboxModal({ isOpen, onClose, isOnline, isSyncing }: OutboxModa
                   type="button"
                   onClick={handleForceSync}
                   disabled={!isOnline || isSyncing}
-                  className="px-6 py-2.5 bg-accent-cyan/15 hover:bg-accent-cyan/25 text-accent-cyan border border-accent-cyan/30 rounded-button text-sm font-medium tracking-wide flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="min-h-[44px] px-6 py-2.5 bg-accent-gold/15 hover:bg-accent-gold/25 text-accent-gold border border-accent-gold/30 rounded-button text-sm font-medium tracking-wide flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isSyncing ? (
                     <>

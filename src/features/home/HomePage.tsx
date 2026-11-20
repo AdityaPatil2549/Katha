@@ -140,9 +140,9 @@ export function HomePage() {
           ) : (
             <div className="flex flex-col items-center text-center mt-12 mb-8">
               <FadeIn className="mb-10">
-                <div className="inline-flex items-center gap-3 px-6 py-2.5 rounded-full bg-midnight-surface/60 border border-accent-cyan/30 backdrop-blur-xl shadow-glow-cyan">
-                  <Sparkles className="w-4 h-4 text-accent-cyan animate-pulse" />
-                  <span className="text-xs font-sans font-bold tracking-[0.2em] text-accent-cyan uppercase">Your Journey Begins</span>
+                <div className="inline-flex items-center gap-3 px-6 py-2.5 rounded-full bg-midnight-surface/60 border border-accent-gold/30 backdrop-blur-xl shadow-glow-gold">
+                  <Sparkles className="w-4 h-4 text-accent-gold animate-pulse" />
+                  <span className="text-xs font-sans font-bold tracking-[0.2em] text-accent-gold uppercase">Your Journey Begins</span>
                 </div>
               </FadeIn>
               

@@ -114,7 +114,7 @@ export default function InstallPrompt() {
                   {/* Features */}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-normal mb-4">
                     <div className="flex items-center gap-2 text-small text-secondary">
-                      <Zap className="w-4 h-4 text-accent-cyan" />
+                      <Zap className="w-4 h-4 text-accent-gold" />
                       <span>Lightning Fast</span>
                     </div>
                     <div className="flex items-center gap-2 text-small text-secondary">

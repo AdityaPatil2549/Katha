@@ -92,12 +92,12 @@ export default function JournalPage() {
         <div className="flex gap-3 mb-8">
           {([
             { id: 'write', label: 'Write', icon: PenTool, accent: 'from-accent-primary to-purple-600' },
-            { id: 'search', label: 'Semantic Search', icon: Search, accent: 'from-accent-cyan to-blue-500' },
+            { id: 'search', label: 'Semantic Search', icon: Search, accent: 'from-accent-gold to-amber-600' },
           ] as const).map(tab => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`px-5 py-3 rounded-xl font-bold flex items-center gap-2 transition-all duration-300 text-sm ${
+              className={`min-h-[44px] px-5 py-3 rounded-xl font-bold flex items-center gap-2 transition-all duration-300 text-sm ${
                 activeTab === tab.id
                   ? `bg-gradient-to-r ${tab.accent} text-white shadow-[0_0_20px_rgba(139,92,246,0.3)]`
                   : 'bg-midnight-surface text-text-secondary hover:text-text-primary border border-white/5 hover:border-white/10'
@@ -142,13 +142,13 @@ export default function JournalPage() {
                       value={tags}
                       onChange={e => setTags(e.target.value)}
                       placeholder="Tags — comma separated (e.g. philosophy, grief)"
-                      className="w-full bg-black/30 border border-white/8 rounded-xl py-2.5 pl-10 pr-4 text-sm text-text-primary placeholder-text-muted focus:border-accent-primary outline-none"
+                      className="w-full bg-black/30 border border-white/8 rounded-xl min-h-[44px] py-3 pl-10 pr-4 text-sm text-text-primary placeholder-text-muted focus:border-accent-primary outline-none"
                     />
                   </div>
                   <button
                     onClick={handleSave}
                     disabled={!content.trim() || isSaving}
-                    className="shrink-0 px-6 py-2.5 rounded-xl bg-gradient-to-r from-accent-primary to-purple-600 text-white text-sm font-bold flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed hover:shadow-[0_0_20px_rgba(139,92,246,0.4)] transition-all"
+                    className="shrink-0 min-h-[44px] px-6 py-3 rounded-xl bg-gradient-to-r from-accent-primary to-purple-600 text-white text-sm font-bold flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed hover:shadow-[0_0_20px_rgba(139,92,246,0.4)] transition-all"
                   >
                     {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Book className="w-4 h-4" />}
                     {isSaving ? 'Embedding…' : 'Save to Memory'}
@@ -178,7 +178,7 @@ export default function JournalPage() {
                         key={entry.id}
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        className="bg-midnight-surface/60 border border-midnight-border rounded-2xl p-5 hover:border-accent-cyan/40 transition-colors"
+                        className="bg-midnight-surface/60 border border-midnight-border rounded-2xl p-5 hover:border-accent-gold/40 transition-colors"
                       >
                         <div className="flex items-start justify-between gap-4 mb-3">
                           <div className="flex items-center gap-2 text-xs text-text-muted">
@@ -188,7 +188,7 @@ export default function JournalPage() {
                             })}
                             {entry.embedding && (
                               <span
-                                className="ml-2 text-xs bg-accent-cyan/10 text-accent-cyan border border-accent-cyan/20 px-1.5 py-0.5 rounded"
+                                className="ml-2 text-xs bg-accent-gold/15 text-accent-gold border border-accent-gold/30 px-1.5 py-0.5 rounded font-semibold"
                                 title="AI embedding generated — this entry is semantically searchable"
                               >
                                 ⚡ Indexed
@@ -228,16 +228,16 @@ export default function JournalPage() {
             >
               {/* Search input */}
               <div className="relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-accent-cyan" />
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-accent-gold" />
                 {isSearching && (
-                  <Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-accent-cyan animate-spin" />
+                  <Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-accent-gold animate-spin" />
                 )}
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
                   placeholder={`Search by meaning — e.g. "when I felt lost and a story changed me"`}
-                  className="w-full bg-midnight-surface border border-accent-cyan/30 rounded-2xl py-4 pl-12 pr-12 text-text-primary placeholder-text-muted focus:border-accent-cyan focus:ring-2 focus:ring-accent-cyan/20 outline-none text-base shadow-[0_0_20px_rgba(6,182,212,0.08)]"
+                  className="w-full bg-midnight-surface border border-accent-gold/30 rounded-2xl min-h-[48px] py-4 pl-12 pr-12 text-text-primary placeholder-text-muted focus:border-accent-gold focus:ring-2 focus:ring-accent-gold/20 outline-none text-base shadow-glow-gold"
                 />
               </div>
 
@@ -254,7 +254,7 @@ export default function JournalPage() {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.05 }}
-                        className="bg-midnight-surface border border-white/5 rounded-2xl p-6 hover:border-accent-cyan/20 transition-colors"
+                        className="bg-midnight-surface border border-white/5 rounded-2xl p-6 hover:border-accent-gold/30 transition-colors"
                       >
                         <div className="flex items-center justify-between mb-3">
                           <span className="text-xs text-text-muted flex items-center gap-1.5">
@@ -263,7 +263,7 @@ export default function JournalPage() {
                               day: 'numeric', month: 'short', year: 'numeric'
                             })}
                           </span>
-                          <span className="text-xs font-bold px-2 py-0.5 bg-accent-cyan/10 text-accent-cyan border border-accent-cyan/20 rounded-full">
+                          <span className="text-xs font-bold px-2 py-0.5 bg-accent-gold/15 text-accent-gold border border-accent-gold/30 rounded-full">
                             {(result.score * 100).toFixed(0)}% match
                           </span>
                         </div>

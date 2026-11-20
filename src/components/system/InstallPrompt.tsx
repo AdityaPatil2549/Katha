@@ -47,13 +47,13 @@ export function InstallPrompt() {
           transition={{ type: "spring", damping: 25, stiffness: 300 }}
           className="fixed bottom-24 md:bottom-6 left-4 md:left-6 z-[100] w-[min(400px,calc(100vw-2rem))] rounded-2xl overflow-hidden shadow-elevation bg-midnight-surface/95 backdrop-blur-xl border border-midnight-border"
         >
-          <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-sky-500 via-blue-500 to-indigo-500" />
+          <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-accent-gold/40 via-accent-amber/50 to-accent-gold/40" />
           <div className="p-5">
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2">
-                  <div className="w-8 h-8 rounded-full bg-accent-cyan/15 flex items-center justify-center border border-accent-cyan/30">
-                    <Smartphone className="w-4 h-4 text-accent-cyan" />
+                  <div className="w-8 h-8 rounded-full bg-accent-gold/15 flex items-center justify-center border border-accent-gold/30">
+                    <Smartphone className="w-4 h-4 text-accent-gold" />
                   </div>
                   <h3 className="font-bold text-text-primary text-base tracking-wide">Install Katha</h3>
                 </div>
@@ -65,7 +65,7 @@ export function InstallPrompt() {
                 type="button"
                 aria-label="Dismiss install prompt"
                 onClick={() => setDismissed(true)}
-                className="w-8 h-8 rounded-full bg-midnight-bg/60 hover:bg-midnight-surface-hover flex items-center justify-center text-text-muted hover:text-text-primary transition-colors border border-midnight-border"
+                className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-full bg-midnight-bg/60 hover:bg-midnight-surface-hover flex items-center justify-center text-text-muted hover:text-text-primary transition-colors border border-midnight-border"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -75,7 +75,7 @@ export function InstallPrompt() {
               <button
                 type="button"
                 onClick={() => setDismissed(true)}
-                className="flex-1 px-4 py-2.5 rounded-xl font-semibold text-sm text-text-secondary hover:text-text-primary hover:bg-midnight-surface-hover transition-colors border border-midnight-border"
+                className="flex-1 min-h-[44px] px-4 py-2.5 rounded-xl font-semibold text-sm text-text-secondary hover:text-text-primary hover:bg-midnight-surface-hover transition-colors border border-midnight-border"
               >
                 Maybe Later
               </button>
@@ -83,7 +83,7 @@ export function InstallPrompt() {
                 type="button"
                 onClick={handleInstall}
                 disabled={isInstalling}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-bold text-sm text-white bg-sky-700 hover:bg-sky-600 transition-all shadow-lg disabled:opacity-50"
+                className="flex-1 min-h-[44px] flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-bold text-sm text-midnight-bg bg-gradient-to-r from-accent-gold to-accent-amber hover:opacity-95 transition-all shadow-glow-gold disabled:opacity-50"
               >
                 {isInstalling ? (
                   <Download className="w-4 h-4 animate-bounce" />

@@ -74,9 +74,9 @@ export function EditorialCollections() {
       }
     };
     return themes[collectionId as keyof typeof themes] || {
-      gradient: 'from-cyan-500/20 to-blue-500/20',
-      borderColor: 'border-accent-cyan',
-      iconColor: 'text-accent-cyan',
+      gradient: 'from-accent-gold/20 to-amber-500/20',
+      borderColor: 'border-accent-gold',
+      iconColor: 'text-accent-gold',
       title: 'Curated Wisdom'
     };
   };
@@ -200,7 +200,7 @@ export function EditorialCollections() {
 
                   <div className="flex flex-wrap gap-2 mb-4">
                     {entry.themes.slice(0, 2).map((theme, idx) => (
-                      <span key={idx} className="text-xs bg-accent-cyan/15 text-accent-cyan px-2 py-1 rounded-full">
+                      <span key={idx} className="text-xs bg-accent-gold/15 text-accent-gold border border-accent-gold/25 px-2 py-1 rounded-full">
                         {theme}
                       </span>
                     ))}
@@ -339,8 +339,8 @@ export function EditorialCollections() {
             
             <div className="grid gap-6 md:grid-cols-3">
               <div className="text-center">
-                <div className="p-4 bg-accent-cyan/15 rounded-xl mb-4 inline-block">
-                  <Compass className="w-8 h-8 text-accent-cyan" />
+                <div className="p-4 bg-accent-gold/15 rounded-xl mb-4 inline-block">
+                  <Compass className="w-8 h-8 text-accent-gold" />
                 </div>
                 <h3 className="text-lg font-semibold text-text-primary mb-2">Curated Wisdom</h3>
                 <p className="text-text-primary/70 text-sm">

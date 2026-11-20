@@ -19,9 +19,9 @@ const toastConfig = {
     text: 'text-accent-amber',
   },
   info: {
-    icon: <Info className="w-5 h-5 text-accent-cyan" />,
-    bg: 'bg-accent-cyan/10 border-accent-cyan/20',
-    text: 'text-accent-cyan',
+    icon: <Info className="w-5 h-5 text-accent-gold" />,
+    bg: 'bg-accent-gold/10 border-accent-gold/20',
+    text: 'text-accent-gold',
   },
 };
 

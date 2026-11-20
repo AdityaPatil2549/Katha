@@ -427,7 +427,7 @@ export default function AddStoryPage() {
         <div className="mb-8 relative z-50">
           <div className="glass-card p-6 md:p-8 rounded-3xl text-center relative overflow-hidden">
             {/* Background ambient light */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-md h-32 bg-accent-cyan/10 blur-[80px] rounded-full pointer-events-none" />
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-md h-32 bg-accent-gold/15 blur-[80px] rounded-full pointer-events-none" />
             
             <BlurReveal>
               <h1 className="heading-1 text-primary mb-2 relative z-10">Add a New Story</h1>
@@ -443,7 +443,7 @@ export default function AddStoryPage() {
             
             {draftSaved && (
               <FadeIn className="absolute top-4 right-6">
-                <div className="text-[11px] font-medium text-accent-cyan px-2.5 py-1 bg-accent-cyan/10 rounded-full border border-accent-cyan/20">
+                <div className="text-xs font-semibold text-accent-gold px-3 py-1 bg-accent-gold/15 rounded-full border border-accent-gold/30">
                   Draft saved
                 </div>
               </FadeIn>
@@ -455,16 +455,16 @@ export default function AddStoryPage() {
                 <div key={step} className="flex items-center">
                   <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold transition-all duration-500 shadow-sm ${
                     currentStep === step 
-                      ? 'bg-accent-cyan text-midnight-bg scale-110 shadow-[0_0_20px_rgba(45,212,191,0.4)]' :
+                      ? 'bg-accent-gold text-midnight-bg scale-110 shadow-glow-gold' :
                     currentStep > step 
-                      ? 'bg-accent-cyan/20 text-accent-cyan border border-accent-cyan/30' :
+                      ? 'bg-accent-gold/20 text-accent-gold border border-accent-gold/30' :
                       'bg-midnight-surface text-text-muted border border-midnight-border/50'
                   }`}>
                     {currentStep > step ? <Check className="w-5 h-5" /> : step}
                   </div>
                   {idx < 3 && (
                     <div className={`w-8 md:w-16 h-1 rounded-full mx-2 transition-all duration-500 ${
-                      currentStep > step ? 'bg-accent-cyan/40 shadow-[0_0_10px_rgba(45,212,191,0.2)]' : 'bg-midnight-border/50'
+                      currentStep > step ? 'bg-accent-gold/40 shadow-glow-gold' : 'bg-midnight-border/50'
                     }`} />
                   )}
                 </div>
@@ -492,7 +492,7 @@ export default function AddStoryPage() {
                 <section className="glass-card p-6 md:p-8 space-y-section">
                   <h2 className="heading-2 text-primary flex items-center justify-between">
                     The Essentials
-                    {isSearchingApi && <span className="text-small text-accent-cyan animate-pulse">Fetching details...</span>}
+                    {isSearchingApi && <span className="text-small text-accent-gold animate-pulse">Fetching details...</span>}
                   </h2>
 
                   {/* API Search */}
@@ -501,39 +501,39 @@ export default function AddStoryPage() {
                       <label className="text-sm font-semibold text-secondary uppercase tracking-wider">
                         Smart Auto-fill
                       </label>
-                      <div className="flex bg-midnight-surface rounded-lg p-1 border border-text-primary/5 shadow-sm overflow-x-auto hide-scrollbar">
+                      <div className="flex bg-midnight-surface rounded-xl p-1.5 border border-text-primary/5 shadow-sm overflow-x-auto hide-scrollbar gap-1">
                         <button
                           type="button"
                           onClick={() => { setSearchPlatform('movie'); setApiSearchQuery(''); }}
-                          className={`px-3 py-1.5 text-xs rounded-md transition-colors whitespace-nowrap ${searchPlatform === 'movie' ? 'bg-accent-cyan/20 text-accent-cyan font-medium' : 'text-muted hover:text-secondary'}`}
+                          className={`min-h-[44px] min-w-[44px] px-3.5 py-2.5 text-xs rounded-lg transition-colors whitespace-nowrap flex items-center justify-center font-medium ${searchPlatform === 'movie' ? 'bg-accent-gold/20 text-accent-gold font-bold shadow-sm' : 'text-muted hover:text-secondary'}`}
                         >
                           Movies
                         </button>
                         <button
                           type="button"
                           onClick={() => { setSearchPlatform('tv'); setApiSearchQuery(''); }}
-                          className={`px-3 py-1.5 text-xs rounded-md transition-colors whitespace-nowrap ${searchPlatform === 'tv' ? 'bg-accent-cyan/20 text-accent-cyan font-medium' : 'text-muted hover:text-secondary'}`}
+                          className={`min-h-[44px] min-w-[44px] px-3.5 py-2.5 text-xs rounded-lg transition-colors whitespace-nowrap flex items-center justify-center font-medium ${searchPlatform === 'tv' ? 'bg-accent-gold/20 text-accent-gold font-bold shadow-sm' : 'text-muted hover:text-secondary'}`}
                         >
                           TV
                         </button>
                         <button
                           type="button"
                           onClick={() => { setSearchPlatform('anime'); setApiSearchQuery(''); }}
-                          className={`px-3 py-1.5 text-xs rounded-md transition-colors whitespace-nowrap ${searchPlatform === 'anime' ? 'bg-accent-primary/20 text-accent-primary font-medium' : 'text-text-muted hover:text-text-secondary'}`}
+                          className={`min-h-[44px] min-w-[44px] px-3.5 py-2.5 text-xs rounded-lg transition-colors whitespace-nowrap flex items-center justify-center font-medium ${searchPlatform === 'anime' ? 'bg-accent-primary/20 text-accent-primary font-bold shadow-sm' : 'text-text-muted hover:text-text-secondary'}`}
                         >
                           Anime
                         </button>
                         <button
                           type="button"
                           onClick={() => { setSearchPlatform('game'); setApiSearchQuery(''); }}
-                          className={`px-3 py-1.5 text-xs rounded-md transition-colors whitespace-nowrap ${searchPlatform === 'game' ? 'bg-accent-emerald/20 text-accent-emerald font-medium' : 'text-text-muted hover:text-text-secondary'}`}
+                          className={`min-h-[44px] min-w-[44px] px-3.5 py-2.5 text-xs rounded-lg transition-colors whitespace-nowrap flex items-center justify-center font-medium ${searchPlatform === 'game' ? 'bg-accent-emerald/20 text-accent-emerald font-bold shadow-sm' : 'text-text-muted hover:text-text-secondary'}`}
                         >
                           Games
                         </button>
                         <button
                           type="button"
                           onClick={() => { setSearchPlatform('youtube'); setApiSearchQuery(''); }}
-                          className={`px-3 py-1.5 text-xs rounded-md transition-colors whitespace-nowrap ${searchPlatform === 'youtube' ? 'bg-accent-rose/20 text-accent-rose font-medium' : 'text-text-muted hover:text-text-secondary'}`}
+                          className={`min-h-[44px] min-w-[44px] px-3.5 py-2.5 text-xs rounded-lg transition-colors whitespace-nowrap flex items-center justify-center font-medium ${searchPlatform === 'youtube' ? 'bg-accent-rose/20 text-accent-rose font-bold shadow-sm' : 'text-text-muted hover:text-text-secondary'}`}
                         >
                           YouTube
                         </button>
@@ -550,7 +550,7 @@ export default function AddStoryPage() {
                         onChange={(e) => setApiSearchQuery(e.target.value)}
                         onFocus={() => { if(searchResults.length > 0) setShowApiDropdown(true); }}
                         disabled={!isOnline}
-                        className="w-full pl-12 pr-4 py-4 bg-midnight-surface border border-accent-cyan/30 rounded-xl text-primary text-base placeholder-text-muted/60 focus:outline-none focus:border-accent-cyan focus:ring-4 focus:ring-accent-cyan/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                        className="w-full pl-12 pr-4 py-4 bg-midnight-surface border border-accent-gold/30 rounded-xl text-primary text-base placeholder-text-muted/60 focus:outline-none focus:border-accent-gold focus:ring-4 focus:ring-accent-gold/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
                         placeholder={!isOnline ? "Smart Search Disabled (Offline Mode)" : `Search ${searchPlatform} database...`}
                       />
                     </div>
@@ -758,7 +758,7 @@ export default function AddStoryPage() {
                           type="number"
                           value={formData.totalSeasons || ''}
                           onChange={(e) => handleInputChange('totalSeasons', parseInt(e.target.value) || undefined)}
-                          className="w-full px-4 py-3 bg-midnight-surface/50 border border-midnight-border rounded-xl text-primary text-center focus:outline-none focus:border-accent-cyan"
+                          className="w-full px-4 py-3 bg-midnight-surface/50 border border-midnight-border rounded-xl text-primary text-center focus:outline-none focus:border-accent-gold"
                           placeholder="-"
                         />
                       </div>
@@ -768,7 +768,7 @@ export default function AddStoryPage() {
                           type="number"
                           value={formData.currentSeason || ''}
                           onChange={(e) => handleInputChange('currentSeason', parseInt(e.target.value) || undefined)}
-                          className="w-full px-4 py-3 bg-midnight-surface/50 border border-midnight-border rounded-xl text-primary text-center focus:outline-none focus:border-accent-cyan"
+                          className="w-full px-4 py-3 bg-midnight-surface/50 border border-midnight-border rounded-xl text-primary text-center focus:outline-none focus:border-accent-gold"
                           placeholder="-"
                         />
                       </div>
@@ -778,7 +778,7 @@ export default function AddStoryPage() {
                           type="number"
                           value={formData.totalEpisodes || ''}
                           onChange={(e) => handleInputChange('totalEpisodes', parseInt(e.target.value) || undefined)}
-                          className="w-full px-4 py-3 bg-midnight-surface/50 border border-midnight-border rounded-xl text-primary text-center focus:outline-none focus:border-accent-cyan"
+                          className="w-full px-4 py-3 bg-midnight-surface/50 border border-midnight-border rounded-xl text-primary text-center focus:outline-none focus:border-accent-gold"
                           placeholder="-"
                         />
                       </div>
@@ -788,7 +788,7 @@ export default function AddStoryPage() {
                           type="number"
                           value={formData.currentEpisode || ''}
                           onChange={(e) => handleInputChange('currentEpisode', parseInt(e.target.value) || undefined)}
-                          className="w-full px-4 py-3 bg-midnight-surface/50 border border-midnight-border rounded-xl text-primary text-center focus:outline-none focus:border-accent-cyan"
+                          className="w-full px-4 py-3 bg-midnight-surface/50 border border-midnight-border rounded-xl text-primary text-center focus:outline-none focus:border-accent-gold"
                           placeholder="-"
                         />
                       </div>
@@ -804,7 +804,7 @@ export default function AddStoryPage() {
                           type="number"
                           value={formData.watchTimeMinutes || ''}
                           onChange={(e) => handleInputChange('watchTimeMinutes', parseInt(e.target.value) || 0)}
-                          className="w-full px-4 py-3 bg-midnight-surface/50 border border-midnight-border rounded-xl text-primary focus:outline-none focus:border-accent-cyan"
+                          className="w-full px-4 py-3 bg-midnight-surface/50 border border-midnight-border rounded-xl text-primary focus:outline-none focus:border-accent-gold"
                           placeholder="120"
                         />
                       </div>
@@ -812,7 +812,7 @@ export default function AddStoryPage() {
                         <label className="block text-sm font-semibold text-secondary mb-2">Watched so far</label>
                         <input
                           type="number"
-                          className="w-full px-4 py-3 bg-midnight-surface/50 border border-midnight-border rounded-xl text-primary focus:outline-none focus:border-accent-cyan"
+                          className="w-full px-4 py-3 bg-midnight-surface/50 border border-midnight-border rounded-xl text-primary focus:outline-none focus:border-accent-gold"
                           placeholder="0"
                         />
                       </div>
@@ -828,7 +828,7 @@ export default function AddStoryPage() {
                       type="number"
                       value={formData.releaseYear || ''}
                       onChange={(e) => handleInputChange('releaseYear', parseInt(e.target.value) || undefined)}
-                      className="w-full max-w-xs px-5 py-4 bg-midnight-surface/50 border border-midnight-border rounded-xl text-primary placeholder-text-muted focus:outline-none focus:border-accent-cyan transition-all"
+                      className="w-full max-w-xs px-5 py-4 bg-midnight-surface/50 border border-midnight-border rounded-xl text-primary placeholder-text-muted focus:outline-none focus:border-accent-gold transition-all"
                       placeholder="e.g. 2024"
                       min="1900"
                       max={new Date().getFullYear() + 5}
@@ -963,13 +963,13 @@ export default function AddStoryPage() {
                             initial={{ scale: 0.8, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             exit={{ scale: 0.8, opacity: 0 }}
-                            className="px-3 py-1.5 rounded-lg bg-accent-cyan/10 text-accent-cyan border border-accent-cyan/20 flex items-center text-sm font-medium"
+                            className="px-3 py-1.5 rounded-lg bg-accent-gold/15 text-accent-gold border border-accent-gold/30 flex items-center text-sm font-medium"
                           >
                             {tag}
                             <button
                               type="button"
                               onClick={() => removeTag(tag)}
-                              className="ml-2 p-0.5 rounded-full hover:bg-accent-cyan/20 transition-colors"
+                              className="ml-2 p-0.5 rounded-full hover:bg-accent-gold/20 transition-colors"
                             >
                               <X className="w-3 h-3" />
                             </button>
@@ -984,7 +984,7 @@ export default function AddStoryPage() {
                         value={customTag}
                         onChange={(e) => setCustomTag(e.target.value)}
                         onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag(customTag))}
-                        className="flex-1 px-5 py-3 bg-midnight-surface/50 border border-midnight-border rounded-xl text-primary placeholder-text-muted focus:outline-none focus:border-accent-cyan transition-all"
+                        className="flex-1 px-5 py-3 bg-midnight-surface/50 border border-midnight-border rounded-xl text-primary placeholder-text-muted focus:outline-none focus:border-accent-gold transition-all"
                         placeholder="Type a tag and press enter..."
                       />
                       <button
@@ -1082,7 +1082,7 @@ export default function AddStoryPage() {
                     <textarea
                       value={formData.notes}
                       onChange={(e) => handleInputChange('notes', e.target.value)}
-                      className="w-full px-5 py-4 bg-midnight-surface/50 border border-midnight-border rounded-xl text-primary placeholder-text-muted/50 focus:outline-none focus:border-accent-cyan/40 focus:ring-2 focus:ring-accent-cyan/20 transition-all font-sans text-base resize-none leading-relaxed shadow-inner"
+                      className="w-full px-5 py-4 bg-midnight-surface/50 border border-midnight-border rounded-xl text-primary placeholder-text-muted/50 focus:outline-none focus:border-accent-gold/40 focus:ring-2 focus:ring-accent-gold/20 transition-all font-sans text-base resize-none leading-relaxed shadow-inner"
                       rows={5}
                       placeholder="This story connects with me because..."
                     />

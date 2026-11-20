@@ -501,21 +501,21 @@ export default function SettingsVaultPage() {
                           Render dynamic WebGL particle starfield in the background. Disable to conserve battery and reduce motion.
                         </p>
                       </div>
-                      <div className="min-h-[44px] min-w-[44px] flex items-center justify-center shrink-0">
+                      <div className="flex items-center justify-center shrink-0">
                         <button
                           type="button"
                           onClick={() => {
                             setDisableCosmos(!disableCosmos);
                             triggerSaveToast();
                           }}
-                          className={`w-14 h-8 flex items-center rounded-full p-1 transition-colors duration-fast ${
+                          className={`w-16 h-11 min-h-[44px] flex items-center rounded-full p-1.5 transition-colors duration-fast ${
                             !disableCosmos ? 'bg-accent-gold' : 'bg-midnight-divider'
                           }`}
                           aria-label="Toggle 3D Celestial Cosmos"
                         >
                           <div
-                            className={`bg-midnight-bg w-6 h-6 rounded-full shadow-md transform transition-transform duration-fast ${
-                              !disableCosmos ? 'translate-x-6' : 'translate-x-0'
+                            className={`bg-midnight-bg w-8 h-8 rounded-full shadow-md transform transition-transform duration-fast ${
+                              !disableCosmos ? 'translate-x-5' : 'translate-x-0'
                             }`}
                           />
                         </button>
@@ -651,13 +651,13 @@ export default function SettingsVaultPage() {
                 {activeSection === 'cloud' && (
                   <div className="space-y-page">
                     <h2 className="heading-2 text-primary flex items-center gap-tight">
-                      <Cloud className="w-5 h-5 text-accent-cyan" />
+                      <Cloud className="w-5 h-5 text-accent-gold" />
                       Cloud & Auth
                     </h2>
 
-                    <div className="surface-elevated p-6 rounded-card border-l-4 border-accent-cyan">
+                    <div className="surface-elevated p-6 rounded-card border-l-4 border-accent-gold">
                       <div className="flex items-center gap-tight mb-3">
-                        <Check className="w-5 h-5 text-accent-cyan" />
+                        <Check className="w-5 h-5 text-accent-gold" />
                         <h3 className="heading-3 text-primary">Google Drive AppData Sync</h3>
                       </div>
                       <p className="text-secondary leading-relaxed mb-6">
@@ -857,7 +857,7 @@ export default function SettingsVaultPage() {
                 {activeSection === 'data' && (
                   <div className="space-y-page">
                     <h2 className="heading-2 text-primary flex items-center gap-tight">
-                      <Database className="w-5 h-5 text-accent-cyan" />
+                      <Database className="w-5 h-5 text-accent-gold" />
                       Data & Storage
                     </h2>
 
@@ -905,7 +905,7 @@ export default function SettingsVaultPage() {
                         </div>
                         <div className="w-full bg-midnight-border rounded-full h-2">
                           <div 
-                            className="bg-accent-cyan h-full rounded-full"
+                            className="bg-accent-gold h-full rounded-full"
                             style={{ width: `${storageInfo.total > 0 ? (storageInfo.knowledge / storageInfo.total) * 100 : 0}%` }}
                           />
                         </div>
@@ -1091,7 +1091,7 @@ export default function SettingsVaultPage() {
                         </div>
                         <div>
                           <h3 className="heading-2 text-primary">Katha</h3>
-                          <p className="text-accent-cyan">Powered by Smriti</p>
+                          <p className="text-accent-gold font-medium">Powered by Smriti</p>
                         </div>
                         <p className="text-secondary max-w-md mx-auto">
                           Your personal story tracker powered by Smriti — a memory engine for your entertainment life. 

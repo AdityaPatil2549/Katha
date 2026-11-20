@@ -84,13 +84,13 @@ export function SmritiChat() {
     <div className="glass-card shadow-glass rounded-card flex flex-col h-[500px] border border-white/5 overflow-hidden">
       {/* Header */}
       <div className="p-4 border-b border-white/5 bg-black/20 flex items-center gap-3">
-        <div className="w-10 h-10 rounded-full bg-accent-cyan/10 flex items-center justify-center border border-accent-cyan/30 shadow-[0_0_15px_rgba(0,242,254,0.3)]">
-          <Brain className="w-5 h-5 text-accent-cyan" />
+        <div className="w-10 h-10 rounded-full bg-accent-gold/15 flex items-center justify-center border border-accent-gold/30 shadow-glow-gold">
+          <Brain className="w-5 h-5 text-accent-gold" />
         </div>
         <div>
           <h3 className="font-bold text-white tracking-wide flex items-center gap-2">
             Smriti Engine
-            <Sparkles className="w-3 h-3 text-accent-cyan" />
+            <Sparkles className="w-3 h-3 text-accent-gold" />
           </h3>
           <p className="text-xs text-secondary">AI Reflection Layer</p>
         </div>
@@ -109,7 +109,7 @@ export function SmritiChat() {
               <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 border ${
                 msg.role === 'user' 
                   ? 'bg-accent-primary/20 border-accent-primary/40 text-accent-primary' 
-                  : 'bg-accent-cyan/20 border-accent-cyan/40 text-accent-cyan'
+                  : 'bg-accent-gold/20 border-accent-gold/40 text-accent-gold'
               }`}>
                 {msg.role === 'user' ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
               </div>
@@ -128,11 +128,11 @@ export function SmritiChat() {
               animate={{ opacity: 1, y: 0 }}
               className="flex items-start gap-3"
             >
-              <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 border bg-accent-cyan/20 border-accent-cyan/40 text-accent-cyan">
+              <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 border bg-accent-gold/20 border-accent-gold/40 text-accent-gold">
                 <Bot className="w-4 h-4" />
               </div>
               <div className="bg-black/40 border border-white/10 rounded-2xl rounded-tl-none p-4 flex items-center gap-2">
-                <Loader2 className="w-4 h-4 animate-spin text-accent-cyan" />
+                <Loader2 className="w-4 h-4 animate-spin text-accent-gold" />
                 <span className="text-xs text-secondary font-medium">Reflecting...</span>
               </div>
             </motion.div>
@@ -150,14 +150,16 @@ export function SmritiChat() {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSend()}
             placeholder="Ask about your journey..."
-            className="w-full bg-black/40 border border-white/10 rounded-full py-3 pl-4 pr-12 text-sm text-white placeholder:text-text-muted focus:outline-none focus:border-accent-cyan/50 focus:ring-1 focus:ring-accent-cyan/50 transition-all shadow-inner"
+            className="w-full bg-black/40 border border-white/10 rounded-full py-3 pl-4 pr-14 text-sm text-white placeholder:text-text-muted focus:outline-none focus:border-accent-gold/50 focus:ring-1 focus:ring-accent-gold/50 transition-all shadow-inner"
           />
           <button
+            type="button"
             onClick={handleSend}
+            aria-label="Send message to Smriti AI"
             disabled={!input.trim() || isTyping}
-            className="absolute right-2 p-2 rounded-full bg-accent-cyan text-black hover:bg-white hover:shadow-[0_0_15px_rgba(0,242,254,0.5)] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="absolute right-1 w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full bg-accent-gold text-midnight-bg hover:bg-white hover:shadow-glow-gold transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
           >
-            <Send className="w-4 h-4 -ml-0.5" />
+            <Send className="w-4 h-4" />
           </button>
         </div>
       </div>

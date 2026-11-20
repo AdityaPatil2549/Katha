@@ -4,7 +4,7 @@ import { BlurReveal } from '@/components/ui/motion/BlurReveal';
 import { FadeIn } from '@/components/ui/motion/FadeIn';
 import { StaggerContainer } from '@/components/ui/motion/StaggerContainer';
 import { Dropdown } from '@/components/ui/Dropdown';
-import { User, Brain, Heart, Target, TrendingUp, Calendar, Clock, Star, BookOpen, Settings, ChevronRight, Save, Edit2 } from 'lucide-react';
+import { User, Brain, Heart, Target, TrendingUp, Calendar, Clock, Star, BookOpen, Settings, ChevronRight, Save, Edit2, Check } from 'lucide-react';
 import { personalRepository } from '@/db/repositories/PersonalRepository';
 import type { PersonalProfile, EmotionalProfile, StoryPreferences, LearningProfile } from '@/types/personal';
 
@@ -162,7 +162,7 @@ export function PersonalProfile() {
     { value: 'bad', label: 'Bad', color: 'text-accent-amber' },
     { value: 'neutral', label: 'Neutral', color: 'text-accent-amber' },
     { value: 'good', label: 'Good', color: 'text-accent-emerald' },
-    { value: 'excellent', label: 'Excellent', color: 'text-accent-cyan' }
+    { value: 'excellent', label: 'Excellent', color: 'text-accent-gold' }
   ];
 
   const categories = [
@@ -494,7 +494,7 @@ export function PersonalProfile() {
             >
               <div className="surface-elevated rounded-xl p-6">
                 <h3 className="text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
-                  <BookOpen className="w-5 h-5 text-accent-cyan" />
+                  <BookOpen className="w-5 h-5 text-accent-gold" />
                   Story Preferences
                 </h3>
                 
@@ -502,46 +502,78 @@ export function PersonalProfile() {
                   <div>
                     <label className="block text-sm font-medium text-text-primary/80 mb-2">Preferred Categories</label>
                     <div className="space-y-2">
-                      {categories.map(category => (
-                        <label key={category.value} className="flex items-center gap-2 text-text-primary/60">
-                          <input
-                            type="checkbox"
-                            checked={profile.storyPreferences.preferredCategories.includes(category.value)}
-                            onChange={(e) => {
-                              const updated = e.target.checked
-                                ? [...profile.storyPreferences.preferredCategories, category.value]
-                                : profile.storyPreferences.preferredCategories.filter(c => c !== category.value);
+                      {categories.map(category => {
+                        const isSelected = profile.storyPreferences.preferredCategories.includes(category.value);
+                        return (
+                          <button
+                            key={category.value}
+                            type="button"
+                            role="checkbox"
+                            aria-checked={isSelected}
+                            disabled={!isEditing}
+                            onClick={() => {
+                              if (!isEditing) return;
+                              const updated = isSelected
+                                ? profile.storyPreferences.preferredCategories.filter(c => c !== category.value)
+                                : [...profile.storyPreferences.preferredCategories, category.value];
                               updateStoryPreferences({ preferredCategories: updated });
                             }}
-                            disabled={!isEditing}
-                            className="rounded disabled:opacity-50"
-                          />
-                          <span>{category.label}</span>
-                        </label>
-                      ))}
+                            className={`w-full min-h-[44px] px-3.5 py-2.5 rounded-xl border flex items-center justify-between text-xs font-semibold uppercase tracking-wider transition-all duration-300 ${
+                              isSelected
+                                ? 'border-accent-gold bg-accent-gold/15 text-accent-gold shadow-glow-gold'
+                                : 'border-midnight-border/60 bg-midnight-surface/40 text-text-secondary hover:text-text-primary hover:border-midnight-border hover:bg-midnight-surface/70'
+                            } ${!isEditing ? 'opacity-80 cursor-default' : ''}`}
+                          >
+                            <span className="capitalize text-sm font-medium tracking-normal">{category.label}</span>
+                            <div className={`w-5 h-5 rounded-md flex items-center justify-center border transition-colors ${
+                              isSelected
+                                ? 'bg-accent-gold border-accent-gold text-midnight-bg'
+                                : 'border-white/20 bg-white/5'
+                            }`}>
+                              {isSelected && <Check className="w-3.5 h-3.5 stroke-[3]" />}
+                            </div>
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-text-primary/80 mb-2">Preferred Difficulty</label>
                     <div className="space-y-2">
-                      {difficulties.map(difficulty => (
-                        <label key={difficulty.value} className="flex items-center gap-2 text-text-primary/60">
-                          <input
-                            type="checkbox"
-                            checked={profile.storyPreferences.preferredDifficulty.includes(difficulty.value)}
-                            onChange={(e) => {
-                              const updated = e.target.checked
-                                ? [...profile.storyPreferences.preferredDifficulty, difficulty.value]
-                                : profile.storyPreferences.preferredDifficulty.filter(d => d !== difficulty.value);
+                      {difficulties.map(difficulty => {
+                        const isSelected = profile.storyPreferences.preferredDifficulty.includes(difficulty.value);
+                        return (
+                          <button
+                            key={difficulty.value}
+                            type="button"
+                            role="checkbox"
+                            aria-checked={isSelected}
+                            disabled={!isEditing}
+                            onClick={() => {
+                              if (!isEditing) return;
+                              const updated = isSelected
+                                ? profile.storyPreferences.preferredDifficulty.filter(d => d !== difficulty.value)
+                                : [...profile.storyPreferences.preferredDifficulty, difficulty.value];
                               updateStoryPreferences({ preferredDifficulty: updated });
                             }}
-                            disabled={!isEditing}
-                            className="rounded disabled:opacity-50"
-                          />
-                          <span>{difficulty.label}</span>
-                        </label>
-                      ))}
+                            className={`w-full min-h-[44px] px-3.5 py-2.5 rounded-xl border flex items-center justify-between text-xs font-semibold uppercase tracking-wider transition-all duration-300 ${
+                              isSelected
+                                ? 'border-accent-gold bg-accent-gold/15 text-accent-gold shadow-glow-gold'
+                                : 'border-midnight-border/60 bg-midnight-surface/40 text-text-secondary hover:text-text-primary hover:border-midnight-border hover:bg-midnight-surface/70'
+                            } ${!isEditing ? 'opacity-80 cursor-default' : ''}`}
+                          >
+                            <span className="capitalize text-sm font-medium tracking-normal">{difficulty.label}</span>
+                            <div className={`w-5 h-5 rounded-md flex items-center justify-center border transition-colors ${
+                              isSelected
+                                ? 'bg-accent-gold border-accent-gold text-midnight-bg'
+                                : 'border-white/20 bg-white/5'
+                            }`}>
+                              {isSelected && <Check className="w-3.5 h-3.5 stroke-[3]" />}
+                            </div>
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
 
@@ -565,23 +597,39 @@ export function PersonalProfile() {
                   <div>
                     <label className="block text-sm font-medium text-text-primary/80 mb-2">Seeking Impacts</label>
                     <div className="space-y-2">
-                      {impacts.map(impact => (
-                        <label key={impact.value} className="flex items-center gap-2 text-text-primary/60">
-                          <input
-                            type="checkbox"
-                            checked={profile.storyPreferences.seekingImpacts.includes(impact.value)}
-                            onChange={(e) => {
-                              const updated = e.target.checked
-                                ? [...profile.storyPreferences.seekingImpacts, impact.value]
-                                : profile.storyPreferences.seekingImpacts.filter(i => i !== impact.value);
+                      {impacts.map(impact => {
+                        const isSelected = profile.storyPreferences.seekingImpacts.includes(impact.value);
+                        return (
+                          <button
+                            key={impact.value}
+                            type="button"
+                            role="checkbox"
+                            aria-checked={isSelected}
+                            disabled={!isEditing}
+                            onClick={() => {
+                              if (!isEditing) return;
+                              const updated = isSelected
+                                ? profile.storyPreferences.seekingImpacts.filter(i => i !== impact.value)
+                                : [...profile.storyPreferences.seekingImpacts, impact.value];
                               updateStoryPreferences({ seekingImpacts: updated });
                             }}
-                            disabled={!isEditing}
-                            className="rounded disabled:opacity-50"
-                          />
-                          <span>{impact.label}</span>
-                        </label>
-                      ))}
+                            className={`w-full min-h-[44px] px-3.5 py-2.5 rounded-xl border flex items-center justify-between text-xs font-semibold uppercase tracking-wider transition-all duration-300 ${
+                              isSelected
+                                ? 'border-accent-gold bg-accent-gold/15 text-accent-gold shadow-glow-gold'
+                                : 'border-midnight-border/60 bg-midnight-surface/40 text-text-secondary hover:text-text-primary hover:border-midnight-border hover:bg-midnight-surface/70'
+                            } ${!isEditing ? 'opacity-80 cursor-default' : ''}`}
+                          >
+                            <span className="capitalize text-sm font-medium tracking-normal">{impact.label}</span>
+                            <div className={`w-5 h-5 rounded-md flex items-center justify-center border transition-colors ${
+                              isSelected
+                                ? 'bg-accent-gold border-accent-gold text-midnight-bg'
+                                : 'border-white/20 bg-white/5'
+                            }`}>
+                              {isSelected && <Check className="w-3.5 h-3.5 stroke-[3]" />}
+                            </div>
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
                 </div>

@@ -284,9 +284,9 @@ export function WisdomDashboard() {
               <p className="text-2xl font-bold text-text-primary">{stats.totalPrinciples}</p>
             </div>
             
-            <div className="surface-interactive rounded-xl p-4 hover:shadow-glow-cyan">
+            <div className="surface-interactive rounded-xl p-4 hover:shadow-glow-gold">
               <div className="flex items-center gap-2 mb-2">
-                <Quote className="w-4 h-4 text-accent-cyan" />
+                <Quote className="w-4 h-4 text-accent-gold" />
                 <span className="text-text-secondary text-sm">Quotes</span>
               </div>
               <p className="text-2xl font-bold text-text-primary">{stats.totalQuotes}</p>
@@ -374,9 +374,9 @@ export function WisdomDashboard() {
 
               {/* Recent Activity */}
               {stats && stats.recentActivity.length > 0 && (
-                <div className="surface-interactive rounded-xl p-6 hover:shadow-glow-cyan">
+                <div className="surface-interactive rounded-xl p-6 hover:shadow-glow-gold">
                   <h3 className="text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
-                    <Clock className="w-5 h-5 text-accent-cyan" />
+                    <Clock className="w-5 h-5 text-accent-gold" />
                     Recent Activity
                   </h3>
                   <div className="space-y-3">
@@ -495,7 +495,7 @@ export function WisdomDashboard() {
               <div className="glass-card rounded-xl p-6">
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-lg font-semibold text-text-primary flex items-center gap-2">
-                    <Quote className="w-5 h-5 text-accent-cyan" />
+                    <Quote className="w-5 h-5 text-accent-gold" />
                     Meaningful Quotes
                   </h3>
                   <button onClick={() => { setModalType('quote'); setShowModal(true); }} className="btn btn-primary flex items-center gap-2">
@@ -507,14 +507,14 @@ export function WisdomDashboard() {
                 {wisdom.quotes.length > 0 ? (
                   <div className="space-y-4">
                     {wisdom.quotes.map((quote) => (
-                      <div key={quote.id} className="border-l-4 border-accent-cyan/50 pl-4">
+                      <div key={quote.id} className="border-l-4 border-accent-gold/50 pl-4">
                         <blockquote className="text-text-primary text-lg mb-2">"{quote.content}"</blockquote>
                         <p className="text-text-primary/60 mb-2">— {quote.attribution}</p>
                         {quote.personalMeaning && (
                           <p className="text-text-primary/70 text-sm italic">{quote.personalMeaning}</p>
                         )}
                         <div className="flex items-center gap-4 text-sm mt-2">
-                          <span className="text-accent-cyan">{quote.category}</span>
+                          <span className="text-accent-gold">{quote.category}</span>
                           <span className="text-text-primary/60">Resonance: {quote.resonance}/10</span>
                         </div>
                       </div>

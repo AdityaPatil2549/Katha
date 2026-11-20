@@ -149,8 +149,8 @@ export function CommandPalette({ isOpen, onClose }: { isOpen: boolean; onClose: 
             className="relative w-full max-w-2xl bg-midnight-surface/95 border border-midnight-border rounded-2xl shadow-2xl overflow-hidden z-10 flex flex-col max-h-[75vh]"
           >
             {/* Search Bar Header */}
-            <div className="flex items-center gap-3 px-5 py-4 border-b border-midnight-border bg-midnight-bg/40">
-              <Search className="w-5 h-5 text-accent-primary shrink-0" />
+            <div className="flex items-center gap-3 px-5 py-3 border-b border-midnight-border bg-midnight-bg/40">
+              <Search className="w-5 h-5 text-accent-gold shrink-0" />
               <input
                 ref={inputRef}
                 type="text"
@@ -161,12 +161,12 @@ export function CommandPalette({ isOpen, onClose }: { isOpen: boolean; onClose: 
                 }}
                 onKeyDown={handleInputKeyDown}
                 placeholder="Jump to a story, life phase, tool, or command..."
-                className="w-full bg-transparent border-none text-base text-text-primary placeholder:text-text-muted focus:outline-none"
+                className="w-full bg-transparent border-none text-base text-text-primary placeholder:text-text-muted focus:outline-none min-h-[44px] py-2"
               />
               <button
                 type="button"
                 onClick={onClose}
-                className="p-1 rounded-md text-text-muted hover:text-text-primary transition-colors"
+                className="w-11 h-11 min-w-[44px] min-h-[44px] inline-flex items-center justify-center rounded-lg text-text-muted hover:text-text-primary hover:bg-white/5 transition-colors"
                 aria-label="Close command palette"
               >
                 <X className="w-4 h-4" />
@@ -202,12 +202,12 @@ export function CommandPalette({ isOpen, onClose }: { isOpen: boolean; onClose: 
 
                       <div className="flex items-center gap-2 shrink-0">
                         {item.badge && (
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-accent-primary/10 text-accent-primary border border-accent-primary/25">
+                          <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider bg-accent-gold/15 text-accent-gold border border-accent-gold/30">
                             {item.badge}
                           </span>
                         )}
                         {isSelected && (
-                          <CornerDownLeft className="w-3.5 h-3.5 text-accent-primary animate-pulse" />
+                          <CornerDownLeft className="w-3.5 h-3.5 text-accent-gold animate-pulse" />
                         )}
                       </div>
                     </div>
@@ -221,12 +221,12 @@ export function CommandPalette({ isOpen, onClose }: { isOpen: boolean; onClose: 
             </div>
 
             {/* Footer Hint */}
-            <div className="flex items-center justify-between px-5 py-2.5 bg-midnight-bg/70 border-t border-midnight-border text-[11px] text-text-muted">
+            <div className="flex items-center justify-between px-5 py-2.5 bg-midnight-bg/70 border-t border-midnight-border text-xs text-text-muted">
               <div className="flex items-center gap-4">
-                <span>Use <kbd className="px-1.5 py-0.5 rounded bg-midnight-surface border border-midnight-border text-[10px] font-mono">↑</kbd> <kbd className="px-1.5 py-0.5 rounded bg-midnight-surface border border-midnight-border text-[10px] font-mono">↓</kbd> to navigate</span>
-                <span><kbd className="px-1.5 py-0.5 rounded bg-midnight-surface border border-midnight-border text-[10px] font-mono">↵</kbd> to select</span>
+                <span>Use <kbd className="px-1.5 py-0.5 rounded bg-midnight-surface border border-midnight-border text-xs font-mono">↑</kbd> <kbd className="px-1.5 py-0.5 rounded bg-midnight-surface border border-midnight-border text-xs font-mono">↓</kbd> to navigate</span>
+                <span><kbd className="px-1.5 py-0.5 rounded bg-midnight-surface border border-midnight-border text-xs font-mono">↵</kbd> to select</span>
               </div>
-              <span><kbd className="px-1.5 py-0.5 rounded bg-midnight-surface border border-midnight-border text-[10px] font-mono">ESC</kbd> to close</span>
+              <span><kbd className="px-1.5 py-0.5 rounded bg-midnight-surface border border-midnight-border text-xs font-mono">ESC</kbd> to close</span>
             </div>
           </motion.div>
         </div>

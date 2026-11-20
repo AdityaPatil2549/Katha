@@ -133,7 +133,7 @@ export function Dropdown({ value, onChange, options, className = '' }: DropdownP
                     <span className="truncate">{option.label}</span>
                     {isSelected && (
                       <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }}>
-                        <Check className="w-4 h-4 text-accent-cyan" />
+                        <Check className="w-4 h-4 text-accent-gold" />
                       </motion.div>
                     )}
                   </button>

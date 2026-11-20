@@ -336,10 +336,11 @@ export default function MemoryWorldPage() {
 
             <div className="flex gap-3">
               <button
+                type="button"
                 onClick={() => setShowPrivateOnly(!showPrivateOnly)}
-                className={`px-4 py-2 rounded-[12px] text-sm font-medium transition-all duration-300 flex items-center gap-2 ${
+                className={`min-h-[44px] px-4 py-2.5 rounded-[12px] text-sm font-medium transition-all duration-300 flex items-center gap-2 ${
                   showPrivateOnly 
-                    ? 'border border-accent-cyan text-accent-cyan shadow-[0_0_15px_rgba(0,242,254,0.2)] bg-accent-cyan/10' 
+                    ? 'border border-accent-gold text-accent-gold shadow-glow-gold bg-accent-gold/15' 
                     : 'border border-white/10 text-text-secondary hover:text-primary hover:border-white/20 hover:bg-white/5'
                 }`}
               >
@@ -380,16 +381,18 @@ export default function MemoryWorldPage() {
                   </h2>
                   <div className="flex gap-2 bg-midnight-surface/20 p-1.5 rounded-chip border border-midnight-border/50 backdrop-blur-md">
                     <button
+                      type="button"
                       onClick={() => setViewMode('grid')}
                       aria-label="Grid View"
-                      className={`p-2.5 rounded-full transition-all duration-500 ease-out ${viewMode === 'grid' ? 'bg-text-primary text-midnight-bg shadow-sm' : 'text-text-muted hover:text-text-primary'}`}
+                      className={`w-11 h-11 min-w-[44px] min-h-[44px] inline-flex items-center justify-center rounded-full transition-all duration-500 ease-out ${viewMode === 'grid' ? 'bg-text-primary text-midnight-bg shadow-sm' : 'text-text-muted hover:text-text-primary'}`}
                     >
                       <Grid className="w-4 h-4" />
                     </button>
                     <button
+                      type="button"
                       onClick={() => setViewMode('list')}
                       aria-label="List View"
-                      className={`p-2.5 rounded-full transition-all duration-500 ease-out ${viewMode === 'list' ? 'bg-text-primary text-midnight-bg shadow-sm' : 'text-text-muted hover:text-text-primary'}`}
+                      className={`w-11 h-11 min-w-[44px] min-h-[44px] inline-flex items-center justify-center rounded-full transition-all duration-500 ease-out ${viewMode === 'list' ? 'bg-text-primary text-midnight-bg shadow-sm' : 'text-text-muted hover:text-text-primary'}`}
                     >
                       <List className="w-4 h-4" />
                     </button>
@@ -398,7 +401,7 @@ export default function MemoryWorldPage() {
 
                 {loading ? (
                   <div className="flex justify-center py-12">
-                    <div className="w-8 h-8 border-2 border-accent-cyan border-t-transparent rounded-full animate-spin" />
+                    <div className="w-8 h-8 border-2 border-accent-gold border-t-transparent rounded-full animate-spin" />
                   </div>
                 ) : filteredMoments.length === 0 ? (
                   <div className="text-center py-12">
@@ -481,7 +484,7 @@ export default function MemoryWorldPage() {
                                   </div>
 
                                   {moment.quote && (
-                                    <blockquote className="text-quote text-quote mb-4 border-l-4 border-accent-cyan pl-4">
+                                    <blockquote className="text-quote text-quote mb-4 border-l-4 border-accent-gold pl-4">
                                       "{moment.quote}"
                                     </blockquote>
                                   )}
@@ -520,21 +523,23 @@ export default function MemoryWorldPage() {
               <div className="space-y-page">
                 <div className="flex items-center justify-between">
                   <h2 className="heading-2 text-primary flex items-center gap-tight">
-                    <MessageSquare className="w-5 h-5 text-accent-cyan" />
+                    <MessageSquare className="w-5 h-5 text-accent-gold" />
                     Moments Gallery
                   </h2>
                   <div className="flex gap-2 bg-midnight-surface/20 p-1.5 rounded-chip border border-midnight-border/50 backdrop-blur-md">
                     <button
+                      type="button"
                       onClick={() => setViewMode('grid')}
                       aria-label="Grid View"
-                      className={`p-2.5 rounded-full transition-all duration-500 ease-out ${viewMode === 'grid' ? 'bg-text-primary text-midnight-bg shadow-sm' : 'text-text-muted hover:text-text-primary'}`}
+                      className={`w-11 h-11 min-w-[44px] min-h-[44px] inline-flex items-center justify-center rounded-full transition-all duration-500 ease-out ${viewMode === 'grid' ? 'bg-text-primary text-midnight-bg shadow-sm' : 'text-text-muted hover:text-text-primary'}`}
                     >
                       <Grid className="w-4 h-4" />
                     </button>
                     <button
+                      type="button"
                       onClick={() => setViewMode('list')}
                       aria-label="List View"
-                      className={`p-2.5 rounded-full transition-all duration-500 ease-out ${viewMode === 'list' ? 'bg-text-primary text-midnight-bg shadow-sm' : 'text-text-muted hover:text-text-primary'}`}
+                      className={`w-11 h-11 min-w-[44px] min-h-[44px] inline-flex items-center justify-center rounded-full transition-all duration-500 ease-out ${viewMode === 'list' ? 'bg-text-primary text-midnight-bg shadow-sm' : 'text-text-muted hover:text-text-primary'}`}
                     >
                       <List className="w-4 h-4" />
                     </button>
@@ -543,7 +548,7 @@ export default function MemoryWorldPage() {
 
                 {loading ? (
                   <div className="flex justify-center py-12">
-                    <div className="w-8 h-8 border-2 border-accent-cyan border-t-transparent rounded-full animate-spin" />
+                    <div className="w-8 h-8 border-2 border-accent-gold border-t-transparent rounded-full animate-spin" />
                   </div>
                 ) : filteredMoments.length === 0 ? (
                   <div className="text-center py-12">
@@ -601,7 +606,7 @@ export default function MemoryWorldPage() {
                           </div>
 
                           {moment.quote && (
-                            <blockquote className="text-quote text-quote border-l-4 border-accent-cyan pl-4">
+                            <blockquote className="text-quote text-quote border-l-4 border-accent-gold pl-4">
                               "{moment.quote}"
                             </blockquote>
                           )}
@@ -634,7 +639,7 @@ export default function MemoryWorldPage() {
 
                 {loading ? (
                   <div className="flex justify-center py-12">
-                    <div className="w-8 h-8 border-2 border-accent-cyan border-t-transparent rounded-full animate-spin" />
+                    <div className="w-8 h-8 border-2 border-accent-gold border-t-transparent rounded-full animate-spin" />
                   </div>
                 ) : moments.length === 0 ? (
                   <div className="text-center py-12">
@@ -807,7 +812,7 @@ export default function MemoryWorldPage() {
                     <input
                       type="text"
                       required
-                      className="w-full bg-midnight-bg border border-midnight-border rounded-button p-3 text-primary focus:border-accent-cyan outline-none"
+                      className="w-full bg-midnight-bg border border-midnight-border rounded-button p-3 text-primary focus:border-accent-gold outline-none"
                       placeholder="e.g. The final battle, or when they first met..."
                       value={newMoment.context}
                       onChange={e => setNewMoment({...newMoment, context: e.target.value})}
@@ -817,7 +822,7 @@ export default function MemoryWorldPage() {
                     <label className="block text-small font-medium text-secondary mb-1">Your Thoughts *</label>
                     <textarea
                       required
-                      className="w-full bg-midnight-bg border border-midnight-border rounded-button p-3 text-primary focus:border-accent-cyan outline-none"
+                      className="w-full bg-midnight-bg border border-midnight-border rounded-button p-3 text-primary focus:border-accent-gold outline-none"
                       rows={4}
                       placeholder="Why did this moment stand out? How did it make you feel?"
                       value={newMoment.thoughts}
@@ -829,7 +834,7 @@ export default function MemoryWorldPage() {
                       <label className="block text-small font-medium text-secondary mb-1">Quote (Optional)</label>
                       <input
                         type="text"
-                        className="w-full bg-midnight-bg border border-midnight-border rounded-button p-3 text-primary focus:border-accent-cyan outline-none"
+                        className="w-full bg-midnight-bg border border-midnight-border rounded-button p-3 text-primary focus:border-accent-gold outline-none"
                         placeholder="An unforgettable line..."
                         value={newMoment.quote}
                         onChange={e => setNewMoment({...newMoment, quote: e.target.value})}
@@ -839,7 +844,7 @@ export default function MemoryWorldPage() {
                       <label className="block text-small font-medium text-secondary mb-1">Character (Optional)</label>
                       <input
                         type="text"
-                        className="w-full bg-midnight-bg border border-midnight-border rounded-button p-3 text-primary focus:border-accent-cyan outline-none"
+                        className="w-full bg-midnight-bg border border-midnight-border rounded-button p-3 text-primary focus:border-accent-gold outline-none"
                         placeholder="Who said it?"
                         value={newMoment.character}
                         onChange={e => setNewMoment({...newMoment, character: e.target.value})}

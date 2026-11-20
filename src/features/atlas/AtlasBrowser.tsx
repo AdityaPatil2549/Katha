@@ -132,7 +132,7 @@ export function AtlasBrowser() {
 
       <div className="flex flex-wrap gap-2 mb-4">
         {entry.themes.slice(0, 2).map((theme, index) => (
-          <span key={index} className="text-xs bg-accent-cyan/15 text-accent-cyan px-2 py-1 rounded-full">
+          <span key={index} className="text-xs bg-accent-gold/15 text-accent-gold px-2 py-1 rounded-full">
             {theme}
           </span>
         ))}

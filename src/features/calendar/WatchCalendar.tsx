@@ -219,13 +219,13 @@ export default function WatchCalendar() {
           
           {/* Main Calendar Grid */}
           <FadeIn delay={0.4} className="xl:col-span-8">
-            <div className="glass-card rounded-card p-6 md:p-8 shadow-glass relative overflow-hidden h-full">
+            <div className="glass-card rounded-card p-2 sm:p-6 md:p-8 shadow-glass relative overflow-hidden h-full">
               {/* Subtle glowing orb in background */}
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] bg-accent-primary/10 rounded-full blur-[100px] pointer-events-none" />
               
               <div className="relative z-10">
                 {/* Week day headers */}
-                <div className="grid grid-cols-7 gap-4 mb-6">
+                <div className="grid grid-cols-7 gap-1 sm:gap-3 md:gap-4 mb-3 sm:mb-6">
                   {weekDays.map(day => (
                     <div key={day} className="text-center text-xs font-bold tracking-widest uppercase text-text-muted">
                       {day}
@@ -234,7 +234,7 @@ export default function WatchCalendar() {
                 </div>
                 
                 {/* Calendar days */}
-                <div className="grid grid-cols-7 gap-3 md:gap-4">
+                <div className="grid grid-cols-7 gap-1 sm:gap-3 md:gap-4">
                   {Array.from({ length: firstDayOfMonth }).map((_, index) => (
                     <div key={`empty-${index}`} className="aspect-square" />
                   ))}
@@ -244,19 +244,21 @@ export default function WatchCalendar() {
                     const hasActivity = dayData.intensity !== 'none';
                     
                     return (
-                      <div key={format(dayData.date, 'yyyy-MM-dd')} className="relative aspect-square flex items-center justify-center">
+                      <div key={format(dayData.date, 'yyyy-MM-dd')} className="relative aspect-square">
                         {isSelected && (
                           <motion.div
                             layoutId="active-day-ring"
-                            className="absolute inset-0 border-2 border-accent-gold rounded-full shadow-glow-gold"
+                            className="absolute inset-0 border-2 border-accent-gold rounded-full shadow-glow-gold pointer-events-none z-10"
                             transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                           />
                         )}
                         
                         <button
+                          type="button"
                           onClick={() => setSelectedDate(dayData.date)}
+                          aria-label={`Select ${format(dayData.date, 'MMMM d, yyyy')}`}
                           className={`
-                            relative w-full h-full rounded-full flex flex-col items-center justify-center group transition-all duration-300
+                            absolute inset-0 w-full h-full rounded-full flex flex-col items-center justify-center group transition-all duration-300
                             ${!isSelected && 'hover:bg-white/5'}
                             ${isToday(dayData.date) ? 'font-bold text-accent-gold' : 'text-primary'}
                           `}
@@ -392,7 +394,7 @@ export default function WatchCalendar() {
                           <button
                             type="button"
                             onClick={() => navigate('/library')}
-                            className="min-h-[44px] px-4 py-2.5 rounded-chip bg-accent-gold/15 border border-accent-gold/30 text-accent-gold font-sans text-xs uppercase tracking-wider hover:bg-accent-gold/25 transition-all shadow-sm inline-flex items-center justify-center"
+                            className="min-h-[48px] h-12 px-6 py-3 rounded-chip bg-accent-gold/15 border border-accent-gold/30 text-accent-gold font-sans text-xs uppercase tracking-wider hover:bg-accent-gold/25 transition-all shadow-sm inline-flex items-center justify-center font-bold"
                           >
                             Log a Session
                           </button>

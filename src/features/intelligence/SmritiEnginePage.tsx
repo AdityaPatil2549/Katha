@@ -177,7 +177,7 @@ const INTELLIGENCE_MODULES = [
     title: 'Life Patterns',
     description: 'Discover connections between stories and life phases',
     icon: <Activity className="w-5 h-5" />,
-    color: 'cyan',
+    color: 'gold',
   },
   {
     id: 'wisdom',
@@ -292,7 +292,8 @@ export default function SmritiEnginePage() {
   const getModuleColor = (color: string) => {
     const colors = {
       violet: 'text-accent-primary bg-accent-primary/10 border-accent-primary/30',
-      cyan: 'text-accent-cyan bg-accent-cyan/10 border-accent-cyan/30',
+      gold: 'text-accent-gold bg-accent-gold/10 border-accent-gold/30',
+      cyan: 'text-accent-gold bg-accent-gold/10 border-accent-gold/30',
       rose: 'text-accent-rose bg-accent-rose/10 border-accent-rose/30',
       emerald: 'text-accent-emerald bg-accent-emerald/10 border-accent-emerald/30',
       amber: 'text-accent-amber bg-accent-amber/10 border-accent-amber/30'
@@ -449,7 +450,7 @@ export default function SmritiEnginePage() {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <span className="text-small text-secondary">Sophistication Score</span>
-              <span className="text-h3 font-bold text-transparent bg-clip-text bg-gradient-to-r from-accent-primary via-purple-400 to-accent-cyan drop-shadow-[0_0_8px_rgba(139,92,246,0.5)]">
+              <span className="text-h3 font-bold text-transparent bg-clip-text bg-gradient-to-r from-accent-primary via-purple-400 to-accent-gold drop-shadow-[0_0_8px_rgba(139,92,246,0.5)]">
                 {insights.tasteEvolution?.sophisticationScore || 0}/100
               </span>
             </div>
@@ -506,19 +507,19 @@ export default function SmritiEnginePage() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="relative group p-5 bg-midnight-surface/80 border border-midnight-border rounded-2xl overflow-hidden transition-all duration-300 hover:border-accent-cyan/40 hover:shadow-[0_0_20px_rgba(6,182,212,0.15)]"
+              className="relative group p-5 bg-midnight-surface/80 border border-midnight-border rounded-2xl overflow-hidden transition-all duration-300 hover:border-accent-gold/40 hover:shadow-[0_0_20px_rgba(197,160,89,0.15)]"
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-accent-cyan/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="absolute inset-0 bg-gradient-to-r from-accent-gold/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               <div className="flex flex-col relative z-10">
                 <div className="flex gap-4 mb-4">
-                  <div className="w-10 h-10 rounded-full bg-accent-cyan/10 flex items-center justify-center border border-accent-cyan/25 transition-all duration-300 flex-shrink-0">
-                    <PieChart className="w-5 h-5 text-accent-cyan" />
+                  <div className="w-10 h-10 rounded-full bg-accent-gold/10 flex items-center justify-center border border-accent-gold/25 transition-all duration-300 flex-shrink-0">
+                    <PieChart className="w-5 h-5 text-accent-gold" />
                   </div>
-                  <h4 className="font-bold text-text-primary mt-2 group-hover:text-accent-cyan transition-colors">Underground Ratio</h4>
+                  <h4 className="font-bold text-text-primary mt-2 group-hover:text-accent-gold transition-colors">Underground Ratio</h4>
                 </div>
                 
                 <div className="flex items-center gap-4">
-                  <div className="text-h3 font-bold text-accent-cyan tabular-nums">
+                  <div className="text-h3 font-bold text-accent-gold tabular-nums">
                     {((insights.tasteEvolution?.undergroundRatio || 0) * 100).toFixed(0)}%
                   </div>
                   <div className="flex-1">
@@ -527,7 +528,7 @@ export default function SmritiEnginePage() {
                         initial={{ width: 0, opacity: 0 }}
                         animate={{ width: `${(insights.tasteEvolution?.undergroundRatio || 0) * 100}%`, opacity: 1 }}
                         transition={{ duration: 1.2, delay: 0.1, type: "spring", bounce: 0.4 }}
-                        className="h-full rounded-full bg-gradient-to-r from-accent-cyan to-blue-500 shadow-[0_0_20px_rgba(6,182,212,0.4)] relative"
+                        className="h-full rounded-full bg-gradient-to-r from-accent-gold to-amber-500 shadow-[0_0_20px_rgba(197,160,89,0.4)] relative"
                       />
                     </div>
                   </div>
@@ -553,10 +554,10 @@ export default function SmritiEnginePage() {
           <h3 className="heading-3 text-primary mb-section">Viewing Patterns</h3>
           <div className="space-y-8">
             <div className="grid grid-cols-2 gap-4">
-              <div className="relative group overflow-hidden p-6 bg-midnight-surface/80 border border-midnight-border rounded-2xl flex flex-col items-center justify-center gap-3 transition-all duration-300 hover:border-accent-cyan/40 hover:bg-accent-cyan/5">
-                <div className="absolute inset-0 bg-gradient-to-br from-accent-cyan/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <div className="w-12 h-12 rounded-full bg-accent-cyan/10 flex items-center justify-center transition-all duration-300">
-                  <Clock className="w-6 h-6 text-accent-cyan" />
+              <div className="relative group overflow-hidden p-6 bg-midnight-surface/80 border border-midnight-border rounded-2xl flex flex-col items-center justify-center gap-3 transition-all duration-300 hover:border-accent-gold/40 hover:bg-accent-gold/5">
+                <div className="absolute inset-0 bg-gradient-to-br from-accent-gold/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="w-12 h-12 rounded-full bg-accent-gold/10 flex items-center justify-center transition-all duration-300">
+                  <Clock className="w-6 h-6 text-accent-gold" />
                 </div>
                 <div className="text-center z-10">
                   <div className="text-xs font-bold text-text-muted uppercase tracking-wider mb-1">Peak Time</div>
@@ -936,7 +937,7 @@ export default function SmritiEnginePage() {
                     layoutId="intelligence-active-tab"
                     className={`absolute inset-0 rounded-[12px] opacity-80 ${
                       module.color === 'violet' ? 'bg-gradient-to-br from-accent-primary to-purple-600 shadow-[0_0_15px_rgba(139,92,246,0.3)]' :
-                      module.color === 'cyan' ? 'bg-gradient-to-br from-accent-cyan to-blue-500 shadow-[0_0_15px_rgba(0,242,254,0.3)]' :
+                      module.color === 'gold' || module.color === 'cyan' ? 'bg-gradient-to-br from-accent-gold to-amber-600 shadow-[0_0_15px_rgba(197,160,89,0.3)]' :
                       module.color === 'rose' ? 'bg-gradient-to-br from-accent-rose to-pink-500 shadow-[0_0_15px_rgba(244,63,94,0.3)]' :
                       module.color === 'emerald' ? 'bg-gradient-to-br from-accent-emerald to-green-500 shadow-[0_0_15px_rgba(16,185,129,0.3)]' :
                       'bg-gradient-to-br from-accent-amber to-orange-500 shadow-[0_0_15px_rgba(245,158,11,0.3)]'

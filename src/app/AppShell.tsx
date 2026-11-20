@@ -163,7 +163,7 @@ export function AppShell() {
             >
               <Search className="w-4 h-4 text-text-muted" />
               <span className="hidden lg:inline text-xs font-medium">Search...</span>
-              <kbd className="hidden sm:inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-midnight-bg/60 border border-midnight-border text-[10px] font-mono text-text-muted">
+              <kbd className="hidden sm:inline-flex items-center gap-0.5 px-2 py-0.5 rounded bg-midnight-bg/60 border border-midnight-border text-xs font-mono text-text-muted">
                 ⌘K
               </kbd>
             </button>
@@ -190,12 +190,12 @@ export function AppShell() {
                 </>
               ) : isSyncing ? (
                 <>
-                  <RefreshCw className="w-4 h-4 text-accent-cyan animate-spin" />
+                  <RefreshCw className="w-4 h-4 text-accent-gold animate-spin" />
                   <span className="hidden sm:inline text-xs font-medium text-text-secondary">Syncing...</span>
                 </>
               ) : pendingCount > 0 ? (
                 <>
-                  <Cloud className="w-4 h-4 text-accent-cyan" />
+                  <Cloud className="w-4 h-4 text-accent-gold" />
                   <span className="hidden sm:inline text-xs font-medium text-text-secondary">{pendingCount} Pending</span>
                 </>
               ) : (

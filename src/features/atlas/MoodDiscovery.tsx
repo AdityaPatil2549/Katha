@@ -93,10 +93,10 @@ export function MoodDiscovery() {
   const getMoodTheme = (mood: string) => {
     const themes = {
       'lost': {
-        gradient: 'from-blue-500/20 to-indigo-500/20',
-        borderColor: 'border-blue',
-        iconColor: 'text-accent-cyan',
-        bgColor: 'bg-accent-cyan/10',
+        gradient: 'from-sky-500/20 to-indigo-500/20',
+        borderColor: 'border-sky-500/40',
+        iconColor: 'text-sky-400',
+        bgColor: 'bg-sky-500/10',
         title: 'Feeling Lost',
         description: 'Find your direction'
       },
@@ -125,10 +125,10 @@ export function MoodDiscovery() {
         description: 'Find calm and clarity'
       },
       'contemplative': {
-        gradient: 'from-cyan-500/20 to-teal-500/20',
-        borderColor: 'border-accent-cyan',
-        iconColor: 'text-accent-cyan',
-        bgColor: 'bg-accent-cyan/10',
+        gradient: 'from-accent-gold/20 to-amber-500/20',
+        borderColor: 'border-accent-gold',
+        iconColor: 'text-accent-gold',
+        bgColor: 'bg-accent-gold/15',
         title: 'Feeling Contemplative',
         description: 'Deepen your understanding'
       }
@@ -182,7 +182,7 @@ export function MoodDiscovery() {
           >
             <button
               onClick={() => setSelectedMood(null)}
-              className="flex items-center gap-2 text-text-primary/60 hover:text-text-primary mb-4 transition-colors"
+              className="min-h-[44px] px-3.5 py-2 rounded-lg inline-flex items-center gap-2 text-text-primary/70 hover:text-text-primary hover:bg-midnight-surface mb-4 transition-colors"
             >
               <ArrowRight className="w-4 h-4 rotate-180" />
               Back to Moods
@@ -370,7 +370,7 @@ export function MoodDiscovery() {
                         e.stopPropagation();
                         loadMoodEntries(mood);
                       }} 
-                      className={`text-sm ${theme.iconColor} hover:opacity-80 transition-opacity font-medium`}
+                      className={`min-h-[44px] px-3 py-2 inline-flex items-center text-sm ${theme.iconColor} hover:opacity-80 transition-opacity font-medium`}
                     >
                       Explore Stories →
                     </button>
@@ -395,8 +395,8 @@ export function MoodDiscovery() {
             
             <div className="grid gap-6 md:grid-cols-3">
               <div className="text-center">
-                <div className="p-4 bg-accent-cyan/15 rounded-xl mb-4 inline-block">
-                  <Heart className="w-8 h-8 text-accent-cyan" />
+                <div className="p-4 bg-accent-gold/15 rounded-xl mb-4 inline-block">
+                  <Heart className="w-8 h-8 text-accent-gold" />
                 </div>
                 <h3 className="text-lg font-semibold text-text-primary mb-2">Emotional Matching</h3>
                 <p className="text-text-primary/70 text-sm">
@@ -449,7 +449,7 @@ export function MoodDiscovery() {
               </div>
               
               <div className="flex items-start gap-3">
-                <Moon className="w-5 h-5 text-accent-cyan mt-1" />
+                <Moon className="w-5 h-5 text-accent-gold mt-1" />
                 <div>
                   <h3 className="text-text-primary font-medium mb-1">Consider Your Desired State</h3>
                   <p className="text-text-primary/70 text-sm">Think about how you want to feel after watching the story.</p>

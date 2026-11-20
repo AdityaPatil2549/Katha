@@ -57,10 +57,10 @@ export function LifePhaseRecommendations() {
   const getPhaseTheme = (phase: string) => {
     const themes = {
       'College': {
-        gradient: 'from-blue-500/20 to-cyan-500/20',
-        borderColor: 'border-accent-cyan',
-        iconColor: 'text-accent-cyan',
-        bgColor: 'bg-accent-cyan/10',
+        gradient: 'from-amber-500/20 to-accent-gold/20',
+        borderColor: 'border-accent-gold',
+        iconColor: 'text-accent-gold',
+        bgColor: 'bg-accent-gold/15',
         title: 'College Years',
         description: 'Discovery, growth, and foundation building'
       },
@@ -335,7 +335,7 @@ export function LifePhaseRecommendations() {
                       <h3 className="text-sm font-semibold text-text-primary mb-2">Key Themes</h3>
                       <div className="flex flex-wrap gap-1">
                         {phase.recommendedThemes.slice(0, 2).map((t, idx) => (
-                          <span key={idx} className="text-xs px-2 py-1 rounded-full bg-accent-cyan/15 text-accent-cyan">
+                          <span key={idx} className="text-xs px-2 py-1 rounded-full bg-accent-gold/15 text-accent-gold border border-accent-gold/25">
                             {t}
                           </span>
                         ))}
@@ -384,8 +384,8 @@ export function LifePhaseRecommendations() {
             
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
               <div className="text-center">
-                <div className="p-4 bg-accent-cyan/15 rounded-xl mb-4 inline-block">
-                  <Users className="w-8 h-8 text-accent-cyan" />
+                <div className="p-4 bg-accent-gold/15 rounded-xl mb-4 inline-block">
+                  <Users className="w-8 h-8 text-accent-gold" />
                 </div>
                 <h3 className="text-lg font-semibold text-text-primary mb-2">Life Context</h3>
                 <p className="text-text-primary/70 text-sm">
