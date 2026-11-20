@@ -17,6 +17,7 @@ import {
 import { motion } from 'framer-motion';
 import { useStoriesStore } from '@/store';
 import { useSyncStore } from '@/store/syncStore';
+import { useSettingsStore } from '@/store/settingsStore';
 import { useNavigate } from 'react-router-dom';
 import { FadeIn } from '@/components/ui/motion/FadeIn';
 import { StaggerContainer, staggerItemVariants } from '@/components/ui/motion/StaggerContainer';
@@ -43,7 +44,7 @@ export default function LibraryPage() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [quickFilter, setQuickFilter] = useState<QuickFilter>('all');
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const { libraryViewMode: viewMode, setLibraryViewMode: setViewMode } = useSettingsStore();
   const [sortBy, setSortBy] = useState<LibrarySortField>('updatedAt');
 
   useEffect(() => {
@@ -219,16 +220,18 @@ export default function LibraryPage() {
             {/* View Mode */}
             <div className="flex gap-2 bg-midnight-surface/20 p-1.5 rounded-chip border border-midnight-border/50 backdrop-blur-md">
               <button
+                type="button"
                 onClick={() => setViewMode('grid')}
                 aria-label="Grid View"
-                className={`p-2.5 rounded-full transition-all duration-500 ease-out ${viewMode === 'grid' ? 'bg-text-primary text-midnight-bg shadow-sm' : 'text-text-muted hover:text-text-primary'}`}
+                className={`w-11 h-11 min-w-[44px] min-h-[44px] inline-flex items-center justify-center rounded-full transition-all duration-500 ease-out ${viewMode === 'grid' ? 'bg-text-primary text-midnight-bg shadow-sm' : 'text-text-muted hover:text-text-primary'}`}
               >
                 <Grid className="w-4 h-4" />
               </button>
               <button
+                type="button"
                 onClick={() => setViewMode('list')}
                 aria-label="List View"
-                className={`p-2.5 rounded-full transition-all duration-500 ease-out ${viewMode === 'list' ? 'bg-text-primary text-midnight-bg shadow-sm' : 'text-text-muted hover:text-text-primary'}`}
+                className={`w-11 h-11 min-w-[44px] min-h-[44px] inline-flex items-center justify-center rounded-full transition-all duration-500 ease-out ${viewMode === 'list' ? 'bg-text-primary text-midnight-bg shadow-sm' : 'text-text-muted hover:text-text-primary'}`}
               >
                 <List className="w-4 h-4" />
               </button>
@@ -243,7 +246,7 @@ export default function LibraryPage() {
             onClick={() => toggleQuickFilter('favorites')}
             aria-pressed={quickFilter === 'favorites'}
             aria-label="Filter by Favorites"
-            className={`group flex items-center gap-3 px-6 py-2.5 rounded-chip border text-sm transition-all duration-300 ${
+            className={`group flex items-center gap-3 px-6 py-2.5 min-h-[44px] rounded-chip border text-sm transition-all duration-300 ${
               quickFilter === 'favorites'
                 ? 'border-accent-rose bg-accent-rose/10 text-text-primary'
                 : 'border-midnight-border/50 text-text-secondary hover:text-text-primary hover:border-text-primary'
@@ -257,13 +260,13 @@ export default function LibraryPage() {
             onClick={() => toggleQuickFilter('watching')}
             aria-pressed={quickFilter === 'watching'}
             aria-label="Filter by Watching"
-            className={`group flex items-center gap-3 px-6 py-2.5 rounded-chip border text-sm transition-all duration-300 ${
+            className={`group flex items-center gap-3 px-6 py-2.5 min-h-[44px] rounded-chip border text-sm transition-all duration-300 ${
               quickFilter === 'watching'
-                ? 'border-accent-cyan bg-accent-cyan/10 text-text-primary'
+                ? 'border-accent-gold bg-accent-gold/10 text-text-primary'
                 : 'border-midnight-border/50 text-text-secondary hover:text-text-primary hover:border-text-primary'
             }`}
           >
-            <Play className={`w-4 h-4 transition-colors ${quickFilter === 'watching' ? 'text-accent-cyan' : 'group-hover:text-accent-cyan'}`} />
+            <Play className={`w-4 h-4 transition-colors ${quickFilter === 'watching' ? 'text-accent-gold' : 'group-hover:text-accent-gold'}`} />
             Watching
           </button>
           <button
@@ -271,7 +274,7 @@ export default function LibraryPage() {
             onClick={() => toggleQuickFilter('completed')}
             aria-pressed={quickFilter === 'completed'}
             aria-label="Filter by Completed"
-            className={`group flex items-center gap-3 px-6 py-2.5 rounded-chip border text-sm transition-all duration-300 ${
+            className={`group flex items-center gap-3 px-6 py-2.5 min-h-[44px] rounded-chip border text-sm transition-all duration-300 ${
               quickFilter === 'completed'
                 ? 'border-accent-emerald bg-accent-emerald/10 text-text-primary'
                 : 'border-midnight-border/50 text-text-secondary hover:text-text-primary hover:border-text-primary'
@@ -395,9 +398,9 @@ export default function LibraryPage() {
       {/* Empty State */}
       {!loading && filteredStories().length === 0 && (
         <FadeIn delay={0.2} duration={0.8} distance={20} className="text-center py-32 max-w-2xl mx-auto flex flex-col items-center">
-          <div className="w-28 h-28 mx-auto mb-10 rounded-[2.5rem] border border-accent-cyan/20 bg-midnight-surface/60 flex items-center justify-center shadow-glow-cyan relative overflow-hidden group backdrop-blur-xl">
-            <div className="absolute inset-0 bg-gradient-to-br from-accent-cyan/20 to-accent-primary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-            <Search className="w-12 h-12 text-accent-cyan group-hover:scale-110 transition-transform duration-500 relative z-10" />
+          <div className="w-28 h-28 mx-auto mb-10 rounded-[2.5rem] border border-accent-gold/20 bg-midnight-surface/60 flex items-center justify-center shadow-glow-gold relative overflow-hidden group backdrop-blur-xl">
+            <div className="absolute inset-0 bg-gradient-to-br from-accent-gold/20 to-accent-primary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+            <Search className="w-12 h-12 text-accent-gold group-hover:scale-110 transition-transform duration-500 relative z-10" />
           </div>
           <h3 className="font-serif text-5xl text-text-primary mb-6 tracking-tight drop-shadow-lg">
             {searchQuery || selectedCategory !== 'all' || selectedStatus !== 'all' ? 'Nothing Found' : 'Blank Canvas'}

@@ -89,10 +89,10 @@ export function Dropdown({ value, onChange, options, className = '' }: DropdownP
         aria-expanded={isOpen}
         onClick={() => setIsOpen(!isOpen)}
         onKeyDown={handleKeyDown}
-        className={`flex items-center justify-between gap-3 px-5 py-3.5 bg-midnight-surface/40 border border-midnight-border/50 rounded-xl text-primary font-medium hover:bg-midnight-surface transition-all duration-300 backdrop-blur-md shadow-sm min-w-[160px] focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-cyan/50 ${isOpen ? 'border-accent-cyan/50 bg-midnight-surface/80 ring-2 ring-accent-cyan/10 shadow-[0_0_20px_rgba(45,212,191,0.1)]' : ''} ${className}`}
+        className={`flex items-center justify-between gap-3 px-5 py-3 min-h-[44px] bg-midnight-surface/40 border border-midnight-border/50 rounded-xl text-primary font-medium hover:bg-midnight-surface transition-all duration-300 backdrop-blur-md shadow-sm min-w-[160px] focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-gold/50 ${isOpen ? 'border-accent-gold/50 bg-midnight-surface/80 ring-2 ring-accent-gold/10 shadow-[0_0_20px_rgba(197,160,89,0.15)]' : ''} ${className}`}
       >
         <span className="truncate">{selectedOption?.label}</span>
-        <ChevronDown className={`w-4 h-4 text-secondary transition-transform duration-300 ${isOpen ? 'rotate-180 text-accent-cyan' : ''}`} />
+        <ChevronDown className={`w-4 h-4 text-secondary transition-transform duration-300 ${isOpen ? 'rotate-180 text-accent-gold' : ''}`} />
       </button>
 
       <AnimatePresence>
@@ -122,9 +122,9 @@ export function Dropdown({ value, onChange, options, className = '' }: DropdownP
                       setIsOpen(false);
                     }}
                     onMouseEnter={() => setFocusedIndex(idx)}
-                    className={`w-full flex items-center justify-between px-5 py-3 text-sm transition-all duration-200 ${
+                    className={`w-full flex items-center justify-between px-5 py-3 min-h-[44px] text-sm transition-all duration-200 ${
                       isSelected
-                        ? 'bg-accent-cyan/10 text-accent-cyan font-semibold'
+                        ? 'bg-accent-gold/15 text-accent-gold font-semibold'
                         : isFocused
                         ? 'bg-white/5 text-primary'
                         : 'text-secondary hover:text-primary'

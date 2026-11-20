@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { BlurReveal } from '@/components/ui/motion/BlurReveal';
 import { FadeIn } from '@/components/ui/motion/FadeIn';
 import { StaggerContainer } from '@/components/ui/motion/StaggerContainer';
-import { Search, Filter, Book, Film, Tv, PlayCircle, FileText, Clock, Star, Heart, Brain, Compass, Sparkles } from 'lucide-react';
+import { Search, Filter, Book, Film, Tv, PlayCircle, FileText, Clock, Star, Heart, Brain, Compass, Sparkles, Check } from 'lucide-react';
 import { atlasRepository } from '@/db/repositories/AtlasRepository';
 import type { AtlasEntry, AtlasCollection, AtlasDiscoveryFilters, AtlasSearchResult } from '@/types/atlas';
 
@@ -205,84 +205,129 @@ export function AtlasBrowser() {
       <div>
         <label className="block text-sm font-medium text-text-primary/80 mb-2">Category</label>
         <div className="space-y-2">
-          {(['movie', 'series', 'anime', 'documentary'] as const).map((category) => (
-            <label key={category} className="flex items-center gap-2 text-text-primary/60">
-              <input
-                type="checkbox"
-                checked={filters.category?.includes(category) || false}
-                onChange={(e) => {
+          {(['movie', 'series', 'anime', 'documentary'] as const).map((category) => {
+            const isSelected = filters.category?.includes(category) || false;
+            return (
+              <button
+                key={category}
+                type="button"
+                role="checkbox"
+                aria-checked={isSelected}
+                aria-label={`Filter by ${category}`}
+                onClick={() => {
                   const current = filters.category || [];
                   setFilters({
                     ...filters,
-                    category: e.target.checked
-                      ? [...current, category as AtlasEntry['category']]
-                      : current.filter(c => c !== category)
+                    category: isSelected
+                      ? current.filter(c => c !== category)
+                      : [...current, category as AtlasEntry['category']]
                   });
                 }}
-                className="rounded"
-                aria-label={`Filter by ${category}`}
-              />
-              <span className="capitalize">{category}</span>
-            </label>
-          ))}
+                className={`w-full min-h-[44px] px-3.5 py-2.5 rounded-xl border flex items-center justify-between text-xs font-semibold uppercase tracking-wider transition-all duration-300 ${
+                  isSelected
+                    ? 'border-accent-gold bg-accent-gold/15 text-accent-gold shadow-glow-gold'
+                    : 'border-midnight-border/60 bg-midnight-surface/40 text-text-secondary hover:text-text-primary hover:border-midnight-border hover:bg-midnight-surface/70'
+                }`}
+              >
+                <span className="capitalize text-sm font-medium tracking-normal">{category}</span>
+                <div className={`w-5 h-5 rounded-md flex items-center justify-center border transition-colors ${
+                  isSelected
+                    ? 'bg-accent-gold border-accent-gold text-midnight-bg'
+                    : 'border-white/20 bg-white/5'
+                }`}>
+                  {isSelected && <Check className="w-3.5 h-3.5 stroke-[3]" />}
+                </div>
+              </button>
+            );
+          })}
         </div>
       </div>
 
       <div>
         <label className="block text-sm font-medium text-text-primary/80 mb-2">Difficulty</label>
         <div className="space-y-2">
-          {(['easy', 'medium', 'heavy'] as const).map((difficulty) => (
-            <label key={difficulty} className="flex items-center gap-2 text-text-primary/60">
-              <input
-                type="checkbox"
-                checked={filters.difficulty?.includes(difficulty) || false}
-                onChange={(e) => {
+          {(['easy', 'medium', 'heavy'] as const).map((difficulty) => {
+            const isSelected = filters.difficulty?.includes(difficulty) || false;
+            return (
+              <button
+                key={difficulty}
+                type="button"
+                role="checkbox"
+                aria-checked={isSelected}
+                aria-label={`Filter by ${difficulty} difficulty`}
+                onClick={() => {
                   const current = filters.difficulty || [];
                   setFilters({
                     ...filters,
-                    difficulty: e.target.checked
-                      ? [...current, difficulty as AtlasEntry['difficulty']]
-                      : current.filter(d => d !== difficulty)
+                    difficulty: isSelected
+                      ? current.filter(d => d !== difficulty)
+                      : [...current, difficulty as AtlasEntry['difficulty']]
                   });
                 }}
-                className="rounded"
-                aria-label={`Filter by ${difficulty} difficulty`}
-              />
-              <span className="capitalize">{difficulty}</span>
-            </label>
-          ))}
+                className={`w-full min-h-[44px] px-3.5 py-2.5 rounded-xl border flex items-center justify-between text-xs font-semibold uppercase tracking-wider transition-all duration-300 ${
+                  isSelected
+                    ? 'border-accent-gold bg-accent-gold/15 text-accent-gold shadow-glow-gold'
+                    : 'border-midnight-border/60 bg-midnight-surface/40 text-text-secondary hover:text-text-primary hover:border-midnight-border hover:bg-midnight-surface/70'
+                }`}
+              >
+                <span className="capitalize text-sm font-medium tracking-normal">{difficulty}</span>
+                <div className={`w-5 h-5 rounded-md flex items-center justify-center border transition-colors ${
+                  isSelected
+                    ? 'bg-accent-gold border-accent-gold text-midnight-bg'
+                    : 'border-white/20 bg-white/5'
+                }`}>
+                  {isSelected && <Check className="w-3.5 h-3.5 stroke-[3]" />}
+                </div>
+              </button>
+            );
+          })}
         </div>
       </div>
 
       <div>
         <label className="block text-sm font-medium text-text-primary/80 mb-2">Themes</label>
         <div className="space-y-2">
-          {['hope', 'love', 'war', 'philosophy', 'growth'].map((theme) => (
-            <label key={theme} className="flex items-center gap-2 text-text-primary/60">
-              <input
-                type="checkbox"
-                checked={filters.themes?.includes(theme) || false}
-                onChange={(e) => {
+          {['hope', 'love', 'war', 'philosophy', 'growth'].map((theme) => {
+            const isSelected = filters.themes?.includes(theme) || false;
+            return (
+              <button
+                key={theme}
+                type="button"
+                role="checkbox"
+                aria-checked={isSelected}
+                aria-label={`Filter by ${theme} theme`}
+                onClick={() => {
                   const current = filters.themes || [];
                   setFilters({
                     ...filters,
-                    themes: e.target.checked
-                      ? [...current, theme]
-                      : current.filter(t => t !== theme)
+                    themes: isSelected
+                      ? current.filter(t => t !== theme)
+                      : [...current, theme]
                   });
                 }}
-                className="rounded"
-                aria-label={`Filter by ${theme} theme`}
-              />
-              <span className="capitalize">{theme}</span>
-            </label>
-          ))}
+                className={`w-full min-h-[44px] px-3.5 py-2.5 rounded-xl border flex items-center justify-between text-xs font-semibold uppercase tracking-wider transition-all duration-300 ${
+                  isSelected
+                    ? 'border-accent-gold bg-accent-gold/15 text-accent-gold shadow-glow-gold'
+                    : 'border-midnight-border/60 bg-midnight-surface/40 text-text-secondary hover:text-text-primary hover:border-midnight-border hover:bg-midnight-surface/70'
+                }`}
+              >
+                <span className="capitalize text-sm font-medium tracking-normal">{theme}</span>
+                <div className={`w-5 h-5 rounded-md flex items-center justify-center border transition-colors ${
+                  isSelected
+                    ? 'bg-accent-gold border-accent-gold text-midnight-bg'
+                    : 'border-white/20 bg-white/5'
+                }`}>
+                  {isSelected && <Check className="w-3.5 h-3.5 stroke-[3]" />}
+                </div>
+              </button>
+            );
+          })}
         </div>
       </div>
 
       <button
         onClick={applyFilters}
-        className="btn btn-primary w-full"
+        className="btn btn-primary w-full min-h-[44px] py-3 text-sm font-bold"
       >
         Apply Filters
       </button>
@@ -364,10 +409,11 @@ export function AtlasBrowser() {
             <div className="mb-6 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <button
+                  type="button"
                   onClick={() => setView('grid')}
                   title="Grid view"
                   aria-label="Switch to grid view"
-                  className={`p-2 rounded-lg transition-colors ${
+                  className={`w-11 h-11 min-w-[44px] min-h-[44px] inline-flex items-center justify-center rounded-lg transition-colors ${
                     view === 'grid'
                       ? 'bg-accent-primary text-white'
                       : 'surface-elevated text-text-primary/60 hover:text-text-primary'
@@ -376,10 +422,11 @@ export function AtlasBrowser() {
                   <Brain className="w-4 h-4" />
                 </button>
                 <button
+                  type="button"
                   onClick={() => setView('list')}
                   title="List view"
                   aria-label="Switch to list view"
-                  className={`p-2 rounded-lg transition-colors ${
+                  className={`w-11 h-11 min-w-[44px] min-h-[44px] inline-flex items-center justify-center rounded-lg transition-colors ${
                     view === 'list'
                       ? 'bg-accent-primary text-white'
                       : 'surface-elevated text-text-primary/60 hover:text-text-primary'

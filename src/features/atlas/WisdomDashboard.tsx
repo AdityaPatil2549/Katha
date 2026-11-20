@@ -219,8 +219,9 @@ export function WisdomDashboard() {
               />
             </div>
             <button
+              type="button"
               onClick={() => exportWisdom('markdown')}
-              className="btn btn-secondary flex items-center gap-2 flex-shrink-0"
+              className="btn btn-secondary min-h-[44px] px-4 py-2.5 flex items-center gap-2 flex-shrink-0 text-sm font-semibold"
             >
               <Download className="w-4 h-4" />
               Export

@@ -894,9 +894,10 @@ export default function SmritiEnginePage() {
               <div className="hidden sm:block h-8 w-px bg-midnight-border mx-1" />
               <Magnetic>
                 <button
+                  type="button"
                   onClick={handleRunAnalysis}
                   disabled={isAnalyzing}
-                  className="px-6 py-3 rounded-[16px] bg-gradient-to-r from-accent-primary to-purple-600 text-white text-sm font-bold tracking-wide flex items-center gap-2 shadow-[0_0_20px_rgba(139,92,246,0.4)] hover:shadow-[0_0_30px_rgba(139,92,246,0.7)] hover:-translate-y-0.5 transition-all duration-300 border border-white/10"
+                  className="min-h-[44px] px-6 py-3 rounded-[16px] bg-gradient-to-r from-accent-primary to-purple-600 text-white text-sm font-bold tracking-wide flex items-center gap-2 shadow-[0_0_20px_rgba(139,92,246,0.4)] hover:shadow-[0_0_30px_rgba(139,92,246,0.7)] hover:-translate-y-0.5 transition-all duration-300 border border-white/10"
                 >
                   {isAnalyzing ? (
                     <>
@@ -1007,15 +1008,17 @@ export default function SmritiEnginePage() {
             <div className="flex flex-wrap gap-4">
               <Magnetic>
                 <button
+                  type="button"
                   onClick={() => void handleRunAnalysis()}
                   disabled={isAnalyzing}
-                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-accent-primary to-purple-600 text-white text-sm font-bold tracking-wide flex items-center gap-2 shadow-[0_0_15px_rgba(139,92,246,0.4)] hover:shadow-[0_0_25px_rgba(139,92,246,0.6)] hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-50"
+                  className="min-h-[44px] px-6 py-2.5 rounded-xl bg-gradient-to-r from-accent-primary to-purple-600 text-white text-sm font-bold tracking-wide flex items-center gap-2 shadow-[0_0_15px_rgba(139,92,246,0.4)] hover:shadow-[0_0_25px_rgba(139,92,246,0.6)] hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-50"
                 >
                   <Brain className="w-4 h-4 text-white" />
                   {isAnalyzing ? 'Analyzing...' : 'Run Full Analysis'}
                 </button>
               </Magnetic>
               <button
+                type="button"
                 onClick={() => {
                   const blob = new Blob([JSON.stringify(insights, null, 2)], { type: 'application/json' });
                   const url = URL.createObjectURL(blob);
@@ -1026,7 +1029,7 @@ export default function SmritiEnginePage() {
                   URL.revokeObjectURL(url);
                   addToast({ type: 'success', message: 'Intelligence report downloaded.' });
                 }}
-                className="px-5 py-2.5 rounded-xl border border-midnight-border hover:bg-surface-hover text-text-secondary hover:text-primary text-sm font-medium flex items-center gap-2 transition-colors duration-300"
+                className="min-h-[44px] px-5 py-2.5 rounded-xl border border-midnight-border hover:bg-surface-hover text-text-secondary hover:text-primary text-sm font-medium flex items-center gap-2 transition-colors duration-300"
               >
                 <Download className="w-4 h-4" />
                 Export JSON Report

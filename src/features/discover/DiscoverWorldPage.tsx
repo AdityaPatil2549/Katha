@@ -264,7 +264,7 @@ export default function DiscoverWorldPage() {
                   {section.icon}
                   <span className="text-xs sm:text-sm font-bold tracking-wide">{section.label}</span>
                 </span>
-                <span className="relative z-10 text-[10px] opacity-75 hidden sm:inline">
+                <span className="relative z-10 text-xs font-medium opacity-80 hidden sm:inline">
                   {section.desc}
                 </span>
               </button>
@@ -298,7 +298,7 @@ export default function DiscoverWorldPage() {
                   </div>
                   <Link 
                     to="/atlas-installer" 
-                    className="min-h-[40px] px-4 py-2 rounded-xl bg-accent-primary text-high-contrast font-bold text-xs uppercase tracking-wider hover:opacity-90 transition-opacity shrink-0 flex items-center gap-2"
+                    className="min-h-[44px] px-4 py-2.5 rounded-xl bg-accent-primary text-high-contrast font-bold text-xs uppercase tracking-wider hover:opacity-90 transition-opacity shrink-0 flex items-center gap-2"
                   >
                     <Download className="w-4 h-4" />
                     <span>Open Installer</span>
@@ -335,8 +335,9 @@ export default function DiscoverWorldPage() {
                     {moods.map((mood) => (
                       <button
                         key={mood}
+                        type="button"
                         onClick={() => handleMoodSelect(mood)}
-                        className={`min-h-[38px] px-4 py-1.5 rounded-full text-xs font-medium capitalize transition-all ${
+                        className={`min-h-[44px] px-4 py-2 inline-flex items-center justify-center rounded-full text-xs font-medium capitalize transition-all ${
                           selectedMood === mood
                             ? 'bg-accent-primary text-high-contrast shadow-sm'
                             : 'bg-midnight-surface/80 border border-midnight-border text-text-secondary hover:text-text-primary hover:bg-midnight-surface-hover'
@@ -372,7 +373,8 @@ export default function DiscoverWorldPage() {
                             <p className="text-xs text-text-secondary italic mb-3">{rec.reason}</p>
                           </div>
                           <button
-                            className="min-h-[36px] w-full py-1.5 px-3 rounded-lg bg-accent-primary/15 text-accent-primary hover:bg-accent-primary hover:text-high-contrast text-xs font-bold uppercase tracking-wider transition-colors"
+                            type="button"
+                            className="min-h-[44px] w-full py-2.5 px-3 rounded-lg bg-accent-primary/15 text-accent-primary hover:bg-accent-primary hover:text-high-contrast text-xs font-bold uppercase tracking-wider transition-colors inline-flex items-center justify-center"
                             onClick={async () => {
                               await useStoriesStore.getState().addStory({
                                 title: rec.title,

@@ -1,8 +1,9 @@
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AppStatusBar } from '@/components/system/AppStatusBar';
-import { UserOnboarding } from '@/features/onboarding/UserOnboarding';
 import { lazy, Suspense, useState, useRef, useEffect } from 'react';
+
+const UserOnboarding = lazy(() => import('@/features/onboarding/UserOnboarding').then(m => ({ default: m.UserOnboarding })));
 import {
   User,
   Settings,
@@ -365,7 +366,9 @@ export function AppShell() {
       {/* Global Status Dock */}
       <AppStatusBar />
 
-      <UserOnboarding />
+      <Suspense fallback={null}>
+        <UserOnboarding />
+      </Suspense>
       
       <OutboxModal 
         isOpen={showOutbox} 

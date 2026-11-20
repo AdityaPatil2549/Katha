@@ -180,8 +180,9 @@ export default function WatchCalendar() {
 
               <Magnetic>
                 <button
+                  type="button"
                   onClick={() => setCurrentMonth(new Date())}
-                  className="px-4 py-2 hover:bg-white/10 rounded-full transition-colors text-accent-gold font-medium text-sm"
+                  className="min-h-[44px] px-4 py-2 inline-flex items-center justify-center hover:bg-white/10 rounded-full transition-colors text-accent-gold font-medium text-sm"
                 >
                   Today
                 </button>
@@ -204,8 +205,9 @@ export default function WatchCalendar() {
                 </div>
               </div>
               <button
+                type="button"
                 onClick={() => navigate('/library')}
-                className="px-5 py-2.5 rounded-chip bg-accent-gold text-midnight-bg font-sans font-bold text-xs uppercase tracking-wider shadow-glow-gold hover:scale-105 active:scale-95 transition-all shrink-0"
+                className="min-h-[44px] px-5 py-2.5 rounded-chip bg-accent-gold text-midnight-bg font-sans font-bold text-xs uppercase tracking-wider shadow-glow-gold hover:scale-105 active:scale-95 transition-all shrink-0 inline-flex items-center justify-center"
               >
                 Log First Journey &rarr;
               </button>
@@ -388,8 +390,9 @@ export default function WatchCalendar() {
                           <p className="text-primary font-medium mb-1">No temporal traces found</p>
                           <p className="text-sm text-text-muted mb-4">The timeline is silent on this day.</p>
                           <button
+                            type="button"
                             onClick={() => navigate('/library')}
-                            className="px-4 py-2 rounded-chip bg-accent-gold/15 border border-accent-gold/30 text-accent-gold font-sans text-xs uppercase tracking-wider hover:bg-accent-gold/25 transition-all shadow-sm"
+                            className="min-h-[44px] px-4 py-2.5 rounded-chip bg-accent-gold/15 border border-accent-gold/30 text-accent-gold font-sans text-xs uppercase tracking-wider hover:bg-accent-gold/25 transition-all shadow-sm inline-flex items-center justify-center"
                           >
                             Log a Session
                           </button>

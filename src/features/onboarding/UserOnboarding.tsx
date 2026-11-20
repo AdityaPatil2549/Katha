@@ -239,23 +239,27 @@ export function UserOnboarding() {
             </div>
 
             {/* Vertical step dots */}
-            <div className="relative flex flex-col items-center gap-3">
+            <div className="relative flex flex-col items-center gap-1">
               {steps.map((s, i) => (
-                <motion.button
+                <button
                   key={s.id}
                   type="button"
                   aria-label={`Go to step ${i + 1}: ${s.title}`}
                   onClick={() => setCurrentStep(i)}
-                  animate={{
-                    height: i === currentStep ? 28 : 8,
-                    opacity: i <= currentStep ? 1 : 0.2,
-                  }}
-                  className="w-1.5 rounded-full transition-colors relative"
-                  style={{
-                    background: i <= currentStep ? step.accent : 'rgba(255,255,255,0.4)',
-                    boxShadow: i === currentStep ? `0 0 12px ${step.glow}` : 'none',
-                  }}
-                />
+                  className="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center group focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-gold/60 rounded-full"
+                >
+                  <motion.div
+                    animate={{
+                      height: i === currentStep ? 28 : 8,
+                      opacity: i <= currentStep ? 1 : 0.25,
+                    }}
+                    className="w-1.5 rounded-full transition-all group-hover:opacity-100"
+                    style={{
+                      background: i <= currentStep ? step.accent : 'rgba(255,255,255,0.4)',
+                      boxShadow: i === currentStep ? `0 0 12px ${step.glow}` : 'none',
+                    }}
+                  />
+                </button>
               ))}
             </div>
           </div>
@@ -276,7 +280,7 @@ export function UserOnboarding() {
                 <button
                   type="button"
                   onClick={handleComplete}
-                  className="px-3 py-1.5 rounded-full text-xs font-semibold text-white/70 hover:text-white hover:bg-white/10 transition-colors"
+                  className="px-4 py-2.5 min-h-[44px] inline-flex items-center justify-center rounded-full text-xs font-semibold text-white/70 hover:text-white hover:bg-white/10 transition-colors"
                 >
                   Skip Tour
                 </button>
@@ -284,7 +288,7 @@ export function UserOnboarding() {
                   type="button"
                   aria-label="Close onboarding tour"
                   onClick={handleComplete}
-                  className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/60 hover:text-white transition-all border border-white/10"
+                  className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/60 hover:text-white transition-all border border-white/10"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -345,9 +349,10 @@ export function UserOnboarding() {
             <div className="px-10 pb-8 pt-6 flex flex-shrink-0 items-center justify-between border-t border-white/5 relative z-10 bg-black/20">
               <div className="flex items-center gap-2">
                 <button
+                  type="button"
                   onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
                   disabled={currentStep === 0}
-                  className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 ${
+                  className={`min-h-[44px] flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 ${
                     currentStep === 0
                       ? 'text-white/10 cursor-not-allowed'
                       : 'text-white/40 hover:text-white hover:bg-white/10'
@@ -360,8 +365,9 @@ export function UserOnboarding() {
                 {/* Skip Tour Button for Highlights (steps 2 & 3) */}
                 {(currentStep === 2 || currentStep === 3) && (
                   <button
+                    type="button"
                     onClick={() => setCurrentStep(4)}
-                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white/40 hover:text-white hover:bg-white/10 transition-all duration-300"
+                    className="min-h-[44px] flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white/40 hover:text-white hover:bg-white/10 transition-all duration-300"
                   >
                     Skip Tour
                   </button>
@@ -369,13 +375,14 @@ export function UserOnboarding() {
               </div>
 
               <motion.button
+                type="button"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => {
                   if (isLast) handleComplete();
                   else setCurrentStep(currentStep + 1);
                 }}
-                className={`relative group flex items-center gap-3 px-8 py-3.5 rounded-2xl font-bold text-sm text-white overflow-hidden transition-all duration-300`}
+                className={`min-h-[44px] relative group flex items-center gap-3 px-8 py-3 rounded-2xl font-bold text-sm text-white overflow-hidden transition-all duration-300`}
                 style={{ boxShadow: `0 10px 30px ${step.glow.replace('0.8','0.3')}` }}
               >
                 <div className={`absolute inset-0 bg-gradient-to-r ${step.color} transition-transform duration-300 group-hover:scale-105`} />

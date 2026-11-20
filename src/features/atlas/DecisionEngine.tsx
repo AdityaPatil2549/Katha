@@ -504,9 +504,10 @@ export function DecisionEngine() {
                 </div>
 
                 <button
+                  type="button"
                   onClick={() => setStep('context')}
                   disabled={!decisionRequest.question}
-                  className="btn btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="btn btn-primary w-full min-h-[44px] py-3 text-sm font-bold disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Continue →
                 </button>
@@ -609,15 +610,17 @@ export function DecisionEngine() {
 
                 <div className="flex gap-4">
                   <button
+                    type="button"
                     onClick={() => setStep('question')}
-                    className="btn btn-secondary flex-1"
+                    className="btn btn-secondary flex-1 min-h-[44px] py-3 text-sm font-semibold"
                   >
                     ← Back
                   </button>
                   <button
+                    type="button"
                     onClick={analyzeDecision}
                     disabled={!decisionRequest.mood || !decisionRequest.timeAvailable}
-                    className="btn btn-primary flex-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="btn btn-primary flex-1 min-h-[44px] py-3 text-sm font-bold disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Get Recommendations →
                   </button>

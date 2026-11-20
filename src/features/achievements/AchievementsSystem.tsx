@@ -429,8 +429,9 @@ export default function AchievementsSystem() {
               {categories.map(category => (
                 <button
                   key={category.id}
+                  type="button"
                   onClick={() => setSelectedCategory(category.id)}
-                  className={`relative px-4 py-2 rounded-xl transition-colors duration-300 flex items-center gap-2 text-sm font-medium ${
+                  className={`min-h-[44px] relative px-4 py-2.5 rounded-xl transition-colors duration-300 flex items-center gap-2 text-sm font-medium ${
                     selectedCategory === category.id
                       ? 'text-midnight-bg'
                       : 'text-text-secondary hover:text-primary'
@@ -455,8 +456,9 @@ export default function AchievementsSystem() {
 
             <Magnetic>
               <button
+                type="button"
                 onClick={() => setShowUnlocked(!showUnlocked)}
-                className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 flex items-center gap-2 ${
+                className={`min-h-[44px] px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 flex items-center gap-2 ${
                   showUnlocked 
                     ? 'border border-accent-emerald text-accent-emerald shadow-[0_0_15px_rgba(16,185,129,0.2)] bg-accent-emerald/10' 
                     : 'border border-transparent text-text-secondary hover:text-primary hover:bg-white/5'

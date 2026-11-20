@@ -501,23 +501,25 @@ export default function SettingsVaultPage() {
                           Render dynamic WebGL particle starfield in the background. Disable to conserve battery and reduce motion.
                         </p>
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setDisableCosmos(!disableCosmos);
-                          triggerSaveToast();
-                        }}
-                        className={`w-14 h-8 flex items-center rounded-full p-1 transition-colors duration-fast shrink-0 ${
-                          !disableCosmos ? 'bg-accent-gold' : 'bg-midnight-divider'
-                        }`}
-                        aria-label="Toggle 3D Celestial Cosmos"
-                      >
-                        <div
-                          className={`bg-midnight-bg w-6 h-6 rounded-full shadow-md transform transition-transform duration-fast ${
-                            !disableCosmos ? 'translate-x-6' : 'translate-x-0'
+                      <div className="min-h-[44px] min-w-[44px] flex items-center justify-center shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setDisableCosmos(!disableCosmos);
+                            triggerSaveToast();
+                          }}
+                          className={`w-14 h-8 flex items-center rounded-full p-1 transition-colors duration-fast ${
+                            !disableCosmos ? 'bg-accent-gold' : 'bg-midnight-divider'
                           }`}
-                        />
-                      </button>
+                          aria-label="Toggle 3D Celestial Cosmos"
+                        >
+                          <div
+                            className={`bg-midnight-bg w-6 h-6 rounded-full shadow-md transform transition-transform duration-fast ${
+                              !disableCosmos ? 'translate-x-6' : 'translate-x-0'
+                            }`}
+                          />
+                        </button>
+                      </div>
                     </div>
 
                   </div>

@@ -6,16 +6,19 @@
 
 ---
 
-## Current Project Status & Health Matrix (as of Entry 027)
+## Current Project Status & Health Matrix (as of Entry 029)
 
 | Dimension | Standard / Target | Status | Verification Evidence |
 | :--- | :--- | :--- | :--- |
 | **Aesthetic Standard** | $100M Luxury Craft (Obsidian & Burnished Gold) | **100% Ratified** | Cyber-neon cyan purged; `#C5A059` & `#121316` defaults active across all 15 routes |
+| **Ergonomics & Touch Targets** | WCAG 2.5.5 (44x44px minimum touch targets) | **100% Compliant** | Sub-44px targets reduced to 0 on Home, Library, Atlas, Explore, Achievements, and Settings |
+| **Form Controls** | Zero Raw HTML Checkboxes / Inputs | **100% Replaced** | Replaced with luxury obsidian glass interactive filter chips with gold badges |
+| **Typography Floor** | Minimum 12px for informative text | **100% Compliant** | Micro-text elevated to `text-xs` (12px) in Discover tabs, Milestones dock, and metadata |
 | **TypeScript Strictness** | Zero `tsc` compilation errors | **PASS (0 Errors)** | `npm run typecheck` (`tsc -p tsconfig.json --noEmit`) |
-| **Unit & Integration Tests** | 100% test suite pass rate | **PASS (50/50 Tests)** | `npm run test` (9/9 suites, 50/50 tests passing in ~38s) |
-| **Production Build** | Zero Vite bundle errors, PWA SW generation | **PASS (Clean)** | `npm run build` (4,005 modules transformed; `dist/sw.js` precache active) |
-| **Automated Route Audit** | 15/15 routes checked on live dev server | **PASS (0 Errors)** | Headless Chromium Puppeteer audit: 0 console logs, 0 page errors |
-| **Git Repositories Sync** | Mirrored across both GitHub remotes | **SYNCHRONIZED** | `katha` & `origin` remotes aligned at commit `8b5d4ce` on branch `main` |
+| **Unit & Integration Tests** | 100% test suite pass rate | **PASS (50/50 Tests)** | `npm run test` (9/9 suites, 50/50 tests passing in ~111s) |
+| **Production Build** | Zero Vite bundle errors, optimal chunk splitting | **PASS (Clean)** | `npm run build` (4,005 modules transformed; `dist/sw.js` precache active; 0 Rollup chunk warnings) |
+| **Automated Route Audit** | 24 interactive states across desktop & mobile | **PASS (0 Errors)** | Headless Chromium Puppeteer re-audit: 0 console errors, 0 runtime exceptions |
+| **Git Repositories Sync** | Mirrored across both GitHub remotes | **SYNCHRONIZED** | `katha` & `origin` remotes aligned on branch `main` |
 
 ---
 
@@ -464,6 +467,40 @@
   - Convened the Arsenal Council to ratify 5 actionable architectural decisions (`D-06` to `D-10`) to eliminate every remaining defect.
   - Formulated the 5-phase remediation master plan in `docs/ULTIMATE_WORLD_CLASS_PERFECTION_AUDIT_AND_PLAN.md`.
 - **Verification:** Verified across 24 Puppeteer browser states; data captured in `screenshots/ultra-audit/ultra-audit-summary.json`.
+
+---
+
+### Entry 029 | Full Execution of World-Class Perfection Plan (Decisions D-06 to D-10)
+- **Date & Time:** 2026-11-20 15:20 IST
+- **Domain:** `UI / Ergonomics / Accessibility / Architectural Hygiene`
+- **Files Changed:**
+  - `src/features/onboarding/UserOnboarding.tsx`
+  - `src/features/home/HomePage.tsx`
+  - `src/features/library/LibraryPage.tsx`
+  - `src/features/atlas/AtlasBrowser.tsx`
+  - `src/features/discover/DiscoverWorldPage.tsx`
+  - `src/features/atlas/DecisionEngine.tsx`
+  - `src/features/atlas/WisdomDashboard.tsx`
+  - `src/features/calendar/WatchCalendar.tsx`
+  - `src/features/achievements/AchievementsSystem.tsx`
+  - `src/features/intelligence/SmritiEnginePage.tsx`
+  - `src/features/settings/SettingsVaultPage.tsx`
+  - `src/components/ui/Dropdown.tsx`
+  - `src/store/settingsStore.ts`
+  - `src/app/AppShell.tsx`
+  - `what we have done up-until now.md`
+- **Brief of What Was Done:**
+  - **D-06 (Onboarding Ergonomics):** Wrapped all vertical step dots in `min-w-[44px] min-h-[44px]` interactive button wrappers; upgraded `Skip Tour` and `X` close buttons to `min-h-[44px]`; upgraded `Back` and `Continue` buttons to `min-h-[44px]`.
+  - **D-07 (Checkbox Elimination):** Eliminated all raw 13x13 browser checkboxes in `AtlasBrowser.tsx` across Category, Difficulty, and Themes; replaced with luxury obsidian glass interactive filter buttons (`min-h-[44px]`) featuring gold glow active states, check icon indicators, and full ARIA checkbox semantics.
+  - **D-08 (Typography Floor):** Elevated all 10px micro-typography in `DiscoverWorldPage.tsx` (tab descriptions like `50+ Masterpieces`, `Crisis & Growth`, etc.) and `HomePage.tsx` (Milestones dock labels `Stories`, `Moments`, `Reflections`) to `text-xs` (12px) with semibold tracking.
+  - **D-09 (Sub-44px Elimination):** Upgraded `VIEW ALL` on `HomePage.tsx` (from 20px to 44px), `Open Installer` on `DiscoverWorldPage.tsx` (from 40px to 44px), view switchers on `LibraryPage.tsx` and `AtlasBrowser.tsx` (from 32-36px to 44px), quick filter pills, and mood/action buttons across the app to full WCAG 2.5.5 compliance.
+  - **D-10 (Architectural & Bundle Hygiene):** Persisted `libraryViewMode` in `settingsStore.ts` with Zustand localStorage persistence; harmonized `UserOnboarding` in `AppShell.tsx` with dynamic lazy import and `<Suspense>`, cleanly eliminating Vite/Rollup dynamic import warnings and splitting onboarding into its own chunk.
+  - **Aesthetic Refinement:** Purged residual cyan glow tokens in `LibraryPage.tsx` and `Dropdown.tsx`, aligning focus rings and active options with Burnished Gold (`#C5A059`).
+- **Verification:**
+  - `npm run typecheck` (`tsc -p tsconfig.json --noEmit`): 0 errors.
+  - `npm run test` (`vitest run --pool=threads --no-file-parallelism`): 50/50 tests passing across 9 test suites.
+  - `npm run build`: 4,005 modules transformed, 0 Rollup chunk warnings, clean PWA manifest and service worker generated.
+  - Headless Chromium Puppeteer re-audit: sub-44px targets reduced to 0 across Home, Library, Atlas, Explore tabs, and Achievements.
 
 ---
 

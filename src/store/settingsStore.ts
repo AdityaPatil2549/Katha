@@ -25,10 +25,12 @@ interface SettingsState {
   autoLockTime: string;
   backupReminder: boolean;
   disableCosmos: boolean;
+  libraryViewMode: 'grid' | 'list';
   notificationPreferences: NotificationPreferences;
   setTheme: (theme: Theme) => void;
   setAccentColor: (color: AccentColor) => void;
   setDisableCosmos: (disable: boolean) => void;
+  setLibraryViewMode: (mode: 'grid' | 'list') => void;
   setNotificationsEnabled: (enabled: boolean) => void;
   setGlobalMute: (muted: boolean) => void;
   setAppLockEnabled: (enabled: boolean) => void;
@@ -61,11 +63,13 @@ export const useSettingsStore = create<SettingsState>()(
       autoLockTime: '30',
       backupReminder: true,
       disableCosmos: false,
+      libraryViewMode: 'grid',
       notificationPreferences: defaultPreferences,
       
       setTheme: (theme) => set({ theme }),
       setAccentColor: (accentColor) => set({ accentColor }),
       setDisableCosmos: (disableCosmos) => set({ disableCosmos }),
+      setLibraryViewMode: (libraryViewMode) => set({ libraryViewMode }),
       setNotificationsEnabled: (notificationsEnabled) => set({ notificationsEnabled }),
       setGlobalMute: (globalMute) => set({ globalMute }),
       setAppLockEnabled: (appLockEnabled) => set({ appLockEnabled }),

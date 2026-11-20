@@ -255,15 +255,15 @@ export function HomePage() {
               <div className="grid grid-cols-3 gap-2 py-2 text-center">
                 <div className="p-2.5 rounded-xl bg-midnight-surface/60 border border-midnight-border/50">
                   <div className="font-serif text-2xl font-bold text-text-primary">{stories.length}</div>
-                  <div className="text-[10px] text-text-muted uppercase font-bold tracking-wider">Stories</div>
+                  <div className="text-xs text-text-muted uppercase font-semibold tracking-wider">Stories</div>
                 </div>
                 <div className="p-2.5 rounded-xl bg-midnight-surface/60 border border-midnight-border/50">
                   <div className="font-serif text-2xl font-bold text-text-primary">{moments.length}</div>
-                  <div className="text-[10px] text-text-muted uppercase font-bold tracking-wider">Moments</div>
+                  <div className="text-xs text-text-muted uppercase font-semibold tracking-wider">Moments</div>
                 </div>
                 <div className="p-2.5 rounded-xl bg-midnight-surface/60 border border-midnight-border/50">
                   <div className="font-serif text-2xl font-bold text-text-primary">{journalCount}</div>
-                  <div className="text-[10px] text-text-muted uppercase font-bold tracking-wider">Reflections</div>
+                  <div className="text-xs text-text-muted uppercase font-semibold tracking-wider">Reflections</div>
                 </div>
               </div>
 
@@ -284,7 +284,8 @@ export function HomePage() {
           <div className="flex items-end justify-between mb-6">
             <h2 className="font-sans text-2xl font-bold text-text-primary tracking-wide">My List</h2>
             <button 
-              className="text-sm font-sans font-bold tracking-widest uppercase text-accent-gold hover:text-text-primary transition-colors" 
+              type="button"
+              className="min-h-[44px] px-3.5 py-2 inline-flex items-center rounded-lg text-sm font-sans font-bold tracking-widest uppercase text-accent-gold hover:text-text-primary hover:bg-white/5 transition-colors" 
               onClick={() => navigate('/library')}
             >
               View All
