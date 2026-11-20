@@ -542,6 +542,28 @@
 
 ---
 
+### Entry 031 — 2026-11-20 (Explore Hub Tab Contrast Elevation & Atlas Browser Luxury Full-Width Reactive Filter Deck)
+- **Domain:** `UI / UX Craft / Design System / Accessibility / Verification`
+- **Files Changed:**
+  - `src/features/discover/DiscoverWorldPage.tsx` (Resolved explore tab contrast: replaced washed-out white pill with Burnished Gold gradient pill with midnight dark typography, achieving >12:1 contrast ratio)
+  - `src/features/atlas/AtlasBrowser.tsx` (Complete redesign: eliminated rigid vertical right sidebar & manual 'Apply' button; introduced top horizontal reactive filter deck, full-width story grid canvas, instant filter updates, and automatic database seeding from bundled `dataset.json`)
+- **Brief of What Was Done:**
+  - **Explore Hub Tab Contrast Elevation:** In `DiscoverWorldPage.tsx`, fixed active tab pill contrast collision where white text rendered on white background. Replaced with `bg-gradient-to-r from-accent-gold to-accent-amber` with `text-midnight-bg font-bold` and glowing gold shadow (`shadow-glow-gold`). Subtitles rendered in `text-midnight-bg/80 font-semibold`, achieving crisp WCAG AAA legibility.
+  - **Atlas Browser Full-Width Transformation:** Eliminated the legacy 12-row vertical filter sidebar that occupied 35% of the viewport and squeezed stories into a narrow column. Replaced with a full-width story grid canvas (`grid-cols-1 md:grid-cols-2 lg:grid-cols-3`).
+  - **Top Horizontal Control Strip & Filter Deck:**
+    - Segmented left tabs for `[All Stories (N)]` and `[Collections (N)]` with gold active indicator.
+    - Centered real-time search input with clear button and gold focus ring.
+    - Right-aligned View switcher (`Grid` / `List`) and Filter toggle button with active filter counter badge.
+    - Horizontal collapsible filter deck with 1-click Category chips (`All Media`, `Movies`, `Series`, `Anime`, `Documentaries`), Difficulty chips with colored status indicators (`Easy`, `Medium`, `Heavy`), and wrapping philosophical theme chips (`#hope`, `#love`, `#war`, `#philosophy`, `#growth`, etc.).
+    - 1-Click "Reset All Filters" button and real-time reactive filtering via `useEffect` (zero manual "Apply" button clicks required).
+  - **Automatic Database Seeding:** Added seamless fallback in `loadData()`: if Dexie IndexedDB has 0 Atlas entries, it automatically imports and installs the bundled `dataset.json` (50+ curated narrative masterpieces), preventing the empty void (`All Stories (0)`) state on clean browser profiles.
+- **Verification:**
+  - `npx tsc --noEmit`: 0 errors.
+  - `npm run test`: 50/50 passed across 9 test suites.
+  - `npm run build`: Production bundle built cleanly with zero compilation warnings in 2m 12s.
+
+---
+
 ## Ongoing Log Maintenance Protocol
 
 For all subsequent work on Katha:

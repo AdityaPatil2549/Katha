@@ -243,32 +243,35 @@ export default function DiscoverWorldPage() {
               { id: 'decision', label: 'Decision Engine', desc: 'What to Watch', icon: <Target className="w-4 h-4" /> },
               { id: 'trending', label: 'Global Trends', desc: 'Trakt Hits & Moods', icon: <TrendingUp className="w-4 h-4" /> },
               { id: 'wisdom', label: 'Wisdom Vault', desc: 'Quotes & Insights', icon: <Lightbulb className="w-4 h-4" /> }
-            ] as const).map((section) => (
-              <button
-                key={section.id}
-                onClick={() => handleTabChange(section.id)}
-                className={`relative min-h-[48px] p-3 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-1 ${
-                  activeSection === section.id
-                    ? 'text-high-contrast shadow-sm'
-                    : 'text-text-secondary hover:text-text-primary hover:bg-midnight-surface-hover'
-                }`}
-              >
-                {activeSection === section.id && (
-                  <motion.div
-                    layoutId="explore-active-tab"
-                    className="absolute inset-0 bg-high-contrast rounded-xl shadow-glow"
-                    transition={{ type: "spring", bounce: 0.2, duration: 0.5 }}
-                  />
-                )}
-                <span className="relative z-10 flex items-center gap-2">
-                  {section.icon}
-                  <span className="text-xs sm:text-sm font-bold tracking-wide">{section.label}</span>
-                </span>
-                <span className="relative z-10 text-xs font-medium opacity-80 hidden sm:inline">
-                  {section.desc}
-                </span>
-              </button>
-            ))}
+            ] as const).map((section) => {
+              const isActive = activeSection === section.id;
+              return (
+                <button
+                  key={section.id}
+                  onClick={() => handleTabChange(section.id)}
+                  className={`relative min-h-[48px] p-3 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-1 group ${
+                    isActive
+                      ? 'text-midnight-bg font-bold shadow-glow-gold'
+                      : 'text-text-secondary hover:text-text-primary hover:bg-midnight-surface-hover'
+                  }`}
+                >
+                  {isActive && (
+                    <motion.div
+                      layoutId="explore-active-tab"
+                      className="absolute inset-0 bg-gradient-to-r from-accent-gold to-accent-amber rounded-xl shadow-glow-gold"
+                      transition={{ type: "spring", bounce: 0.2, duration: 0.5 }}
+                    />
+                  )}
+                  <span className={`relative z-10 flex items-center gap-2 ${isActive ? 'text-midnight-bg font-bold' : 'group-hover:text-text-primary'}`}>
+                    {section.icon}
+                    <span className="text-xs sm:text-sm font-bold tracking-wide">{section.label}</span>
+                  </span>
+                  <span className={`relative z-10 text-xs font-semibold hidden sm:inline ${isActive ? 'text-midnight-bg/80' : 'text-text-muted group-hover:text-text-secondary'}`}>
+                    {section.desc}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </div>
         </FadeIn>
