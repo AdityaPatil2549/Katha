@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Heart, Compass, Clock, Lightbulb, Play, Pause, ChevronRight } from 'lucide-react';
+import { X, Heart, Compass, Clock, Lightbulb, Play, Pause, ChevronRight, Share2, Check } from 'lucide-react';
 
 interface WrappedInsights {
   emotionalJourney: {
@@ -32,6 +32,41 @@ export default function WrappedView({ insights, onClose }: WrappedViewProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
   const [progress, setProgress] = useState(0);
+  const [copied, setCopied] = useState(false);
+
+  const handleShareWrapped = async () => {
+    const topGenre = insights.tasteEvolution.genres.reduce(
+      (prev, current) => prev.current > current.current ? prev : current,
+      { genre: 'Cinema', current: 0 }
+    );
+    const shareText = `✨ My Katha Wrapped Summary ✨\n\n` +
+      `🎭 Dominant Mood: ${insights.emotionalJourney.dominantMood.toUpperCase()}\n` +
+      `🧭 Top Genre: ${topGenre.genre}\n` +
+      `🧠 Sophistication: ${insights.tasteEvolution.sophisticationScore}/100\n` +
+      `🌙 Prime Watch Time: ${insights.lifePatterns.viewingHabits.peakTime}\n` +
+      `💡 Key Wisdom: "${insights.wisdomExtraction.topLessons[0]?.lesson || 'Every story leaves a mark.'}"\n\n` +
+      `Track your cinematic journey on Katha.`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'My Katha Wrapped',
+          text: shareText,
+        });
+        return;
+      } catch {
+        // fallback to clipboard
+      }
+    }
+
+    try {
+      await navigator.clipboard.writeText(shareText);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    } catch {
+      // ignore
+    }
+  };
   
   const SLIDE_DURATION = 8000; // 8 seconds per slide
 
@@ -263,15 +298,26 @@ export default function WrappedView({ insights, onClose }: WrappedViewProps) {
               </motion.p>
             </div>
             
-            <motion.button
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 1.5 }}
-              onClick={onClose}
-              className="mt-8 px-8 py-4 bg-white text-black font-bold rounded-full shadow-[0_0_30px_rgba(255,255,255,0.3)] hover:scale-105 transition-transform"
+              className="mt-8 flex flex-wrap items-center justify-center gap-4"
             >
-              Keep Exploring
-            </motion.button>
+              <button
+                onClick={handleShareWrapped}
+                className="px-8 py-4 bg-gradient-to-r from-accent-gold to-amber-500 text-midnight-bg font-bold rounded-full shadow-glow-gold hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
+              >
+                {copied ? <Check className="w-5 h-5" /> : <Share2 className="w-5 h-5" />}
+                <span>{copied ? 'Summary Copied!' : 'Share Wrapped Archetype'}</span>
+              </button>
+              <button
+                onClick={onClose}
+                className="px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-bold rounded-full border border-white/20 hover:scale-105 transition-all"
+              >
+                Keep Exploring
+              </button>
+            </motion.div>
           </div>
         );
       }
@@ -341,16 +387,26 @@ export default function WrappedView({ insights, onClose }: WrappedViewProps) {
       </div>
 
       {/* Controls */}
-      <div className="absolute top-8 right-6 z-50 flex items-center gap-4">
+      <div className="absolute top-8 right-6 z-50 flex items-center gap-3">
+        <button 
+          onClick={handleShareWrapped}
+          className="px-3.5 py-2 rounded-full bg-white/10 flex items-center gap-1.5 text-xs font-bold text-white hover:bg-white/20 transition-colors border border-white/10 backdrop-blur-md"
+          title="Share Wrapped Summary"
+        >
+          {copied ? <Check className="w-4 h-4 text-accent-emerald" /> : <Share2 className="w-4 h-4 text-accent-gold" />}
+          <span>{copied ? 'Copied' : 'Share'}</span>
+        </button>
         <button 
           onClick={() => setIsPlaying(!isPlaying)}
           className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-colors"
+          aria-label={isPlaying ? 'Pause' : 'Play'}
         >
           {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
         </button>
         <button 
           onClick={onClose}
           className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-colors"
+          aria-label="Close Wrapped"
         >
           <X className="w-5 h-5" />
         </button>

@@ -24,9 +24,11 @@ interface SettingsState {
   encryptionEnabled: boolean;
   autoLockTime: string;
   backupReminder: boolean;
+  disableCosmos: boolean;
   notificationPreferences: NotificationPreferences;
   setTheme: (theme: Theme) => void;
   setAccentColor: (color: AccentColor) => void;
+  setDisableCosmos: (disable: boolean) => void;
   setNotificationsEnabled: (enabled: boolean) => void;
   setGlobalMute: (muted: boolean) => void;
   setAppLockEnabled: (enabled: boolean) => void;
@@ -58,10 +60,12 @@ export const useSettingsStore = create<SettingsState>()(
       encryptionEnabled: false,
       autoLockTime: '30',
       backupReminder: true,
+      disableCosmos: false,
       notificationPreferences: defaultPreferences,
       
       setTheme: (theme) => set({ theme }),
       setAccentColor: (accentColor) => set({ accentColor }),
+      setDisableCosmos: (disableCosmos) => set({ disableCosmos }),
       setNotificationsEnabled: (notificationsEnabled) => set({ notificationsEnabled }),
       setGlobalMute: (globalMute) => set({ globalMute }),
       setAppLockEnabled: (appLockEnabled) => set({ appLockEnabled }),

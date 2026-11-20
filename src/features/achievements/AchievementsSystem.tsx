@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { BlurReveal } from '@/components/ui/motion/BlurReveal';
 import { FadeIn } from '@/components/ui/motion/FadeIn';
@@ -22,7 +23,9 @@ import {
   CheckCircle,
   Crown,
   Medal,
-  Gem
+  Gem,
+  X,
+  ArrowRight
 } from 'lucide-react';
 import { useStoriesStore, useMomentsStore, useSessionsStore } from '@/store';
 
@@ -43,11 +46,13 @@ interface Achievement {
 }
 
 export default function AchievementsSystem() {
+  const navigate = useNavigate();
   const { stories, loadStories } = useStoriesStore();
   const { moments, loadMoments } = useMomentsStore();
   const { sessions, loadSessions } = useSessionsStore();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [showUnlocked, setShowUnlocked] = useState(false);
+  const [inspectedAchievement, setInspectedAchievement] = useState<Achievement | null>(null);
 
   useEffect(() => {
     void loadStories();
@@ -314,11 +319,11 @@ export default function AchievementsSystem() {
         glow: 'shadow-[0_0_20px_rgba(139,92,246,0.2)]'
       };
       case 'rare': return {
-        bg: 'from-accent-cyan/20 to-accent-primary/20',
-        border: 'border-accent-cyan/50',
-        text: 'text-accent-cyan',
-        progress: 'bg-gradient-to-r from-accent-cyan to-accent-primary',
-        glow: 'shadow-[0_0_20px_rgba(0,242,254,0.15)]'
+        bg: 'from-accent-gold/20 to-accent-primary/20',
+        border: 'border-accent-gold/50',
+        text: 'text-accent-gold',
+        progress: 'bg-gradient-to-r from-accent-gold to-accent-primary',
+        glow: 'shadow-glow-gold'
       };
       default: return {
         bg: 'from-white/10 to-white/5',
@@ -392,7 +397,7 @@ export default function AchievementsSystem() {
             </div>
             
             <div className="glass-card p-5 rounded-card shadow-glass flex flex-col justify-between border-t border-white/10">
-              <div className="flex items-center gap-2 text-accent-cyan mb-3">
+              <div className="flex items-center gap-2 text-accent-gold mb-3">
                 <Heart className="w-5 h-5" />
                 <span className="text-xs font-bold uppercase tracking-wider">Engagement</span>
               </div>
@@ -480,10 +485,15 @@ export default function AchievementsSystem() {
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.9 }}
                     transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                    onClick={() => setInspectedAchievement(achievement)}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`Inspect ${achievement.title} criteria`}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { setInspectedAchievement(achievement); } }}
                     className={`
-                      relative overflow-hidden rounded-[24px] p-6 flex flex-col justify-between min-h-[220px] transition-all duration-500
+                      relative overflow-hidden rounded-[24px] p-6 flex flex-col justify-between min-h-[220px] transition-all duration-300 cursor-pointer hover:scale-[1.02] active:scale-[0.98]
                       ${isLocked 
-                        ? 'glass-card border border-white/5 opacity-75 grayscale-[50%]' 
+                        ? 'glass-card border border-white/5 opacity-75 grayscale-[50%] hover:opacity-100 hover:grayscale-0 hover:border-accent-gold/40' 
                         : `bg-gradient-to-br ${config.bg} border-2 ${config.border} backdrop-blur-xl ${config.glow}`
                       }
                     `}
@@ -556,6 +566,133 @@ export default function AchievementsSystem() {
             </div>
           </FadeIn>
         )}
+
+        {/* Interactive Badge Criteria Inspection Modal */}
+        <AnimatePresence>
+          {inspectedAchievement && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 bg-midnight-bg/85 backdrop-blur-md flex items-center justify-center p-4 sm:p-6"
+              onClick={() => setInspectedAchievement(null)}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="badge-modal-title"
+            >
+              <motion.div
+                initial={{ scale: 0.95, opacity: 0, y: 20 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.95, opacity: 0, y: 20 }}
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                className="bg-midnight-surface border border-accent-gold/30 rounded-[2rem] max-w-lg w-full p-8 shadow-elevation relative overflow-hidden"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {/* Background ambient glow */}
+                <div className="absolute top-0 right-0 -mt-12 -mr-12 w-48 h-48 bg-accent-gold/15 rounded-full blur-[60px] pointer-events-none" />
+
+                <div className="flex items-start justify-between gap-4 mb-6">
+                  <div className="flex items-center gap-4">
+                    <div className={`p-4 rounded-2xl flex items-center justify-center border ${
+                      inspectedAchievement.unlocked 
+                        ? 'bg-accent-gold/20 border-accent-gold/40 text-accent-gold shadow-glow-gold' 
+                        : 'bg-midnight-bg/80 border-white/10 text-text-muted'
+                    }`}>
+                      {inspectedAchievement.unlocked ? inspectedAchievement.icon : <Lock className="w-8 h-8" />}
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-xs uppercase font-bold tracking-widest px-2.5 py-0.5 rounded-full bg-accent-gold/15 text-accent-gold border border-accent-gold/30">
+                          {inspectedAchievement.rarity}
+                        </span>
+                        <span className="text-xs text-text-muted uppercase tracking-wider">
+                          {inspectedAchievement.category}
+                        </span>
+                      </div>
+                      <h2 id="badge-modal-title" className="font-serif text-2xl font-bold text-primary">
+                        {inspectedAchievement.title}
+                      </h2>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setInspectedAchievement(null)}
+                    className="p-2 rounded-full hover:bg-white/10 text-text-muted hover:text-text-primary transition-colors"
+                    aria-label="Close modal"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                <p className="text-sm text-text-secondary leading-relaxed mb-6 font-light">
+                  {inspectedAchievement.description}
+                </p>
+
+                {/* Progress breakdown */}
+                <div className="p-5 rounded-2xl bg-midnight-bg/60 border border-white/10 space-y-4 mb-6">
+                  <div className="flex items-center justify-between text-xs uppercase tracking-wider font-bold">
+                    <span className="text-text-muted">Target Requirement</span>
+                    <span className="text-accent-gold">
+                      {inspectedAchievement.requirement.value} {inspectedAchievement.requirement.type}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between text-xs uppercase tracking-wider font-bold">
+                    <span className="text-text-muted">Current Progress</span>
+                    <span className={inspectedAchievement.unlocked ? 'text-accent-emerald' : 'text-primary'}>
+                      {inspectedAchievement.progress} / {inspectedAchievement.requirement.value} ({Math.round((inspectedAchievement.progress / inspectedAchievement.requirement.value) * 100)}%)
+                    </span>
+                  </div>
+
+                  <div className="w-full bg-midnight-surface rounded-full h-2 overflow-hidden border border-white/10">
+                    <motion.div
+                      className={`h-full ${inspectedAchievement.unlocked ? 'bg-accent-emerald' : 'bg-gradient-gold'}`}
+                      initial={{ width: 0 }}
+                      animate={{ width: `${(inspectedAchievement.progress / inspectedAchievement.requirement.value) * 100}%` }}
+                      transition={{ duration: 0.8 }}
+                    />
+                  </div>
+                </div>
+
+                {/* Action CTA */}
+                <div className="flex items-center justify-between gap-4 pt-2">
+                  <div className="text-xs text-text-muted">
+                    {inspectedAchievement.unlocked ? (
+                      <span className="flex items-center gap-1.5 text-accent-emerald font-semibold">
+                        <CheckCircle className="w-4 h-4" /> Honor Claimed in Vault
+                      </span>
+                    ) : (
+                      <span>Complete requirement to unlock</span>
+                    )}
+                  </div>
+
+                  {!inspectedAchievement.unlocked ? (
+                    <button
+                      onClick={() => {
+                        const type = inspectedAchievement.requirement.type;
+                        setInspectedAchievement(null);
+                        if (type === 'stories') navigate('/library');
+                        else if (type === 'moments') navigate('/journal');
+                        else if (type === 'sessions' || type === 'days') navigate('/calendar');
+                        else navigate('/explore');
+                      }}
+                      className="px-5 py-2.5 rounded-chip bg-accent-gold text-midnight-bg font-sans font-bold text-xs uppercase tracking-wider shadow-glow-gold hover:scale-105 active:scale-95 transition-all flex items-center gap-1.5"
+                    >
+                      <span>Take Action</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => setInspectedAchievement(null)}
+                      className="btn btn-secondary text-xs"
+                    >
+                      Done
+                    </button>
+                  )}
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </StaggerContainer>
     </div>
   );

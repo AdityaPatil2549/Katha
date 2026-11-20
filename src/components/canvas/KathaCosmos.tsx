@@ -116,10 +116,11 @@ function CameraRig() {
 export function KathaCosmos() {
   const resolvedTheme = useResolvedTheme();
   const reducedMotion = useReducedMotionPreference();
+  const disableCosmos = useSettingsStore((s) => s.disableCosmos);
   const isLight = resolvedTheme === 'light';
   const fogColor = isLight ? '#FAF9F6' : '#121316';
 
-  if (reducedMotion) {
+  if (reducedMotion || disableCosmos) {
     return (
       <div
         className="fixed inset-0 z-0 pointer-events-none"

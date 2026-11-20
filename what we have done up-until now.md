@@ -375,6 +375,37 @@
 
 ---
 
+### Entry 026 | Canonical Story Page Consolidation, Full Audit Resolution & Multi-Role Polish
+- **Date & Time:** 2026-11-20 12:25 IST
+- **Domain:** `UI & Full-Stack / Canonical Story Page & Multi-Role Audit Fulfillment`
+- **Files Changed:**
+  - `src/features/story/StoryPage.tsx`
+  - `src/features/story/StoryPageEnhanced.tsx`
+  - `src/components/ui/MediaCard.tsx`
+  - `src/features/calendar/WatchCalendar.tsx`
+  - `src/features/achievements/AchievementsSystem.tsx`
+  - `src/features/intelligence/WrappedView.tsx`
+  - `src/components/canvas/KathaCosmos.tsx`
+  - `src/features/home/HomePage.tsx`
+  - `src/features/settings/SettingsVaultPage.tsx`
+  - `src/store/settingsStore.ts`
+  - `what we have done up-until now.md`
+- **Brief of What Was Done:**
+  - **Canonical Story Page Consolidation (Ratified Decision D-03):** Fully merged TMDB search, MDBList multi-source critical consensus ratings (IMDb, Rotten Tomatoes, Metacritic, Letterboxd, Trakt, TMDb), Watchmode streaming availability pills and sources, YouTube playable trailer, and Fanart HD clearart watermark projection directly into `StoryPage.tsx`. Converted `StoryPageEnhanced.tsx` to a clean re-export (`export { default } from './StoryPage';`), eliminating code duplication while maintaining 100% backward compatibility for all existing routes and bookmarks.
+  - **Neon-to-Gold Luxury Color Theory Purge (Decisions D-04 & Role 7 Artist):** Purged all residual `shadow-glow-cyan`, `text-accent-cyan`, `border-accent-cyan`, and `bg-accent-cyan` tokens in `StoryPage.tsx`, `MediaCard.tsx`, `WatchCalendar.tsx`, and `AchievementsSystem.tsx`, replacing them with Burnished Gold (`#C5A059`, `shadow-glow-gold`, `gradient-gold`, `border-accent-gold`) and Obsidian dark surfaces.
+  - **Contextual Temporal Encouragement (Role 2 Black Box Tester):** Added an empty-month banner in `WatchCalendar.tsx` encouraging users with a 1-click shortcut to log their first journey when a month has zero sessions, plus a direct session-log shortcut on empty days.
+  - **Interactive Criteria on Achievements (Role 2 Black Box Tester):** Added interactive inspection modal on badges in `AchievementsSystem.tsx` showing exact unlock requirements, current progress percentage, and contextual action CTAs (e.g. "Browse Library", "Open Journal", "Open Temporal Engine").
+  - **Wrapped Social Sharing Loop (Role 4 Product Owner):** Added "Share Wrapped Summary" button to `WrappedView.tsx` with Web Share API and formatted clipboard card fallback.
+  - **Cosmos Motion Toggle (Role 5 Aged Uncle / Performance):** Added 3D Cosmos motion toggle switch in `SettingsVaultPage.tsx` and `settingsStore.ts` to allow users to disable Three.js WebGL canvas on low-power devices.
+  - **Production Verification:**
+    - `npm run typecheck`: 0 errors.
+    - `npm run test`: 50 passed out of 50 across 9 test suites (`vitest run --pool=threads --no-file-parallelism`).
+    - `npm run build`: Clean production build across all 4,005 modules, service worker generated.
+    - Automated Chromium Puppeteer route audit across all 15 routes: 0 console errors, 0 page errors, 0 navigation failures (`scratch/deep-browser-audit.mjs`).
+- **Verification:** Verified with `tsc`, `vitest`, `vite build`, and `deep-browser-audit.mjs`.
+
+---
+
 ## Ongoing Log Maintenance Protocol
 
 For all subsequent work on Katha:

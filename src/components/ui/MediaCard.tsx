@@ -90,7 +90,7 @@ export function MediaCard({ id, title, year, type, posterUrl, posterBase64, watc
       onMouseLeave={() => setIsHovered(false)}
       onClick={onClick}
     >
-      <div className="h-[240px] sm:h-[300px] bg-midnight-surface rounded-[16px] overflow-hidden relative mb-3 shadow-[0_4px_20px_rgba(0,0,0,0.5)] group-hover:shadow-[0_0_25px_rgba(0,242,254,0.3)] transition-all duration-500 border border-white/5 group-hover:border-accent-cyan/30">
+      <div className="h-[240px] sm:h-[300px] bg-midnight-surface rounded-[16px] overflow-hidden relative mb-3 shadow-[0_4px_20px_rgba(0,0,0,0.5)] group-hover:shadow-[0_0_25px_rgba(197,160,89,0.25)] transition-all duration-500 border border-white/5 group-hover:border-accent-gold/40">
         
         {/* Base Poster */}
         {(posterUrl || posterBase64) ? (
@@ -115,7 +115,7 @@ export function MediaCard({ id, title, year, type, posterUrl, posterBase64, watc
         {/* Watchers Badge */}
         {watchers && (
           <div className="absolute top-2 right-2 z-20">
-            <div className="bg-black/75 backdrop-blur-md px-2 py-1 rounded-full text-xs font-bold text-cyan-300 border border-white/15 flex items-center gap-1 shadow-lg">
+            <div className="bg-black/75 backdrop-blur-md px-2 py-1 rounded-full text-xs font-bold text-accent-gold border border-white/15 flex items-center gap-1 shadow-lg">
               <Eye className="w-3 h-3" />
               {watchers}
             </div>
@@ -146,8 +146,8 @@ export function MediaCard({ id, title, year, type, posterUrl, posterBase64, watc
               {/* Rich Ratings Injection */}
               <div className="flex flex-col gap-2 mt-auto">
                 {isLoadingRichData && !ratings && (
-                  <div className="flex items-center gap-2 text-cyan-300 text-xs font-medium">
-                    <div className="w-3 h-3 border-2 border-cyan-300 border-t-transparent rounded-full animate-spin" />
+                  <div className="flex items-center gap-2 text-accent-gold text-xs font-medium">
+                    <div className="w-3 h-3 border-2 border-accent-gold border-t-transparent rounded-full animate-spin" />
                     Fetching scores...
                   </div>
                 )}
@@ -183,7 +183,7 @@ export function MediaCard({ id, title, year, type, posterUrl, posterBase64, watc
       </div>
       
       <div className="px-1">
-        <h4 className="text-primary font-bold text-sm sm:text-base truncate group-hover:text-accent-cyan transition-colors">{title}</h4>
+        <h4 className="text-primary font-bold text-sm sm:text-base truncate group-hover:text-accent-gold transition-colors">{title}</h4>
         {year && <p className="text-xs sm:text-sm text-secondary/80 font-medium">{year}</p>}
       </div>
     </motion.div>

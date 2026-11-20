@@ -284,7 +284,7 @@ export function HomePage() {
           <div className="flex items-end justify-between mb-6">
             <h2 className="font-sans text-2xl font-bold text-text-primary tracking-wide">My List</h2>
             <button 
-              className="text-sm font-sans font-bold tracking-widest uppercase text-accent-cyan hover:text-text-primary transition-colors" 
+              className="text-sm font-sans font-bold tracking-widest uppercase text-accent-gold hover:text-text-primary transition-colors" 
               onClick={() => navigate('/library')}
             >
               View All
@@ -308,7 +308,7 @@ export function HomePage() {
                   viewport={{ once: true, margin: "-50px" }}
                   transition={{ duration: 0.8, delay: index * 0.1, ease: [0.25, 0.46, 0.45, 0.94] }}
                   whileHover={{ scale: 1.05, rotateY: -2, zIndex: 40, transition: { type: 'spring', stiffness: 300, damping: 20 } }}
-                  className="flex-none w-[280px] aspect-[16/9] bg-midnight-surface border border-midnight-border rounded-xl overflow-hidden cursor-pointer group snap-start relative shadow-card transition-all duration-300 hover:shadow-glow-cyan z-10 [transform-style:preserve-3d]"
+                  className="flex-none w-[280px] aspect-[16/9] bg-midnight-surface border border-midnight-border rounded-xl overflow-hidden cursor-pointer group snap-start relative shadow-card transition-all duration-300 hover:shadow-glow-gold z-10 [transform-style:preserve-3d]"
                   onClick={() => navigate(`/story/${item.id}`)}
                 >
                   <Tilt rotationFactor={8} isRevese>
@@ -325,7 +325,7 @@ export function HomePage() {
                     <div className="absolute bottom-0 left-0 right-0 p-5 z-20 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-500 [transform:translateZ(30px)]">
                       <motion.div layoutId={`story-title-${item.id}`} className="font-serif text-2xl font-bold text-text-primary leading-tight mb-2 truncate">{item.title}</motion.div>
                       <div className="flex items-center gap-3 text-xs font-bold text-text-secondary uppercase tracking-wider">
-                        <span className="text-accent-cyan">{item.category}</span>
+                        <span className="text-accent-gold">{item.category}</span>
                         <span>•</span>
                         <span className="text-accent-amber">{item.rating ? `${item.rating}/10` : 'No Rating'}</span>
                       </div>
@@ -340,8 +340,35 @@ export function HomePage() {
                 </motion.div>
               ))
             ) : (
-              <div className="w-full h-[157px] flex items-center justify-center border border-dashed border-midnight-border rounded-xl text-text-muted">
-                Your list is empty. Add some stories to see them here!
+              <div className="w-full rounded-2xl p-8 border border-accent-gold/25 bg-gradient-to-br from-midnight-surface/90 via-midnight-surface/50 to-midnight-bg/90 backdrop-blur-xl flex flex-col md:flex-row items-center justify-between gap-6 shadow-card">
+                <div className="space-y-2 text-center md:text-left">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent-gold/10 border border-accent-gold/30 text-accent-gold text-xs font-bold uppercase tracking-widest">
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>Begin Your Odyssey</span>
+                  </div>
+                  <h3 className="font-serif text-2xl md:text-3xl font-bold text-text-primary">Your Narrative Vault is Waiting</h3>
+                  <p className="text-xs sm:text-sm text-text-secondary max-w-xl leading-relaxed">
+                    Seed your library with 50+ curated philosophical masterpieces, life-crisis narratives, and timeless classics, or log your first personal story.
+                  </p>
+                </div>
+                <div className="flex flex-wrap items-center gap-3 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => navigate('/explore?tab=atlas')}
+                    className="min-h-[44px] px-5 py-2.5 rounded-full bg-accent-gold text-midnight-bg font-bold text-xs uppercase tracking-wider hover:brightness-110 transition-all duration-300 shadow-glow-gold flex items-center gap-2"
+                  >
+                    <Compass className="w-4 h-4" />
+                    <span>Install Masterpieces</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => navigate('/add-story')}
+                    className="min-h-[44px] px-5 py-2.5 rounded-full bg-midnight-surface/80 border border-midnight-border hover:border-accent-gold/50 text-text-primary font-bold text-xs uppercase tracking-wider transition-all duration-300 flex items-center gap-2"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>Add First Story</span>
+                  </button>
+                </div>
               </div>
             )}
           </div>
@@ -351,16 +378,16 @@ export function HomePage() {
         {moments.length > 0 && moments[0] && (
           <section className="px-6 md:px-12 lg:px-16">
             <h2 className="font-sans text-2xl font-bold text-text-primary tracking-wide mb-6">Moment of the Day</h2>
-            <div className="w-full bg-gradient-to-r from-accent-primary/20 via-accent-rose/10 to-transparent rounded-2xl p-1 border border-text-primary/5 relative overflow-hidden group">
-              <div className="absolute inset-0 bg-gradient-cinematic opacity-0 group-hover:opacity-20 transition-opacity duration-700 blur-xl" />
+            <div className="w-full bg-gradient-to-r from-accent-gold/20 via-accent-gold/5 to-transparent rounded-2xl p-1 border border-text-primary/5 relative overflow-hidden group">
+              <div className="absolute inset-0 bg-gradient-gold opacity-0 group-hover:opacity-10 transition-opacity duration-700 blur-xl" />
               <div className="bg-midnight-surface/80 backdrop-blur-xl rounded-xl p-10 md:p-16 flex flex-col md:flex-row items-center gap-12 relative z-10">
                 <div className="flex-1 text-left">
-                  <Sparkles className="w-8 h-8 text-accent-primary mb-6 animate-pulse-soft" />
+                  <Sparkles className="w-8 h-8 text-accent-gold mb-6 animate-pulse-soft" />
                   <blockquote className="font-serif text-4xl md:text-5xl text-text-primary italic leading-tight mb-6 drop-shadow-md">
                     "{moments[0].quote || moments[0].context}"
                   </blockquote>
                   <div className="font-sans text-sm text-text-secondary font-bold tracking-widest uppercase">
-                    — {moments[0].character || 'You'}, <span className="text-accent-rose">{stories.find(s => s.id === moments[0]?.storyId)?.title || 'Unknown'}</span>
+                    — {moments[0].character || 'You'}, <span className="text-accent-gold">{stories.find(s => s.id === moments[0]?.storyId)?.title || 'Unknown'}</span>
                   </div>
                 </div>
               </div>

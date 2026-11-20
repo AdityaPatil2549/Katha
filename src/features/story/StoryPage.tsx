@@ -21,7 +21,8 @@ import {
   Lightbulb,
   Copy,
   Check,
-  Cloud
+  Cloud,
+  Film
 } from 'lucide-react';
 import { useStoriesStore, useMomentsStore, useSessionsStore, useKnowledgeStore } from '@/store';
 import { useToastStore } from '@/store/toastStore';
@@ -30,6 +31,11 @@ import type { Story, Moment, Session, Knowledge } from '@/types/models';
 import { FadeIn } from '@/components/ui/motion/FadeIn';
 import { StaggerContainer, staggerItemVariants } from '@/components/ui/motion/StaggerContainer';
 import { BlurReveal } from '@/components/ui/motion/BlurReveal';
+import { tmdbService } from '@/services/TMDBService';
+import { fanartService, type FanartResult } from '@/services/FanartService';
+import { mdblistService, type MDBListRating } from '@/services/MDBListService';
+import { watchmodeService } from '@/services/WatchmodeService';
+import { youtubeService, type YouTubeSearchResult } from '@/services/YouTubeService';
 
 export default function StoryPage() {
   const { storyId } = useParams<{ storyId: string }>();
@@ -76,6 +82,10 @@ export default function StoryPage() {
   const [editingMoment, setEditingMoment] = useState<Moment | null>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'moments' | 'sessions' | 'knowledge'>('overview');
   const [copied, setCopied] = useState(false);
+  const [fanart, setFanart] = useState<FanartResult | null>(null);
+  const [ratings, setRatings] = useState<MDBListRating[] | null>(null);
+  const [trailer, setTrailer] = useState<YouTubeSearchResult | null>(null);
+  const [streaming, setStreaming] = useState<{ primaryPlatform: string; allSourcesText: string } | null>(null);
   const [pendingConfirm, setPendingConfirm] = useState<{
     title: string;
     message: string;
@@ -126,6 +136,45 @@ export default function StoryPage() {
       }
     }
   }, [storyId, stories, getMomentsByStory, searchParams, setSearchParams]);
+
+  // Deep Intelligence Fetching (Ratings, Fanart, Streaming, Trailer)
+  useEffect(() => {
+    if (!story?.title) return;
+    let isCancelled = false;
+
+    const fetchRichData = async () => {
+      try {
+        const searchRes = await tmdbService.search(story.title);
+        if (isCancelled || !searchRes || searchRes.length === 0) return;
+
+        const match = searchRes[0];
+        if (!match) return;
+
+        const type = match.media_type === 'tv' ? 'tv' : 'movie';
+        const fanartType = type === 'tv' ? 'tv' : 'movies';
+
+        const [fanartData, ratingsData, streamData, trailerData] = await Promise.all([
+          fanartService.getImages(match.id, fanartType),
+          mdblistService.getRatings(match.id),
+          watchmodeService.getSourcesByTmdbId(match.id, type),
+          youtubeService.search(`${story.title} official trailer`)
+        ]);
+
+        if (isCancelled) return;
+        if (fanartData) setFanart(fanartData);
+        if (ratingsData?.ratings) setRatings(ratingsData.ratings);
+        if (streamData) setStreaming(watchmodeService.processSources(streamData));
+        if (trailerData && trailerData.length > 0 && trailerData[0]) setTrailer(trailerData[0]);
+      } catch (err) {
+        console.warn('Rich data unavailable for story:', story.title, err);
+      }
+    };
+
+    void fetchRichData();
+    return () => {
+      isCancelled = true;
+    };
+  }, [story?.id, story?.title]);
 
   const handleToggleFavorite = async () => {
     if (!story) return;
@@ -325,13 +374,24 @@ export default function StoryPage() {
   return (
     <StaggerContainer 
       staggerDelay={0.1}
-      className="max-w-6xl mx-auto px-6 py-16 space-y-16"
+      className="max-w-6xl mx-auto px-6 py-16 space-y-16 relative overflow-hidden"
     >
+      {/* Fanart HD Clearart Watermark Projection */}
+      {(fanart?.hdmovieclearart?.[0]?.url || fanart?.hdtvclearart?.[0]?.url) && (
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 0.12, y: 0 }}
+          transition={{ duration: 1.5 }}
+          className="absolute top-8 right-8 w-80 sm:w-96 h-48 bg-contain bg-no-repeat bg-right-top mix-blend-screen pointer-events-none z-0"
+          style={{ backgroundImage: `url(${fanart?.hdmovieclearart?.[0]?.url || fanart?.hdtvclearart?.[0]?.url})` }}
+        />
+      )}
+
       {/* Hero Section */}
-      <motion.div variants={staggerItemVariants} className="flex flex-col lg:flex-row items-center lg:items-start gap-12 lg:gap-20 border-b border-midnight-border/20 pb-20">
+      <motion.div variants={staggerItemVariants} className="relative z-10 flex flex-col lg:flex-row items-center lg:items-start gap-12 lg:gap-20 border-b border-midnight-border/20 pb-20">
         {/* Poster */}
         <motion.div style={{ y: posterY, opacity: posterOpacity }} className="w-64 sm:w-80 shrink-0">
-          <div className="aspect-[2/3] rounded-[2.5rem] overflow-hidden bg-midnight-surface/20 border border-midnight-border/20 shadow-glow-cyan relative group">
+          <div className="aspect-[2/3] rounded-[2.5rem] overflow-hidden bg-midnight-surface/20 border border-midnight-border/20 shadow-glow-gold relative group">
             {story.posterUrl ? (
               <img src={story.posterUrl} alt={story.title} className="w-full h-full object-cover transition-transform duration-[1.5s] ease-[cubic-bezier(0.25,0.46,0.45,0.94)] group-hover:scale-105" />
             ) : (
@@ -345,7 +405,7 @@ export default function StoryPage() {
             <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-700 backdrop-blur-[2px]">
                <button
                   onClick={() => setIsPlaying(!isPlaying)}
-                  className="p-6 rounded-full bg-text-primary text-midnight-bg shadow-soft transform translate-y-8 group-hover:translate-y-0 transition-all duration-700 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] hover:scale-105 active:scale-95"
+                  className="p-6 rounded-full bg-accent-gold text-midnight-bg shadow-glow-gold transform translate-y-8 group-hover:translate-y-0 transition-all duration-700 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] hover:scale-105 active:scale-95"
                   aria-label={isPlaying ? 'Pause' : 'Play'}
                 >
                   {isPlaying ? <Pause className="w-8 h-8 fill-current" /> : <Play className="w-8 h-8 fill-current ml-1" />}
@@ -373,8 +433,8 @@ export default function StoryPage() {
             </div>
 
             <FadeIn delay={0.5} duration={0.8} className="flex flex-wrap items-center justify-center lg:justify-start gap-4 text-sm font-sans tracking-[0.1em] text-text-secondary uppercase">
-              <div className="flex items-center gap-1.5 text-accent-cyan font-medium">
-                <Star className="w-4 h-4" />
+              <div className="flex items-center gap-1.5 text-accent-gold font-medium">
+                <Star className="w-4 h-4 fill-current" />
                 <span>{story.rating || '—'} / 10</span>
               </div>
               <span className="w-1.5 h-1.5 rounded-full bg-midnight-divider" />
@@ -408,8 +468,8 @@ export default function StoryPage() {
                     onClick={() => handleStatusChange(status)}
                     className={`px-5 py-2 rounded-chip text-xs tracking-wider uppercase transition-all duration-300 border ${
                       story.status === status 
-                        ? 'bg-text-primary text-midnight-bg border-text-primary font-medium shadow-sm' 
-                        : 'bg-midnight-surface/30 text-text-muted border-midnight-border/50 hover:border-text-primary/50'
+                        ? 'bg-accent-gold text-midnight-bg border-accent-gold font-medium shadow-glow-gold' 
+                        : 'bg-midnight-surface/30 text-text-muted border-midnight-border/50 hover:border-accent-gold/40'
                     }`}
                   >
                     {status}
@@ -430,7 +490,7 @@ export default function StoryPage() {
                     initial={{ width: 0 }}
                     animate={{ width: `${(story.currentEpisode / story.totalEpisodes) * 100}%` }}
                     transition={{ duration: 1, ease: "easeOut", delay: 0.8 }}
-                    className="bg-accent-cyan h-full rounded-full"
+                    className="bg-accent-gold h-full rounded-full"
                   />
                 </div>
               </div>
@@ -440,19 +500,19 @@ export default function StoryPage() {
           {/* Actions */}
           <FadeIn delay={0.8} duration={0.8} className="flex flex-wrap justify-center lg:justify-start gap-4 pt-6">
             <button 
-              className="bg-text-primary text-midnight-bg px-6 py-3 rounded-button font-sans tracking-wide text-sm transition-transform duration-300 hover:scale-105 active:scale-95 flex items-center shadow-soft"
+              className="bg-accent-gold text-midnight-bg px-6 py-3 rounded-button font-sans tracking-wide text-sm font-semibold transition-transform duration-300 hover:scale-105 active:scale-95 flex items-center shadow-glow-gold"
               onClick={() => setShowAddMoment(true)}
             >
               <Plus className="w-4 h-4 mr-2" />
               Add Moment
             </button>
             <button
-              onClick={() => navigate(`/story/${story.id}/enhanced`)}
+              onClick={() => setActiveTab('overview')}
               className="px-6 py-3 rounded-button border border-accent-gold/40 bg-accent-gold/10 text-accent-gold hover:bg-accent-gold/20 text-sm font-sans tracking-wide transition-all duration-300 flex items-center gap-2 shadow-sm"
-              title="Open deep intelligence: ratings, streaming providers, and trailers"
+              title="View intelligence consensus, streaming sources, and trailer"
             >
               <Lightbulb className="w-4 h-4" />
-              Deep Intelligence View
+              Intelligence & Streaming
             </button>
             <button 
               className="px-6 py-3 rounded-button border border-midnight-border/50 text-text-primary text-sm font-sans tracking-wide transition-colors hover:bg-midnight-surface/50 flex items-center gap-2"
@@ -549,41 +609,122 @@ export default function StoryPage() {
             className="min-h-[400px]"
           >
             {activeTab === 'overview' && (
-              <div className="bg-midnight-surface/10 rounded-[2rem] p-10 md:p-12 border border-midnight-border/30 grid grid-cols-1 md:grid-cols-2 gap-12">
-                <div className="space-y-8">
-                  <div>
-                    <h4 className="text-xs font-sans tracking-[0.2em] uppercase text-text-muted mb-4">Details</h4>
-                    <div className="space-y-6">
-                      <div className="flex justify-between border-b border-midnight-border/30 pb-4">
-                        <span className="text-text-secondary font-light">Impact Index</span>
-                        <span className="text-text-primary font-medium">{story.impactIndex} / 10</span>
+              <div className="space-y-12">
+                {/* Critical Consensus (MDBList) */}
+                {ratings && ratings.length > 0 && (
+                  <div className="bg-midnight-surface/10 rounded-[2rem] p-8 md:p-10 border border-midnight-border/30">
+                    <h4 className="text-xs font-sans tracking-[0.2em] uppercase text-accent-gold mb-6 flex items-center gap-2">
+                      <Star className="w-4 h-4 text-accent-gold fill-current" />
+                      Critical Consensus & Global Ratings
+                    </h4>
+                    <div className="flex flex-wrap gap-3">
+                      {ratings.map((r, i) => {
+                        const getRatingColor = (src: string) => {
+                          switch (src.toLowerCase()) {
+                            case 'imdb': return 'from-[#f5c518]/20 to-[#f5c518]/5 border-[#f5c518]/40 text-[#f5c518]';
+                            case 'tomatoes': return 'from-[#fa320a]/20 to-[#fa320a]/5 border-[#fa320a]/40 text-[#fa320a]';
+                            case 'metacritic': return 'from-[#66cc33]/20 to-[#66cc33]/5 border-[#66cc33]/40 text-[#66cc33]';
+                            case 'letterboxd': return 'from-[#00e054]/20 to-[#00e054]/5 border-[#00e054]/40 text-[#00e054]';
+                            case 'trakt': return 'from-[#ed1c24]/20 to-[#ed1c24]/5 border-[#ed1c24]/40 text-[#ed1c24]';
+                            case 'tmdb': return 'from-[#01b4e4]/20 to-[#01b4e4]/5 border-[#01b4e4]/40 text-[#01b4e4]';
+                            default: return 'from-accent-gold/20 to-transparent border-accent-gold/30 text-accent-gold';
+                          }
+                        };
+                        return (
+                          <div key={i} className={`flex items-center gap-3 px-4 py-2.5 rounded-xl bg-gradient-to-br ${getRatingColor(r.source)} border backdrop-blur-sm shadow-sm`}>
+                            <span className="font-bold uppercase tracking-wider text-xs opacity-80">{r.source === 'imdb' ? 'IMDb' : r.source}</span>
+                            <span className="text-base font-bold">{r.value}{r.source === 'metacritic' || r.source === 'tomatoes' ? '%' : ''}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Where to Watch & Official Trailer */}
+                {(streaming?.primaryPlatform || trailer) && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    {streaming?.primaryPlatform && (
+                      <div className="bg-midnight-surface/10 rounded-[2rem] p-8 md:p-10 border border-midnight-border/30 flex flex-col justify-between">
+                        <div>
+                          <h4 className="text-xs font-sans tracking-[0.2em] uppercase text-accent-gold mb-6 flex items-center gap-2">
+                            <Film className="w-4 h-4 text-accent-gold" /> Where to Watch
+                          </h4>
+                          <div className="flex items-center gap-4 mb-4">
+                            <div className="px-5 py-2.5 rounded-xl bg-accent-gold/15 border border-accent-gold/40 text-accent-gold font-bold shadow-glow-gold">
+                              {streaming.primaryPlatform}
+                            </div>
+                            <span className="text-xs text-text-secondary uppercase tracking-wider">Primary Platform</span>
+                          </div>
+                        </div>
+                        {streaming.allSourcesText && (
+                          <div className="text-xs text-text-secondary/90 whitespace-pre-wrap font-sans p-4 bg-midnight-bg/60 rounded-xl border border-midnight-border/40 mt-4 leading-relaxed">
+                            {streaming.allSourcesText.replace('[Where to Watch]\n', '')}
+                          </div>
+                        )}
                       </div>
-                      <div className="flex justify-between border-b border-midnight-border/30 pb-4">
-                        <span className="text-text-secondary font-light">Life Phase</span>
-                        <span className="text-text-primary font-medium">{story.lifePhase || '—'}</span>
+                    )}
+
+                    {trailer && (
+                      <div className="bg-midnight-surface/10 rounded-[2rem] p-8 md:p-10 border border-midnight-border/30 flex flex-col justify-between">
+                        <h4 className="text-xs font-sans tracking-[0.2em] uppercase text-accent-gold mb-6 flex items-center gap-2">
+                          <Play className="w-4 h-4 text-accent-gold" /> Official Trailer
+                        </h4>
+                        <div 
+                          className="relative aspect-video rounded-xl overflow-hidden bg-black/60 mb-3 group cursor-pointer border border-midnight-border/50 hover:border-accent-gold/50 transition-colors shadow-soft"
+                          onClick={() => window.open(`https://youtube.com/watch?v=${trailer.id}`, '_blank')}
+                          title="Watch trailer on YouTube"
+                        >
+                          <img src={trailer.thumbnailUrl} alt={trailer.title} className="w-full h-full object-cover opacity-70 group-hover:opacity-50 transition-opacity" />
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="w-14 h-14 rounded-full bg-accent-gold/20 backdrop-blur-sm border border-accent-gold/60 flex items-center justify-center group-hover:scale-110 transition-transform shadow-glow-gold">
+                              <Play className="w-6 h-6 text-accent-gold ml-1 fill-accent-gold/40" />
+                            </div>
+                          </div>
+                        </div>
+                        <p className="text-xs text-text-muted truncate font-sans">{trailer.title}</p>
                       </div>
-                      <div className="flex justify-between border-b border-midnight-border/30 pb-4">
-                        <span className="text-text-secondary font-light">Platform</span>
-                        <span className="text-text-primary font-medium">{story.platform}</span>
+                    )}
+                  </div>
+                )}
+
+                {/* Details & Statistics */}
+                <div className="bg-midnight-surface/10 rounded-[2rem] p-10 md:p-12 border border-midnight-border/30 grid grid-cols-1 md:grid-cols-2 gap-12">
+                  <div className="space-y-8">
+                    <div>
+                      <h4 className="text-xs font-sans tracking-[0.2em] uppercase text-text-muted mb-4">Details</h4>
+                      <div className="space-y-6">
+                        <div className="flex justify-between border-b border-midnight-border/30 pb-4">
+                          <span className="text-text-secondary font-light">Impact Index</span>
+                          <span className="text-text-primary font-medium">{story.impactIndex} / 10</span>
+                        </div>
+                        <div className="flex justify-between border-b border-midnight-border/30 pb-4">
+                          <span className="text-text-secondary font-light">Life Phase</span>
+                          <span className="text-text-primary font-medium">{story.lifePhase || '—'}</span>
+                        </div>
+                        <div className="flex justify-between border-b border-midnight-border/30 pb-4">
+                          <span className="text-text-secondary font-light">Platform</span>
+                          <span className="text-text-primary font-medium">{story.platform}</span>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-                <div className="space-y-8">
-                  <div>
-                    <h4 className="text-xs font-sans tracking-[0.2em] uppercase text-text-muted mb-4">Statistics</h4>
-                    <div className="space-y-6">
-                      <div className="flex justify-between border-b border-midnight-border/30 pb-4">
-                        <span className="text-text-secondary font-light">Total Watch Time</span>
-                        <span className="text-text-primary font-medium">{formatRuntime(story.watchTimeMinutes)}</span>
-                      </div>
-                      <div className="flex justify-between border-b border-midnight-border/30 pb-4">
-                        <span className="text-text-secondary font-light">Moments Captured</span>
-                        <span className="text-text-primary font-medium">{storyMoments.length}</span>
-                      </div>
-                      <div className="flex justify-between border-b border-midnight-border/30 pb-4">
-                        <span className="text-text-secondary font-light">Added On</span>
-                        <span className="text-text-primary font-medium">{formatDate(story.createdAt)}</span>
+                  <div className="space-y-8">
+                    <div>
+                      <h4 className="text-xs font-sans tracking-[0.2em] uppercase text-text-muted mb-4">Statistics</h4>
+                      <div className="space-y-6">
+                        <div className="flex justify-between border-b border-midnight-border/30 pb-4">
+                          <span className="text-text-secondary font-light">Total Watch Time</span>
+                          <span className="text-text-primary font-medium">{formatRuntime(story.watchTimeMinutes)}</span>
+                        </div>
+                        <div className="flex justify-between border-b border-midnight-border/30 pb-4">
+                          <span className="text-text-secondary font-light">Moments Captured</span>
+                          <span className="text-text-primary font-medium">{storyMoments.length}</span>
+                        </div>
+                        <div className="flex justify-between border-b border-midnight-border/30 pb-4">
+                          <span className="text-text-secondary font-light">Added On</span>
+                          <span className="text-text-primary font-medium">{formatDate(story.createdAt)}</span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -621,7 +762,7 @@ export default function StoryPage() {
                     ) : (
                       storyMoments.map((moment) => (
                         <div key={moment.id} className="bg-midnight-surface/20 rounded-[2rem] p-8 md:p-10 border border-midnight-border/30 group hover:border-midnight-border/60 transition-colors duration-500 shadow-sm relative overflow-hidden">
-                          <div className="absolute top-0 left-0 w-1.5 h-full bg-accent-cyan/50 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                          <div className="absolute top-0 left-0 w-1.5 h-full bg-accent-gold/50 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                           <div className="flex flex-col md:flex-row gap-8">
                             <div className="flex-1 space-y-6">
                               {moment.quote && (
@@ -669,7 +810,7 @@ export default function StoryPage() {
                                 {pendingIds.includes(moment.id) && (
                                   <div className="p-3">
                                   <div title="Pending Sync">
-                                    <Cloud className="w-4 h-4 text-accent-cyan animate-pulse" />
+                                    <Cloud className="w-4 h-4 text-accent-gold animate-pulse" />
                                   </div>
                                   </div>
                                 )}
@@ -732,7 +873,7 @@ export default function StoryPage() {
                               <div className="space-y-3">
                                 <div className="flex items-center gap-4">
                                   <div className="flex items-center gap-2 text-text-primary font-medium">
-                                    <Clock className="w-4 h-4 text-accent-cyan" />
+                                    <Clock className="w-4 h-4 text-accent-gold" />
                                     <span>{session.duration} min</span>
                                   </div>
                                   {session.mood && (
@@ -797,7 +938,7 @@ export default function StoryPage() {
                         .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
                         .map(item => (
                           <div key={item.id} className="bg-midnight-surface/20 p-8 rounded-[2rem] border border-midnight-border/30 space-y-6 relative overflow-hidden group">
-                            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-accent-emerald to-accent-cyan opacity-50" />
+                            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-accent-emerald to-accent-gold opacity-50" />
                             <div className="flex items-start justify-between gap-4">
                               <div className="flex gap-4">
                                 <div className="mt-1">
@@ -877,7 +1018,7 @@ export default function StoryPage() {
                     <label className="block text-xs font-sans tracking-widest uppercase text-text-secondary mb-3">Context / Scene *</label>
                     <textarea 
                       required
-                      className="w-full px-4 py-3 bg-midnight-surface/20 border border-midnight-border/30 rounded-[1.25rem] text-text-primary placeholder-text-muted/50 focus:outline-none focus:border-accent-cyan/40 focus:ring-1 focus:ring-accent-cyan/20 backdrop-blur-md transition-all font-sans text-sm resize-none leading-relaxed"
+                      className="w-full px-4 py-3 bg-midnight-surface/20 border border-midnight-border/30 rounded-[1.25rem] text-text-primary placeholder-text-muted/50 focus:outline-none focus:border-accent-gold/40 focus:ring-1 focus:ring-accent-gold/20 backdrop-blur-md transition-all font-sans text-sm resize-none leading-relaxed"
                       rows={2}
                       placeholder="What is happening in this moment?"
                       value={newMoment.context}
@@ -889,7 +1030,7 @@ export default function StoryPage() {
                     <label className="block text-xs font-sans tracking-widest uppercase text-text-secondary mb-3">Your Thoughts *</label>
                     <textarea 
                       required
-                      className="w-full px-4 py-3 bg-midnight-surface/20 border border-midnight-border/30 rounded-[1.25rem] text-text-primary placeholder-text-muted/50 focus:outline-none focus:border-accent-cyan/40 focus:ring-1 focus:ring-accent-cyan/20 backdrop-blur-md transition-all font-sans text-sm resize-none leading-relaxed"
+                      className="w-full px-4 py-3 bg-midnight-surface/20 border border-midnight-border/30 rounded-[1.25rem] text-text-primary placeholder-text-muted/50 focus:outline-none focus:border-accent-gold/40 focus:ring-1 focus:ring-accent-gold/20 backdrop-blur-md transition-all font-sans text-sm resize-none leading-relaxed"
                       rows={4}
                       placeholder="Why does this moment matter to you?"
                       value={newMoment.thoughts}
@@ -979,7 +1120,7 @@ export default function StoryPage() {
                       type="number"
                       required
                       min={1}
-                      className="w-full px-4 py-3 bg-midnight-surface/20 border border-midnight-border/30 rounded-[1.25rem] text-text-primary placeholder-text-muted/50 focus:outline-none focus:border-accent-cyan/40 focus:ring-1 focus:ring-accent-cyan/20 backdrop-blur-md transition-all font-sans text-sm"
+                      className="w-full px-4 py-3 bg-midnight-surface/20 border border-midnight-border/30 rounded-[1.25rem] text-text-primary placeholder-text-muted/50 focus:outline-none focus:border-accent-gold/40 focus:ring-1 focus:ring-accent-gold/20 backdrop-blur-md transition-all font-sans text-sm"
                       placeholder="30"
                       value={newSession.duration}
                       onChange={e => setNewSession({...newSession, duration: parseInt(e.target.value) || 0})}
@@ -1048,7 +1189,7 @@ export default function StoryPage() {
                     <input
                       type="text"
                       required
-                      className="w-full px-4 py-3 bg-midnight-surface/20 border border-midnight-border/30 rounded-[1.25rem] text-text-primary placeholder-text-muted/50 focus:outline-none focus:border-accent-cyan/40 focus:ring-1 focus:ring-accent-cyan/20 backdrop-blur-md transition-all font-sans text-sm"
+                      className="w-full px-4 py-3 bg-midnight-surface/20 border border-midnight-border/30 rounded-[1.25rem] text-text-primary placeholder-text-muted/50 focus:outline-none focus:border-accent-gold/40 focus:ring-1 focus:ring-accent-gold/20 backdrop-blur-md transition-all font-sans text-sm"
                       placeholder="What did this story teach you?"
                       value={newKnowledge.lesson}
                       onChange={e => setNewKnowledge({...newKnowledge, lesson: e.target.value})}
@@ -1058,7 +1199,7 @@ export default function StoryPage() {
                     <label className="block text-xs font-sans tracking-widest uppercase text-text-secondary mb-3">Core Principle (Optional)</label>
                     <input
                       type="text"
-                      className="w-full px-4 py-3 bg-midnight-surface/20 border border-midnight-border/30 rounded-[1.25rem] text-text-primary placeholder-text-muted/50 focus:outline-none focus:border-accent-cyan/40 focus:ring-1 focus:ring-accent-cyan/20 backdrop-blur-md transition-all font-sans text-sm"
+                      className="w-full px-4 py-3 bg-midnight-surface/20 border border-midnight-border/30 rounded-[1.25rem] text-text-primary placeholder-text-muted/50 focus:outline-none focus:border-accent-gold/40 focus:ring-1 focus:ring-accent-gold/20 backdrop-blur-md transition-all font-sans text-sm"
                       placeholder="A principle you'll carry forward..."
                       value={newKnowledge.principle}
                       onChange={e => setNewKnowledge({...newKnowledge, principle: e.target.value})}

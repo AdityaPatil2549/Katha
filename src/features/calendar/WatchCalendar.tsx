@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TextEffect } from '@/components/ui/motion/TextEffect';
 import { FadeIn } from '@/components/ui/motion/FadeIn';
@@ -29,6 +30,7 @@ interface DayData {
 }
 
 export default function WatchCalendar() {
+  const navigate = useNavigate();
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
   const { sessions, loadSessions } = useSessionsStore();
@@ -179,7 +181,7 @@ export default function WatchCalendar() {
               <Magnetic>
                 <button
                   onClick={() => setCurrentMonth(new Date())}
-                  className="px-4 py-2 hover:bg-white/10 rounded-full transition-colors text-accent-cyan font-medium text-sm"
+                  className="px-4 py-2 hover:bg-white/10 rounded-full transition-colors text-accent-gold font-medium text-sm"
                 >
                   Today
                 </button>
@@ -187,6 +189,29 @@ export default function WatchCalendar() {
             </div>
           </FadeIn>
         </div>
+
+        {/* Empty Month Contextual Encouragement Banner */}
+        {monthStats.totalDays === 0 && (
+          <FadeIn delay={0.35} className="mb-6">
+            <div className="p-6 rounded-card bg-midnight-surface/30 border border-accent-gold/30 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-glow-gold backdrop-blur-md">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-full bg-accent-gold/15 border border-accent-gold/30 flex items-center justify-center shrink-0">
+                  <Flame className="w-6 h-6 text-accent-gold" />
+                </div>
+                <div>
+                  <h4 className="font-serif text-lg text-primary font-bold">Untracked Space in {format(currentMonth, 'MMMM yyyy')}</h4>
+                  <p className="text-xs text-text-muted">No viewing sessions logged this month yet. What journey moved you?</p>
+                </div>
+              </div>
+              <button
+                onClick={() => navigate('/library')}
+                className="px-5 py-2.5 rounded-chip bg-accent-gold text-midnight-bg font-sans font-bold text-xs uppercase tracking-wider shadow-glow-gold hover:scale-105 active:scale-95 transition-all shrink-0"
+              >
+                Log First Journey &rarr;
+              </button>
+            </div>
+          </FadeIn>
+        )}
 
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
           
@@ -221,7 +246,7 @@ export default function WatchCalendar() {
                         {isSelected && (
                           <motion.div
                             layoutId="active-day-ring"
-                            className="absolute inset-0 border-2 border-accent-cyan rounded-full shadow-[0_0_15px_rgba(0,242,254,0.4)]"
+                            className="absolute inset-0 border-2 border-accent-gold rounded-full shadow-glow-gold"
                             transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                           />
                         )}
@@ -231,7 +256,7 @@ export default function WatchCalendar() {
                           className={`
                             relative w-full h-full rounded-full flex flex-col items-center justify-center group transition-all duration-300
                             ${!isSelected && 'hover:bg-white/5'}
-                            ${isToday(dayData.date) ? 'font-bold text-accent-cyan' : 'text-primary'}
+                            ${isToday(dayData.date) ? 'font-bold text-accent-gold' : 'text-primary'}
                           `}
                         >
                           <span className="text-sm md:text-base relative z-10">{format(dayData.date, 'd')}</span>
@@ -286,7 +311,7 @@ export default function WatchCalendar() {
             <FadeIn delay={0.5}>
               <div className="grid grid-cols-2 gap-4">
                 <div className="glass-card p-5 rounded-card shadow-glass flex flex-col justify-between">
-                  <div className="flex items-center gap-2 text-accent-cyan mb-3">
+                  <div className="flex items-center gap-2 text-accent-gold mb-3">
                     <Activity className="w-5 h-5" />
                     <span className="text-xs font-bold uppercase tracking-wider">Active Days</span>
                   </div>
@@ -334,7 +359,7 @@ export default function WatchCalendar() {
                   transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                   className="glass-card rounded-card p-6 shadow-glass relative overflow-hidden flex-1"
                 >
-                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-accent-cyan via-accent-primary to-accent-rose opacity-50" />
+                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-accent-gold via-accent-primary to-accent-rose opacity-50" />
                   
                   <div className="flex items-center justify-between mb-6">
                     <div>
@@ -344,7 +369,7 @@ export default function WatchCalendar() {
                       <p className="text-sm text-text-muted">{format(selectedDate, 'EEEE, yyyy')}</p>
                     </div>
                     {isToday(selectedDate) && (
-                      <span className="px-3 py-1 bg-accent-cyan/20 text-accent-cyan text-xs font-bold uppercase tracking-wider rounded-full border border-accent-cyan/30">
+                      <span className="px-3 py-1 bg-accent-gold/20 text-accent-gold text-xs font-bold uppercase tracking-wider rounded-full border border-accent-gold/30">
                         Today
                       </span>
                     )}
@@ -361,7 +386,13 @@ export default function WatchCalendar() {
                             <CalendarIcon className="w-6 h-6 text-text-muted" />
                           </div>
                           <p className="text-primary font-medium mb-1">No temporal traces found</p>
-                          <p className="text-sm text-text-muted">The timeline is silent on this day.</p>
+                          <p className="text-sm text-text-muted mb-4">The timeline is silent on this day.</p>
+                          <button
+                            onClick={() => navigate('/library')}
+                            className="px-4 py-2 rounded-chip bg-accent-gold/15 border border-accent-gold/30 text-accent-gold font-sans text-xs uppercase tracking-wider hover:bg-accent-gold/25 transition-all shadow-sm"
+                          >
+                            Log a Session
+                          </button>
                         </div>
                       );
                     }
